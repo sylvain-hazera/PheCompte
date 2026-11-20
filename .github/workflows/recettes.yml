@@ -1,6 +1,7 @@
 name: Recettes de la communauté
 # Publie dans l'application les recettes proposées en issue (marquées <!-- phecompte-recette v1 -->).
-# Étiquette « validée » = recette vérifiée par une diététicienne. Fermer l'issue retire la recette.
+# Validation avant publication : seules les issues portant l'étiquette « validée » apparaissent dans l'application.
+# Retirer l'étiquette ou fermer l'issue retire la recette.
 on:
   issues:
     types: [opened, edited, labeled, unlabeled, closed, reopened, deleted]
@@ -34,20 +35,24 @@ jobs:
         if: github.event.action == 'edited' && github.event.changes.body && contains(github.event.issue.labels.*.name, 'validée')
         run: |
           gh issue edit "$ISSUE" --remove-label "validée"
-          gh issue comment "$ISSUE" --body "La recette a été modifiée : l'étiquette **validée** a été retirée. Une diététicienne doit la vérifier à nouveau."
+          gh issue comment "$ISSUE" --body "La recette a été modifiée : l'étiquette **validée** a été retirée et la recette n'apparaît plus dans l'application. Une diététicienne doit la vérifier à nouveau puis remettre l'étiquette **validée**."
       - name: Construire la liste des recettes
         run: |
           gh issue list --state open --limit 1000 --json number,title,body,labels,author,url,createdAt > /tmp/issues.json
           python3 scripts/recettes.py /tmp/issues.json "$ISSUE"
       - name: Répondre à l'auteur
-        if: github.event.action == 'opened' || github.event.action == 'edited'
+        if: github.event.action == 'opened' || github.event.action == 'edited' || (github.event.action == 'labeled' && github.event.label.name == 'validée')
         run: |
           r=$(cat /tmp/recette-result.txt)
           case "$r" in
-            ok)
+            pending)
               if [ "${{ github.event.action }}" = "opened" ]; then
                 gh issue edit "$ISSUE" --add-label recette
-                gh issue comment "$ISSUE" --body "Merci ! La recette est publiée dans l'application avec la mention **non vérifiée**. Une diététicienne peut la valider en ajoutant l'étiquette **validée**. Fermer cette issue retire la recette."
+                gh issue comment "$ISSUE" --body "Merci ! La recette est bien reçue (Phé recalculée automatiquement). Elle apparaîtra dans l'application dès qu'une diététicienne l'aura vérifiée et aura ajouté l'étiquette **validée**."
+              fi ;;
+            ok)
+              if [ "${{ github.event.action }}" = "labeled" ]; then
+                gh issue comment "$ISSUE" --body "Recette validée : elle est maintenant publiée dans l'application. Retirer l'étiquette **validée** ou fermer cette issue la retire."
               fi ;;
             error:*)
               printf 'La recette n’a pas pu être publiée : %s\n\nCorrigez-la depuis l’application (bouton « Proposer une recette ») puis remplacez la description de cette issue.\n' "${r#error: }" > /tmp/comment.md

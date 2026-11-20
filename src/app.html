@@ -593,7 +593,7 @@ function viewRecettes(p){
   <section class="card"><div class="list">${rows.length ? rows.map(r => `<button class="item" data-act="recipe" data-id="${esc(r.id)}">
       <span class="grow"><span class="t">${p.favoris.includes(r.id) ? "★ " : ""}${esc(r.n)}</span><br><span class="s">${recType(r)} · ${esc(r.lv)} · ${esc(r.min)} min${r.src ? (r.statut === "validee" ? " · ✓ validée" : " · communauté, non vérifiée") : ""}</span></span>
       <span class="parts num">${esc(r.parts)}<small>parts</small></span></button>`).join("")
-    : `<div class="empty">${ui.recType === "Favoris" && !q ? "Ajoutez des recettes en favori avec l'étoile." : ui.recType === "Communauté" && !q ? "Aucune recette proposée pour l'instant. Soyez le premier !" : "Aucune recette ne correspond."}</div>`}</div></section>
+    : `<div class="empty">${ui.recType === "Favoris" && !q ? "Ajoutez des recettes en favori avec l'étoile." : ui.recType === "Communauté" && !q ? "Aucune recette de la communauté validée pour l'instant. Proposez la vôtre !" : "Aucune recette ne correspond."}</div>`}</div></section>
   <p class="small muted" style="margin:0">Valeurs pour la recette entière. Divisez par le nombre de portions servies.</p>`;
 }
 function viewRecipe(p, r){
@@ -647,7 +647,7 @@ function ingRow(x, i){
 function openPropose(){
   const d = draft;
   sheet("Proposer une recette", `
-    <div class="note small">La recette sera publiée sur GitHub et visible par tous, avec la mention « non vérifiée » jusqu'à validation par une diététicienne. Un compte GitHub gratuit est nécessaire. N'indiquez pas d'informations personnelles.</div>
+    <div class="note small">La recette est envoyée sur GitHub, où le texte est public. Elle apparaîtra dans l'application une fois vérifiée par une diététicienne. Un compte GitHub gratuit est nécessaire. N'indiquez pas d'informations personnelles.</div>
     <label class="f">Nom de la recette<input type="text" data-f="n" maxlength="80" value="${esc(d.n)}" placeholder="Ex. : Gratin de courgettes"></label>
     <div class="row" style="flex-wrap:nowrap"><label class="f grow">Type<select data-f="t">${["Entrée","Plat principal","Dessert","Pain"].map(t => `<option ${d.t === t ? "selected" : ""}>${t}</option>`).join("")}</select></label>
       <label class="f grow">Niveau<select data-f="lv">${["Facile","Moyen","Difficile"].map(t => `<option ${d.lv === t ? "selected" : ""}>${t}</option>`).join("")}</select></label></div>
@@ -731,7 +731,7 @@ ${JSON.stringify(payload, null, 1)}
   const tooLong = full.length > 7500;
   out.innerHTML = `<div class="card" style="gap:10px">
     <b>Dernière étape</b>
-    <span class="small">${tooLong ? "La recette est longue : copiez le texte ci-dessous, puis ouvrez GitHub et collez-le dans la description avant de cliquer sur « Create » / « Submit new issue »." : "GitHub va s'ouvrir avec la recette déjà remplie. Connectez-vous si besoin puis cliquez sur « Create » (ou « Submit new issue »). Elle apparaîtra dans l'application quelques minutes plus tard."}</span>
+    <span class="small">${tooLong ? "La recette est longue : copiez le texte ci-dessous, puis ouvrez GitHub et collez-le dans la description avant de cliquer sur « Create » / « Submit new issue »." : "GitHub va s'ouvrir avec la recette déjà remplie. Connectez-vous si besoin puis cliquez sur « Create » (ou « Submit new issue »). Elle apparaîtra dans l'application après validation par une diététicienne."}</span>
     <a class="btn primary block" href="${esc(tooLong ? `https://github.com/${REPO}/issues/new?title=${encodeURIComponent(title)}` : full)}" target="_blank" rel="noopener" data-act="propSent">Ouvrir GitHub</a>
     <button class="btn block" data-act="propCopy">Copier le texte de la recette</button>
     <textarea id="propText" readonly aria-label="Texte de la recette">${esc(body)}</textarea></div>`;
@@ -877,7 +877,7 @@ document.addEventListener("click", e => {
     case "ingDel": draft.ing.splice(+t.dataset.i, 1); if (!draft.ing.length) draft.ing.push(blankIng()); saveDraft(); redrawIngs(); document.getElementById("propSend").innerHTML = ""; break;
     case "propReady": propReady(); break;
     case "propCopy": copyText(document.getElementById("propText")); break;
-    case "propSent": toast("Merci ! Terminez l'envoi sur GitHub"); break;
+    case "propSent": toast("Merci ! Terminez l'envoi sur GitHub, puis attendez la validation"); break;
     case "propClear": armed(t, "Confirmer : tout effacer", () => { draft = {n:"", t:"Plat principal", lv:"Moyen", p:"", min:"", kcal:"", auteur:"", ing:[blankIng()], et:""}; saveDraft(); openPropose(); }); break;
     case "fav": { const id = rid(t.dataset.id); p.favoris = p.favoris.includes(id) ? p.favoris.filter(x => x !== id) : [...p.favoris, id]; save(); render(); break; }
     case "editProfile": openProfile(false); break;

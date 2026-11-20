@@ -17,4 +17,8 @@ Le dossier `dist/` est publié automatiquement sur GitHub Pages à chaque push s
 
 La table des aliments, les formules des produits emballés et les recettes proviennent de l'application aPhetit (Merck Serono / BioMarin, 2015-2017), élaborée avec la SFEIM et l'association Les Feux Follets. Usage personnel ; à faire valider par l'équipe médicale.
 
+## Recettes de la communauté
+
+Proposées depuis l'application sous forme d'issue GitHub. La Phé est recalculée par `scripts/recettes.py`. **Une recette n'est publiée qu'après ajout de l'étiquette « validée »** (par une diététicienne ou le mainteneur) ; retirer l'étiquette ou fermer l'issue la retire. Une modification de la recette retire automatiquement la validation.
+
 **Outil indicatif : ne remplace pas l'avis de l'équipe médicale.**

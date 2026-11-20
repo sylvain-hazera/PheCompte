@@ -1,5 +1,7 @@
 """Construit data/recettes-communaute.json à partir des issues GitHub ouvertes.
 
+Seules les recettes portant l'étiquette « validée » sont publiées (validation avant publication).
+
 Usage : python3 scripts/recettes.py issues.json [numero_issue_declencheur]
 Le contenu des issues est non fiable : tout est validé, borné et recalculé ici.
 La Phé est recalculée avec la même méthode que l'application (src/app.html, ingPhe).
@@ -118,9 +120,10 @@ def main():
         try:
             r = parse(issue)
             if r:
-                out.append(r)
+                if r["statut"] == "validee":
+                    out.append(r)
                 if issue["number"] == trigger:
-                    result = "ok"
+                    result = "ok" if r["statut"] == "validee" else "pending"
         except (ValueError, KeyError, TypeError, json.JSONDecodeError) as e:
             if issue["number"] == trigger:
                 result = "error: %s" % e
