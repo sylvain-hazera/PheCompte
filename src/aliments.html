@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Base d'aliments PhéCompte</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: reference document, one wide column (max 1100px); sticky filter bar; sortable table that scrolls horizontally on phones. */
+:root{
+  --bg:#f3f6f8; --surface:#fff; --surface-2:#e9eff2; --ink:#12232e; --muted:#566b78; --line:#d6e0e5;
+  --accent:#0d7a70; --accent-ink:#fff; --accent-soft:#d5efeb; --low:#2b9a57; --mid:#d98a1f; --high:#cf3f39;
+  --f-display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --f-body:"Figtree","Segoe UI",system-ui,-apple-system,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0c161c; --surface:#14222b; --surface-2:#1b2c36; --ink:#e6eef2; --muted:#93a8b4; --line:#253a46;
+  --accent:#3cbcae; --accent-ink:#06201d; --accent-soft:#163a37; --low:#4cc47e; --mid:#f0a845; --high:#f06a62; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c161c; --surface:#14222b; --surface-2:#1b2c36; --ink:#e6eef2; --muted:#93a8b4; --line:#253a46;
+  --accent:#3cbcae; --accent-ink:#06201d; --accent-soft:#163a37; --low:#4cc47e; --mid:#f0a845; --high:#f06a62; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body)}
+.wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px;display:grid;gap:20px}
+h1,h2{font-family:var(--f-display);margin:0;line-height:1.15;text-wrap:balance}
+h1{font-size:clamp(1.6rem,4vw,2.3rem);font-weight:800}
+h2{font-size:1.25rem}
+p{margin:0;max-width:75ch}
+.muted{color:var(--muted)}
+.small{font-size:.86rem}
+a{color:var(--accent)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:12px;min-width:0}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.stat{background:var(--surface-2);border-radius:12px;padding:12px}
+.stat b{display:block;font:800 1.5rem var(--f-display);font-variant-numeric:tabular-nums}
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);padding-block:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-bottom:1px solid var(--line)}
+input,select,textarea,button{font:inherit;color:inherit}
+input[type=search],input[type=text],select{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 10px;min-height:40px}
+input[type=search]{flex:1 1 220px;min-width:0}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 14px;font-weight:600;cursor:pointer;min-height:40px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,th button:focus-visible,.st button:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 55%,transparent);outline-offset:2px}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th,td{padding:9px 10px;border-top:1px solid var(--line);text-align:left;vertical-align:top}
+thead th{border-top:0;background:var(--surface-2);font-size:.78rem;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+th button{all:unset;cursor:pointer}
+th button::after{content:" ↕";opacity:.4}
+th[aria-sort=ascending] button::after{content:" ↑";opacity:1}
+th[aria-sort=descending] button::after{content:" ↓";opacity:1}
+td.n,th.n{text-align:right}
+td.name{font-weight:600}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:baseline}
+.d0{background:var(--low)}.d1{background:var(--mid)}.d2{background:var(--high)}
+.st{display:flex;gap:4px}
+.st button{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:4px 8px;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap}
+.st button[aria-pressed=true].ok{background:var(--low);border-color:var(--low);color:#fff}
+.st button[aria-pressed=true].ko{background:var(--high);border-color:var(--high);color:#fff}
+td input.cmt{width:100%;min-width:160px;min-height:34px;padding:5px 8px;font-size:.88rem}
+tr.ko td{background:color-mix(in srgb,var(--high) 7%,transparent)}
+tr.ok td.name::after{content:" ✓";color:var(--low)}
+.formula{font-family:ui-monospace,Menlo,monospace;background:var(--surface-2);border-radius:8px;padding:2px 6px;white-space:nowrap}
+textarea{width:100%;min-height:140px;border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--surface);font:12.5px/1.4 ui-monospace,Menlo,monospace}
+details summary{cursor:pointer;font-weight:600}
+.rec td ul,.rec td ol{margin:4px 0 0;padding-left:1.2em}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600}
+@media print{
+  .bar,.noprint,.st,td.c-cmt,th.c-cmt{display:none!important}
+  body{background:#fff;color:#000;font-size:11px}
+  .card,.scroll{border:0;padding:0}
+  thead th{background:#eee;color:#000}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header style="display:grid;gap:8px">
+    <div class="small muted"><a href="index.html">← Retour à l'application PhéCompte</a></div>
+    <h1>Base d'aliments et recettes PhéCompte</h1>
+    <p class="muted">Document de relecture destiné aux diététicien(ne)s. Il présente toutes les valeurs utilisées par l'application pour compter les parts de phénylalanine.</p>
+  </header>
+
+  <section class="card">
+    <h2>Comment lire ce tableau</h2>
+    <div class="grid2">
+      <div class="stat"><b>1 part = 20 mg</b><span class="small muted">de phénylalanine (Phé)</span></div>
+      <div class="stat"><b id="nFood">–</b><span class="small muted">fruits et légumes dans la base</span></div>
+      <div class="stat"><b id="nRec">–</b><span class="small muted">recettes</span></div>
+    </div>
+    <p class="small">Pour chaque aliment, la base contient une seule valeur : <b>le poids (en grammes) qui apporte 1 part de Phé</b>. Les colonnes « Phé pour 100 g » et « Parts pour 100 g » en sont déduites : <span class="formula">Phé/100 g = 20 × 100 ÷ poids</span>. L'application calcule les parts d'une portion par <span class="formula">parts = grammes ÷ poids pour 1 part</span>, arrondi au centième.</p>
+    <p class="small muted">Origine des données : application aPhetit (Merck Serono puis BioMarin, 2015-2017), élaborée avec la SFEIM et l'association Les Feux Follets. Elles n'ont pas été mises à jour depuis : c'est l'objet de cette relecture.</p>
+  </section>
+
+  <section class="card noprint">
+    <h2>Relire et valider</h2>
+    <p class="small">Pour chaque ligne, cliquez sur <b>Correct</b> ou <b>À corriger</b> et ajoutez un commentaire (par exemple la valeur attendue). Vos réponses restent dans ce navigateur. Une fois la relecture terminée, exportez-les et envoyez le fichier à la famille.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+      <label class="small" for="reviewer">Relu par</label>
+      <input type="text" id="reviewer" placeholder="Nom, fonction, établissement" style="flex:1 1 260px">
+    </div>
+    <div class="small" id="progress"></div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      <button class="btn primary" id="dl">Télécharger les remarques (CSV)</button>
+      <button class="btn" id="cp">Copier les remarques</button>
+      <button class="btn" id="clr">Effacer mes réponses</button>
+    </div>
+    <textarea id="out" readonly hidden aria-label="Remarques"></textarea>
+  </section>
+
+  <section style="display:grid;gap:12px">
+    <h2>Fruits et légumes</h2>
+    <div class="bar">
+      <input type="search" id="q" placeholder="Rechercher un aliment" aria-label="Rechercher un aliment">
+      <select id="fc" aria-label="Catégorie"><option value="">Toutes catégories</option><option value="F">Fruits</option><option value="L">Légumes</option></select>
+      <select id="ft" aria-label="Teneur"><option value="">Toutes teneurs</option><option value="0">Faible</option><option value="1">Moyenne</option><option value="2">Forte</option></select>
+      <select id="fs" aria-label="Relecture"><option value="">Toutes les lignes</option><option value="todo">Non relues</option><option value="ok">Correctes</option><option value="ko">À corriger</option></select>
+      <span class="small muted" id="count"></span>
+    </div>
+    <div class="scroll"><table id="tbl">
+      <thead><tr>
+        <th data-k="n" aria-sort="ascending"><button>Aliment</button></th>
+        <th data-k="c"><button>Catégorie</button></th>
+        <th data-k="t"><button>Teneur</button></th>
+        <th data-k="w" class="n"><button>Poids pour 1 part (g)</button></th>
+        <th data-k="mg" class="n"><button>Phé / 100 g (mg)</button></th>
+        <th data-k="p" class="n"><button>Parts / 100 g</button></th>
+        <th class="c-cmt noprint">Relecture</th>
+        <th class="c-cmt noprint">Commentaire</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </section>
+
+  <section class="card">
+    <h2>Produits emballés (calcul à partir de l'étiquette)</h2>
+    <p class="small">Pour un produit du commerce sans aspartame, l'utilisateur saisit les protéines pour 100 g lues sur l'étiquette. L'application estime la Phé avec un ratio fixe en mg de Phé par gramme de protéines :</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Type de produit</th><th>Protéines / 100 g</th><th class="n">Ratio retenu</th><th>Poids pour 1 part</th><th>Saisie acceptée</th></tr></thead>
+      <tbody>
+        <tr><td>Avec lait ou céréales (pommes de terre seules, légumes cuisinés)</td><td>toutes valeurs</td><td class="n">50 mg Phé / g</td><td><span class="formula">40 ÷ protéines</span></td><td>0 à 12 g</td></tr>
+        <tr><td>Sans lait ni céréales (fruits, légumes, avec ou sans pommes de terre)</td><td>moins de 0,8 g</td><td class="n">32 mg Phé / g</td><td><span class="formula">62,5 ÷ protéines</span></td><td rowspan="2">0 à 5 g</td></tr>
+        <tr><td>Sans lait ni céréales</td><td>0,8 g et plus</td><td class="n">38 mg Phé / g</td><td><span class="formula">52,63 ÷ protéines</span></td></tr>
+      </tbody>
+    </table></div>
+    <p class="small muted">Exemple : une purée de carottes du commerce sans lait à 0,6 g de protéines pour 100 g donne 1 part pour 104 g.</p>
+    <div class="noprint st" style="align-items:center;flex-wrap:wrap;gap:8px"><span class="small">Ces ratios sont-ils corrects ?</span>
+      <button class="ok" data-id="formules" data-v="ok">Correct</button><button class="ko" data-id="formules" data-v="ko">À corriger</button>
+      <input type="text" class="cmt" data-id="formules" placeholder="Commentaire" style="flex:1 1 220px"></div>
+  </section>
+
+  <section style="display:grid;gap:12px">
+    <h2>Recettes</h2>
+    <p class="small muted">Valeurs pour la recette entière, telles qu'affichées dans l'application.</p>
+    <div class="scroll"><table class="rec" id="rtbl">
+      <thead><tr><th>Recette</th><th>Type</th><th class="n">Parts</th><th class="n">Phé (mg)</th><th class="n">kcal</th><th class="c-cmt noprint">Relecture</th><th class="c-cmt noprint">Commentaire</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </section>
+</div>
+<div id="toast"></div>
+<script>
+/*DATA*/
+</script>
+<script>
+"use strict";
+const TEN = ["Faible","Moyenne","Forte"], CAT = {F:"Fruits", L:"Légumes"};
+const fmt = (n, d=1) => Number(n).toLocaleString("fr-FR", {maximumFractionDigits:d});
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const foods = ALIMENTS.map(([id, n, w, t, c]) => ({id:"a"+id, n:n.trim(), w, t, c, mg:2000 / w, p:100 / w}));
+const KEY = "phecompte.revue.v1";
+let rev = {};
+try { rev = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch(e){}
+const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(rev)); } catch(e){} };
+const R = id => rev[id] || (rev[id] = {});
+document.getElementById("nFood").textContent = foods.length;
+document.getElementById("nRec").textContent = RECETTES.length;
+const rv = document.getElementById("reviewer"); rv.value = rev._who || "";
+rv.addEventListener("input", () => { rev._who = rv.value; persist(); });
+
+let sortK = "n", sortDir = 1;
+function stCell(id){
+  const r = rev[id] || {};
+  return `<td class="c-cmt noprint"><div class="st"><button class="ok" data-id="${id}" data-v="ok" aria-pressed="${r.s==="ok"}">Correct</button><button class="ko" data-id="${id}" data-v="ko" aria-pressed="${r.s==="ko"}">À corriger</button></div></td>
+    <td class="c-cmt noprint"><input type="text" class="cmt" data-id="${id}" value="${esc(r.c||"")}" placeholder="Valeur attendue, remarque…" aria-label="Commentaire"></td>`;
+}
+function drawFoods(){
+  const q = document.getElementById("q").value.trim().toLowerCase();
+  const fc = document.getElementById("fc").value, ft = document.getElementById("ft").value, fs = document.getElementById("fs").value;
+  const rows = foods.filter(f => (!q || f.n.toLowerCase().includes(q)) && (!fc || f.c === fc) && (ft === "" || f.t === +ft)
+      && (!fs || (fs === "todo" ? !(rev[f.id] && rev[f.id].s) : rev[f.id] && rev[f.id].s === fs)))
+    .sort((a, b) => sortDir * (typeof a[sortK] === "string" ? a[sortK].localeCompare(b[sortK], "fr") : a[sortK] - b[sortK]));
+  document.querySelector("#tbl tbody").innerHTML = rows.map(f => { const s = (rev[f.id]||{}).s || ""; return `<tr class="${s}">
+    <td class="name">${esc(f.n)}</td><td>${CAT[f.c]}</td><td><span class="dot d${f.t}"></span>${TEN[f.t]}</td>
+    <td class="n">${fmt(f.w)}</td><td class="n">${fmt(f.mg)}</td><td class="n">${fmt(f.p, 2)}</td>${stCell(f.id)}</tr>`; }).join("")
+    || `<tr><td colspan="8" class="muted">Aucun aliment ne correspond aux filtres.</td></tr>`;
+  document.getElementById("count").textContent = `${rows.length} aliment${rows.length > 1 ? "s" : ""}`;
+  progress();
+}
+function drawRecipes(){
+  document.querySelector("#rtbl tbody").innerHTML = RECETTES.map(r => { const id = "r" + r.id, s = (rev[id]||{}).s || ""; return `<tr class="${s}">
+    <td class="name">${esc(r.n)}<details class="small"><summary>Ingrédients et étapes</summary><ul>${r.ing.map(i => `<li>${esc(i)}</li>`).join("")}</ul><ol>${r.et.map(e => `<li>${esc(e)}</li>`).join("")}</ol></details></td>
+    <td>${esc(r.t)}</td><td class="n">${esc(r.parts)}</td><td class="n">${fmt(r.phe, 0)}</td><td class="n">${fmt(r.kcal, 0)}</td>${stCell(id)}</tr>`; }).join("");
+}
+function progress(){
+  const ids = [...foods.map(f => f.id), ...RECETTES.map(r => "r" + r.id), "formules"];
+  const ok = ids.filter(i => rev[i] && rev[i].s === "ok").length, ko = ids.filter(i => rev[i] && rev[i].s === "ko").length;
+  document.getElementById("progress").innerHTML = `<b>${ok + ko} / ${ids.length}</b> lignes relues · <span style="color:var(--low)">${ok} correctes</span> · <span style="color:var(--high)">${ko} à corriger</span>`;
+  document.querySelectorAll('[data-id="formules"][data-v]').forEach(b => b.setAttribute("aria-pressed", (rev.formules||{}).s === b.dataset.v));
+}
+document.querySelectorAll("#tbl th[data-k] button").forEach(b => b.addEventListener("click", () => {
+  const k = b.parentElement.dataset.k; sortDir = sortK === k ? -sortDir : 1; sortK = k;
+  document.querySelectorAll("#tbl th[data-k]").forEach(th => th.removeAttribute("aria-sort"));
+  b.parentElement.setAttribute("aria-sort", sortDir > 0 ? "ascending" : "descending"); drawFoods();
+}));
+["q","fc","ft","fs"].forEach(id => document.getElementById(id).addEventListener("input", drawFoods));
+document.addEventListener("click", e => {
+  const b = e.target.closest("button[data-v]"); if (!b) return;
+  const r = R(b.dataset.id); r.s = r.s === b.dataset.v ? "" : b.dataset.v; persist();
+  const tr = b.closest("tr");
+  if (tr){ tr.className = r.s; tr.querySelectorAll("button[data-v]").forEach(x => x.setAttribute("aria-pressed", r.s === x.dataset.v)); }
+  progress();
+});
+document.addEventListener("input", e => { if (e.target.classList.contains("cmt")){ R(e.target.dataset.id).c = e.target.value; persist(); } });
+
+function csv(){
+  const q = s => /[;"\n]/.test(s) ? `"${String(s).replace(/"/g, '""')}"` : String(s);
+  let out = `Relecture base PhéCompte;${q(rev._who || "")};${new Date().toLocaleDateString("fr-FR")}\nType;Élément;Valeur dans l'application;Avis;Commentaire\n`;
+  const line = (type, id, name, val) => { const r = rev[id]; if (r && (r.s || r.c)) out += [type, q(name), q(val), r.s === "ok" ? "Correct" : r.s === "ko" ? "À corriger" : "", q(r.c || "")].join(";") + "\n"; };
+  line("Formules", "formules", "Produits emballés", "50 / 32 / 38 mg Phé par g de protéines");
+  foods.slice().sort((a, b) => a.n.localeCompare(b.n, "fr")).forEach(f => line(CAT[f.c], f.id, f.n, `1 part = ${fmt(f.w)} g (${TEN[f.t]})`));
+  RECETTES.forEach(r => line("Recette", "r" + r.id, r.n, `${r.parts} parts, ${r.phe} mg Phé`));
+  return out;
+}
+function toast(m){ const t = document.getElementById("toast"); t.innerHTML = `<div class="toast" role="status">${esc(m)}</div>`; setTimeout(() => t.innerHTML = "", 2500); }
+document.getElementById("dl").addEventListener("click", () => {
+  const blob = new Blob(["﻿" + csv()], {type:"text/csv"}), a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "relecture-aliments-phecompte.csv"; document.body.appendChild(a); a.click(); a.remove();
+  const o = document.getElementById("out"); o.value = csv(); o.hidden = false;
+});
+document.getElementById("cp").addEventListener("click", () => {
+  const o = document.getElementById("out"); o.value = csv(); o.hidden = false;
+  (navigator.clipboard ? navigator.clipboard.writeText(o.value) : Promise.reject()).then(() => toast("Remarques copiées"), () => { o.select(); toast("Texte sélectionné : copiez-le"); });
+});
+let clrArmed = false;
+document.getElementById("clr").addEventListener("click", e => {
+  if (!clrArmed){ clrArmed = true; e.target.textContent = "Confirmer l'effacement"; setTimeout(() => { clrArmed = false; e.target.textContent = "Effacer mes réponses"; }, 4000); return; }
+  rev = {_who: rev._who}; persist(); clrArmed = false; e.target.textContent = "Effacer mes réponses";
+  document.querySelector('[data-id="formules"].cmt').value = ""; drawFoods(); drawRecipes(); toast("Réponses effacées");
+});
+document.querySelector('[data-id="formules"].cmt').value = (rev.formules || {}).c || "";
+drawFoods(); drawRecipes();
+</script>
+</body>
+</html>
