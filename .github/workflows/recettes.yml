@@ -1,0 +1,76 @@
+name: Recettes de la communauté
+# Publie dans l'application les recettes proposées en issue (marquées <!-- phecompte-recette v1 -->).
+# Étiquette « validée » = recette vérifiée par une diététicienne. Fermer l'issue retire la recette.
+on:
+  issues:
+    types: [opened, edited, labeled, unlabeled, closed, reopened, deleted]
+  workflow_dispatch:
+permissions:
+  contents: write
+  issues: write
+  pages: write
+  id-token: write
+concurrency:
+  group: recettes
+  cancel-in-progress: false
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      ISSUE: ${{ github.event.issue.number }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Créer les étiquettes
+        run: |
+          gh label create recette --color 0d7a70 --description "Recette proposée depuis l'application" --force
+          gh label create "validée" --color 2b9a57 --description "Recette vérifiée par une diététicienne" --force
+      - name: Retirer la validation après une modification de la recette
+        if: github.event.action == 'edited' && github.event.changes.body && contains(github.event.issue.labels.*.name, 'validée')
+        run: |
+          gh issue edit "$ISSUE" --remove-label "validée"
+          gh issue comment "$ISSUE" --body "La recette a été modifiée : l'étiquette **validée** a été retirée. Une diététicienne doit la vérifier à nouveau."
+      - name: Construire la liste des recettes
+        run: |
+          gh issue list --state open --limit 1000 --json number,title,body,labels,author,url,createdAt > /tmp/issues.json
+          python3 scripts/recettes.py /tmp/issues.json "$ISSUE"
+      - name: Répondre à l'auteur
+        if: github.event.action == 'opened' || github.event.action == 'edited'
+        run: |
+          r=$(cat /tmp/recette-result.txt)
+          case "$r" in
+            ok)
+              if [ "${{ github.event.action }}" = "opened" ]; then
+                gh issue edit "$ISSUE" --add-label recette
+                gh issue comment "$ISSUE" --body "Merci ! La recette est publiée dans l'application avec la mention **non vérifiée**. Une diététicienne peut la valider en ajoutant l'étiquette **validée**. Fermer cette issue retire la recette."
+              fi ;;
+            error:*)
+              printf 'La recette n’a pas pu être publiée : %s\n\nCorrigez-la depuis l’application (bouton « Proposer une recette ») puis remplacez la description de cette issue.\n' "${r#error: }" > /tmp/comment.md
+              gh issue comment "$ISSUE" --body-file /tmp/comment.md ;;
+          esac
+      - id: commit
+        name: Enregistrer
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add data/recettes-communaute.json
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "Recettes de la communauté : mise à jour"
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+  deploy:
+    needs: sync
+    if: needs.sync.outputs.changed == 'true'
+    uses: ./.github/workflows/pages.yml
+    permissions:
+      contents: read
+      pages: write
+      id-token: write

@@ -42,6 +42,7 @@ main{display:grid;gap:16px}
 .grow{flex:1;min-width:0}
 .btn{appearance:none;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:11px 16px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+a.btn{text-decoration:none;color:inherit}a.btn.primary{color:var(--accent-ink)}
 .btn.danger{color:var(--high);border-color:color-mix(in srgb,var(--high) 40%,var(--line))}
 .btn.danger.armed{background:var(--high);color:#fff;border-color:var(--high)}
 .btn.ghost{background:transparent;border-color:transparent;color:var(--accent);padding-inline:8px}
@@ -560,38 +561,180 @@ async function shareFile(text, name, type){
 }
 
 /* ---------- Recettes ---------- */
+const REPO = "sylvain-hazera/PheCompte";
+let COMM = [];
+try { COMM = JSON.parse(localStorage.getItem("phecompte.comm") || "[]"); if (!Array.isArray(COMM)) COMM = []; } catch(e){ COMM = []; }
+const allRecipes = () => [...RECETTES, ...COMM];
+const rid = s => /^\d+$/.test(s) ? +s : s;
 const recType = r => ({"Plat principal":"Plats","Entrée":"Entrées","Dessert":"Desserts","Pain":"Pains"}[r.t] || r.t);
+const badge = r => !r.src ? "" : r.statut === "validee"
+  ? `<span class="status st-in">Validée par une diététicienne</span>` : `<span class="status st-lo">Communauté · non vérifiée</span>`;
+function loadCommunity(){
+  fetch("recettes-communaute.json", {cache:"no-cache"}).then(r => r.ok ? r.json() : Promise.reject()).then(d => {
+    if (!Array.isArray(d)) return;
+    COMM = d; try { localStorage.setItem("phecompte.comm", JSON.stringify(d)); } catch(e){}
+    if (ui.tab === "recettes" && !document.getElementById("sheetRoot").innerHTML) render();
+  }).catch(() => {});
+}
 function viewRecettes(p){
-  if (ui.recipe != null) return viewRecipe(p, RECETTES.find(r => r.id === ui.recipe));
-  const q = ui.recQ.trim().toLowerCase();
-  const rows = RECETTES.filter(r => (ui.recType === "Tout" || (ui.recType === "Favoris" ? p.favoris.includes(r.id) : recType(r) === ui.recType))
+  if (ui.recipe != null){ const r = allRecipes().find(x => x.id === ui.recipe); if (r) return viewRecipe(p, r); ui.recipe = null; }
+  const q = ui.recQ.trim().toLowerCase(), all = allRecipes();
+  const rows = all.filter(r => (ui.recType === "Tout" || (ui.recType === "Favoris" ? p.favoris.includes(r.id) : ui.recType === "Communauté" ? !!r.src : recType(r) === ui.recType))
     && (!q || r.n.toLowerCase().includes(q) || r.ing.some(i => i.toLowerCase().includes(q)))
-    && ui.recIng.every(k => r.k.includes(k)));
-  const keys = [...new Set(RECETTES.flatMap(r => r.k))].sort((a, b) => a.localeCompare(b, "fr"));
+    && ui.recIng.every(k => (r.k || []).includes(k)));
+  const keys = [...new Set(all.flatMap(r => r.k || []))].sort((a, b) => a.localeCompare(b, "fr"));
   return `
+  <button class="btn primary block" data-act="propose">${icon("plus")}Proposer une recette</button>
   <input type="search" id="recQ" placeholder="Rechercher une recette ou un ingrédient" value="${esc(ui.recQ)}" autocomplete="off">
-  <div class="chips">${["Tout","Entrées","Plats","Desserts","Pains","Favoris"].map(t => `<button class="chip" data-act="recType" data-t="${t}" aria-pressed="${ui.recType===t}">${t === "Favoris" ? "★ Favoris" : t}</button>`).join("")}</div>
-  <details ${ui.recIng.length ? "open" : ""} class="card"><summary>Filtrer par ingrédient${ui.recIng.length ? ` (${ui.recIng.length}/2)` : ""}</summary>
+  <div class="chips">${["Tout","Entrées","Plats","Desserts","Pains","Communauté","Favoris"].map(t => `<button class="chip" data-act="recType" data-t="${t}" aria-pressed="${ui.recType===t}">${t === "Favoris" ? "★ Favoris" : t === "Communauté" ? `Communauté (${COMM.length})` : t}</button>`).join("")}</div>
+  ${keys.length ? `<details ${ui.recIng.length ? "open" : ""} class="card"><summary>Filtrer par ingrédient${ui.recIng.length ? ` (${ui.recIng.length}/2)` : ""}</summary>
     <div class="row" style="gap:6px">${keys.map(k => `<button class="chip" data-act="recIng" data-k="${esc(k)}" aria-pressed="${ui.recIng.includes(k)}" ${!ui.recIng.includes(k) && ui.recIng.length >= 2 ? "disabled" : ""}>${esc(k[0].toUpperCase() + k.slice(1))}</button>`).join("")}</div>
-  </details>
-  <section class="card"><div class="list">${rows.length ? rows.map(r => `<button class="item" data-act="recipe" data-id="${r.id}">
-      <span class="grow"><span class="t">${p.favoris.includes(r.id) ? "★ " : ""}${esc(r.n)}</span><br><span class="s">${recType(r)} · ${esc(r.lv)} · ${r.min} min</span></span>
+  </details>` : ""}
+  <section class="card"><div class="list">${rows.length ? rows.map(r => `<button class="item" data-act="recipe" data-id="${esc(r.id)}">
+      <span class="grow"><span class="t">${p.favoris.includes(r.id) ? "★ " : ""}${esc(r.n)}</span><br><span class="s">${recType(r)} · ${esc(r.lv)} · ${esc(r.min)} min${r.src ? (r.statut === "validee" ? " · ✓ validée" : " · communauté, non vérifiée") : ""}</span></span>
       <span class="parts num">${esc(r.parts)}<small>parts</small></span></button>`).join("")
-    : `<div class="empty">${ui.recType === "Favoris" && !q ? "Ajoutez des recettes en favori avec l'étoile." : "Aucune recette ne correspond."}</div>`}</div></section>
+    : `<div class="empty">${ui.recType === "Favoris" && !q ? "Ajoutez des recettes en favori avec l'étoile." : ui.recType === "Communauté" && !q ? "Aucune recette proposée pour l'instant. Soyez le premier !" : "Aucune recette ne correspond."}</div>`}</div></section>
   <p class="small muted" style="margin:0">Valeurs pour la recette entière. Divisez par le nombre de portions servies.</p>`;
 }
 function viewRecipe(p, r){
   const fav = p.favoris.includes(r.id);
+  const det = Array.isArray(r.ingDetail) ? r.ingDetail : null;
   return `<div class="row"><button class="btn ghost" data-act="recBack">${icon("back")}Recettes</button><span class="grow"></span>
-    <button class="btn${fav ? " primary" : ""}" data-act="fav" data-id="${r.id}" aria-pressed="${fav}">${icon("star")}${fav ? "Favori" : "Ajouter aux favoris"}</button></div>
+    <button class="btn${fav ? " primary" : ""}" data-act="fav" data-id="${esc(r.id)}" aria-pressed="${fav}">${icon("star")}${fav ? "Favori" : "Ajouter aux favoris"}</button></div>
   <article class="card recipe">
-    <div class="label">${recType(r)} · ${esc(r.lv)} · ${r.min} min de préparation${r.p ? " · " + esc(r.p) + " pers." : ""}</div>
+    ${r.src ? `<div class="row">${badge(r)}</div>` : ""}
+    <div class="label">${recType(r)} · ${esc(r.lv)} · ${esc(r.min)} min de préparation${r.p ? " · " + esc(r.p) + " pers." : ""}</div>
     <h2>${esc(r.n)}</h2>
-    <div class="facts num"><div><b>${esc(r.parts)}</b><span>parts de Phé</span></div><div><b>${fmt(r.phe, 0)}</b><span>mg de Phé</span></div><div><b>${fmt(r.kcal, 0)}</b><span>kcal</span></div></div>
-    <div class="small muted">Pour la recette entière.</div>
-    <h3>Ingrédients</h3><ul class="ing">${r.ing.map(i => `<li>${esc(i)}</li>`).join("")}</ul>
+    ${r.src ? `<div class="small muted">Proposée par ${esc(r.auteur || "un membre")}${r.date ? " le " + longDate(r.date) : ""}</div>` : ""}
+    <div class="facts num"><div><b>${esc(r.parts)}</b><span>parts de Phé</span></div><div><b>${fmt(r.phe, 0)}</b><span>mg de Phé</span></div><div><b>${r.kcal ? fmt(r.kcal, 0) : "–"}</b><span>kcal</span></div></div>
+    <div class="small muted">Pour la recette entière.${r.src ? " Phé calculée automatiquement à partir des ingrédients." : ""}</div>
+    ${r.src && r.statut !== "validee" ? `<div class="warn small">Cette recette n'a pas encore été vérifiée par une diététicienne. Contrôlez les quantités avant de l'utiliser.</div>` : ""}
+    <h3>Ingrédients</h3><ul class="ing">${det ? det.map(d => `<li>${esc(d.txt)}${d.parts != null ? ` <span class="muted num">(${fmt(d.parts)} part${d.parts > 1 ? "s" : ""})</span>` : ""}</li>`).join("") : r.ing.map(i => `<li>${esc(i)}</li>`).join("")}</ul>
     <h3>Préparation</h3><ol class="steps">${r.et.map(e => `<li>${esc(e)}</li>`).join("")}</ol>
+    ${r.url ? `<a class="btn block" href="${esc(r.url)}" target="_blank" rel="noopener">Commenter ou signaler une erreur (GitHub)</a>` : ""}
   </article>`;
+}
+
+/* proposer une recette */
+const ING_MODES = [["base","Fruit ou légume de la base"],["prot","Produit emballé (protéines)"],["phe","Phé indiquée sur l'étiquette"],["zero","Sans Phé (sucre, huile, eau…)"]];
+const FOOD_BY_NAME = new Map([...FOOD.values()].map(f => [f.n.toLowerCase(), f]));
+const blankIng = () => ({nom:"", g:"", mode:"base", ref:"", prot:"", lait:true, phe100:""});
+let draft;
+try { draft = JSON.parse(localStorage.getItem("phecompte.draft") || "null"); } catch(e){ draft = null; }
+if (!draft || !Array.isArray(draft.ing)) draft = {n:"", t:"Plat principal", lv:"Moyen", p:"", min:"", kcal:"", auteur:"", ing:[blankIng()], et:""};
+const saveDraft = () => { try { localStorage.setItem("phecompte.draft", JSON.stringify(draft)); } catch(e){} };
+/* même calcul que scripts/recettes.py */
+function ingPhe(x){
+  const g = parseNum(x.g); if (isNaN(g) || g <= 0) return NaN;
+  if (x.mode === "zero") return 0;
+  if (x.mode === "base"){ const f = FOOD.get(x.ref); return f ? g / f.w * PART_MG : NaN; }
+  if (x.mode === "prot"){ const pr = parseNum(x.prot); if (isNaN(pr) || pr < 0 || pr > (x.lait ? 12 : 5)) return NaN; return g * pr * (x.lait ? 50 : pr < 0.8 ? 32 : 38) / 100; }
+  if (x.mode === "phe"){ const v = parseNum(x.phe100); if (isNaN(v) || v < 0 || v > 5000) return NaN; return g * v / 100; }
+  return NaN;
+}
+function ingRow(x, i){
+  const f = x.mode === "base" ? `<input type="text" list="foodNames" data-i="${i}" data-f="nom" placeholder="Ex. : Carotte" value="${esc(x.nom)}" aria-label="Aliment">`
+    : `<input type="text" data-i="${i}" data-f="nom" placeholder="${x.mode === "zero" ? "Ex. : huile d'olive" : "Nom du produit"}" value="${esc(x.nom)}" aria-label="Nom" maxlength="80">`;
+  const extra = x.mode === "prot" ? `<div class="row" style="flex-wrap:nowrap"><input type="text" inputmode="decimal" data-i="${i}" data-f="prot" placeholder="Protéines / 100 g" value="${esc(x.prot)}" aria-label="Protéines pour 100 g"><select data-i="${i}" data-f="lait" aria-label="Type"><option value="1" ${x.lait ? "selected" : ""}>Avec lait/céréales</option><option value="0" ${x.lait ? "" : "selected"}>Sans lait ni céréales</option></select></div>`
+    : x.mode === "phe" ? `<input type="text" inputmode="decimal" data-i="${i}" data-f="phe100" placeholder="Phé en mg pour 100 g" value="${esc(x.phe100)}" aria-label="Phé pour 100 g">` : "";
+  return `<div class="card" style="padding:12px;gap:8px;box-shadow:none">
+    <div class="row" style="flex-wrap:nowrap"><select data-i="${i}" data-f="mode" aria-label="Type d'ingrédient" class="grow">${ING_MODES.map(([k, l]) => `<option value="${k}" ${x.mode === k ? "selected" : ""}>${l}</option>`).join("")}</select>
+      <button class="icon-btn" data-act="ingDel" data-i="${i}" aria-label="Retirer l'ingrédient">${icon("trash")}</button></div>
+    ${f}${extra}
+    <div class="row" style="flex-wrap:nowrap"><input type="text" inputmode="decimal" data-i="${i}" data-f="g" placeholder="Quantité en g" value="${esc(x.g)}" aria-label="Quantité en grammes" style="max-width:150px"><span class="grow small muted num" id="ingOut${i}"></span></div>
+  </div>`;
+}
+function openPropose(){
+  const d = draft;
+  sheet("Proposer une recette", `
+    <div class="note small">La recette sera publiée sur GitHub et visible par tous, avec la mention « non vérifiée » jusqu'à validation par une diététicienne. Un compte GitHub gratuit est nécessaire. N'indiquez pas d'informations personnelles.</div>
+    <label class="f">Nom de la recette<input type="text" data-f="n" maxlength="80" value="${esc(d.n)}" placeholder="Ex. : Gratin de courgettes"></label>
+    <div class="row" style="flex-wrap:nowrap"><label class="f grow">Type<select data-f="t">${["Entrée","Plat principal","Dessert","Pain"].map(t => `<option ${d.t === t ? "selected" : ""}>${t}</option>`).join("")}</select></label>
+      <label class="f grow">Niveau<select data-f="lv">${["Facile","Moyen","Difficile"].map(t => `<option ${d.lv === t ? "selected" : ""}>${t}</option>`).join("")}</select></label></div>
+    <div class="row" style="flex-wrap:nowrap"><label class="f grow">Préparation (min)<input type="text" inputmode="numeric" data-f="min" value="${esc(d.min)}"></label><label class="f grow">Personnes<input type="text" inputmode="numeric" data-f="p" value="${esc(d.p)}"></label><label class="f grow">kcal (total)<input type="text" inputmode="numeric" data-f="kcal" value="${esc(d.kcal)}" placeholder="facultatif"></label></div>
+    <div class="label">Ingrédients</div>
+    <datalist id="foodNames">${[...FOOD.values()].sort((a, b) => a.n.localeCompare(b.n, "fr")).map(f => `<option value="${esc(f.n)}">`).join("")}</datalist>
+    <div id="ingRows" style="display:grid;gap:10px">${d.ing.map(ingRow).join("")}</div>
+    <button class="btn" data-act="ingAdd">${icon("plus")}Ajouter un ingrédient</button>
+    <div class="total card" style="padding:14px"><div class="label">Total calculé</div><div class="num" style="font:800 1.8rem var(--f-display)" id="propTotal"></div></div>
+    <label class="f">Étapes (une par ligne)<textarea data-f="et" style="font:inherit;min-height:140px" placeholder="Préchauffer le four à 180 °C.&#10;Couper les courgettes en rondelles.">${esc(d.et)}</textarea></label>
+    <label class="f">Votre prénom ou pseudo (facultatif)<input type="text" data-f="auteur" maxlength="40" value="${esc(d.auteur)}"></label>
+    <div id="propErr" class="err" role="alert"></div>
+    <button class="btn primary block" data-act="propReady">Préparer l'envoi</button>
+    <button class="btn ghost" data-act="propClear">Effacer le brouillon</button>
+    <div id="propSend"></div>`, b => {
+      b.addEventListener("input", onPropInput); b.addEventListener("change", onPropInput); propCompute();
+    });
+}
+function onPropInput(e){
+  const el = e.target, f = el.dataset.f; if (!f) return;
+  if (el.dataset.i != null){
+    const x = draft.ing[+el.dataset.i];
+    if (f === "mode"){ if (e.type !== "change") return; x.mode = el.value; x.ref = ""; redrawIngs(); }
+    else if (f === "lait") x.lait = el.value === "1";
+    else { x[f] = el.value; if (f === "nom" && x.mode === "base"){ const m = FOOD_BY_NAME.get(el.value.trim().toLowerCase()); x.ref = m ? m.ref : ""; } }
+  } else draft[f] = el.value;
+  document.getElementById("propSend").innerHTML = "";
+  saveDraft(); propCompute();
+}
+function redrawIngs(){ document.getElementById("ingRows").innerHTML = draft.ing.map(ingRow).join(""); propCompute(); }
+function propCompute(){
+  let tot = 0, ok = true;
+  draft.ing.forEach((x, i) => {
+    const out = document.getElementById("ingOut" + i); if (!out) return;
+    const v = ingPhe(x);
+    if (isNaN(v)){ ok = false; out.textContent = x.mode === "base" && x.nom && !x.ref ? "Aliment introuvable dans la base" : "À compléter"; out.style.color = "var(--mid)"; }
+    else { tot += v; out.textContent = `${fmt(v / PART_MG)} part${v / PART_MG > 1 ? "s" : ""} · ${fmt(v, 0)} mg`; out.style.color = ""; }
+  });
+  const el = document.getElementById("propTotal");
+  if (el) el.innerHTML = `${fmt(Math.round(tot / PART_MG * 10) / 10, 1)} parts <span style="font-size:1rem;font-weight:600">· ${fmt(tot, 0)} mg de Phé${ok ? "" : " (incomplet)"}</span>`;
+  return {tot, ok};
+}
+function propReady(){
+  const d = draft, err = document.getElementById("propErr"), out = document.getElementById("propSend");
+  const ing = d.ing.filter(x => x.nom.trim() || x.g);
+  const steps = d.et.split("\n").map(s => s.trim()).filter(Boolean);
+  const min = parseInt(d.min, 10);
+  const problems = [];
+  if (d.n.trim().length < 3) problems.push("donnez un nom à la recette (3 lettres minimum)");
+  if (!ing.length) problems.push("ajoutez au moins un ingrédient");
+  if (ing.some(x => !x.nom.trim() || isNaN(ingPhe(x)))) problems.push("complétez chaque ingrédient (nom, quantité et valeur demandée)");
+  if (!steps.length) problems.push("décrivez au moins une étape");
+  if (isNaN(min) || min < 0 || min > 1440) problems.push("indiquez le temps de préparation en minutes");
+  if (problems.length){ err.textContent = "Pour continuer, " + problems.join(", ") + "."; out.innerHTML = ""; return; }
+  err.textContent = "";
+  const clean = s => String(s).replace(/`/g, "'").trim();
+  const payload = {v:1, n:clean(d.n), t:d.t, lv:d.lv, min, p:clean(d.p).slice(0, 3), kcal: parseInt(d.kcal, 10) > 0 ? parseInt(d.kcal, 10) : null, auteur:clean(d.auteur),
+    ing: ing.map(x => { const o = {nom:clean(x.nom), g:parseNum(x.g), mode:x.mode}; if (x.mode === "base") o.ref = x.ref; if (x.mode === "prot"){ o.prot = parseNum(x.prot); o.lait = x.lait; } if (x.mode === "phe") o.phe100 = parseNum(x.phe100); return o; }),
+    et: steps.map(clean)};
+  const tot = ing.reduce((s, x) => s + ingPhe(x), 0);
+  const body = `<!-- phecompte-recette v1 -->
+### ${payload.n}
+
+**${payload.t}** · ${payload.lv} · ${min} min${payload.p ? " · " + payload.p + " pers." : ""}${payload.kcal ? " · " + payload.kcal + " kcal" : ""}
+**Total calculé : ${fmt(Math.round(tot / PART_MG * 10) / 10, 1)} parts (${fmt(tot, 0)} mg de Phé)**
+
+#### Ingrédients
+${ing.map(x => `- ${fmt(parseNum(x.g))} g ${clean(x.nom)} — ${ING_MODES.find(m => m[0] === x.mode)[1].toLowerCase()} → ${fmt(ingPhe(x) / PART_MG)} part(s)`).join("\n")}
+
+#### Préparation
+${steps.map((s, i) => `${i + 1}. ${clean(s)}`).join("\n")}
+
+<details><summary>Données pour l'application (ne pas modifier)</summary>
+
+\`\`\`json
+${JSON.stringify(payload, null, 1)}
+\`\`\`
+</details>`;
+  const title = "[Recette] " + payload.n;
+  const full = `https://github.com/${REPO}/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
+  const tooLong = full.length > 7500;
+  out.innerHTML = `<div class="card" style="gap:10px">
+    <b>Dernière étape</b>
+    <span class="small">${tooLong ? "La recette est longue : copiez le texte ci-dessous, puis ouvrez GitHub et collez-le dans la description avant de cliquer sur « Create » / « Submit new issue »." : "GitHub va s'ouvrir avec la recette déjà remplie. Connectez-vous si besoin puis cliquez sur « Create » (ou « Submit new issue »). Elle apparaîtra dans l'application quelques minutes plus tard."}</span>
+    <a class="btn primary block" href="${esc(tooLong ? `https://github.com/${REPO}/issues/new?title=${encodeURIComponent(title)}` : full)}" target="_blank" rel="noopener" data-act="propSent">Ouvrir GitHub</a>
+    <button class="btn block" data-act="propCopy">Copier le texte de la recette</button>
+    <textarea id="propText" readonly aria-label="Texte de la recette">${esc(body)}</textarea></div>`;
 }
 
 /* ---------- Convertir ---------- */
@@ -727,9 +870,16 @@ document.addEventListener("click", e => {
     case "export": openExport(); break;
     case "recType": ui.recType = t.dataset.t; render(); break;
     case "recIng": { const k = t.dataset.k; ui.recIng = ui.recIng.includes(k) ? ui.recIng.filter(x => x !== k) : [...ui.recIng, k].slice(0, 2); render(); break; }
-    case "recipe": ui.recipe = +t.dataset.id; render(); window.scrollTo(0, 0); break;
+    case "recipe": ui.recipe = rid(t.dataset.id); render(); window.scrollTo(0, 0); break;
     case "recBack": ui.recipe = null; render(); break;
-    case "fav": { const id = +t.dataset.id; p.favoris = p.favoris.includes(id) ? p.favoris.filter(x => x !== id) : [...p.favoris, id]; save(); render(); break; }
+    case "propose": openPropose(); break;
+    case "ingAdd": draft.ing.push(blankIng()); saveDraft(); redrawIngs(); document.getElementById("propSend").innerHTML = ""; break;
+    case "ingDel": draft.ing.splice(+t.dataset.i, 1); if (!draft.ing.length) draft.ing.push(blankIng()); saveDraft(); redrawIngs(); document.getElementById("propSend").innerHTML = ""; break;
+    case "propReady": propReady(); break;
+    case "propCopy": copyText(document.getElementById("propText")); break;
+    case "propSent": toast("Merci ! Terminez l'envoi sur GitHub"); break;
+    case "propClear": armed(t, "Confirmer : tout effacer", () => { draft = {n:"", t:"Plat principal", lv:"Moyen", p:"", min:"", kcal:"", auteur:"", ing:[blankIng()], et:""}; saveDraft(); openPropose(); }); break;
+    case "fav": { const id = rid(t.dataset.id); p.favoris = p.favoris.includes(id) ? p.favoris.filter(x => x !== id) : [...p.favoris, id]; save(); render(); break; }
     case "editProfile": openProfile(false); break;
     case "newProfile": openProfile(true); break;
     case "startReal": openProfile(false); break;
@@ -746,4 +896,5 @@ document.addEventListener("change", e => {
   if (e.target.id === "restoreFile" && e.target.files[0]){ const r = new FileReader(); r.onload = () => restore(r.result); r.readAsText(e.target.files[0]); }
 });
 route();
+loadCommunity();
 </script>
