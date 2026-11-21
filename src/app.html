@@ -135,6 +135,7 @@ table.ref td:first-child,table.ref th:first-child{text-align:left}
 .banner .btn{min-height:38px;padding:7px 12px;background:var(--sun-ink);color:var(--sun);border:0}
 details summary{cursor:pointer;font-weight:700}
 .small{font-size:.85rem}
+.card.info{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 35%,var(--line));box-shadow:none}
 .daynav{display:flex;align-items:center;gap:6px;padding:8px;grid-template-columns:none}
 .daynav .pick{position:relative;display:grid;text-align:center;line-height:1.25;padding-block:4px}
 .daynav .pick input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;min-height:0}
@@ -372,6 +373,7 @@ function render(){
 function banners(p){
   let h = "";
   if (p.isExample) h += `<div class="banner"><span class="grow">Profil d'exemple : ces aliments et résultats sont fictifs.</span><button class="btn" data-act="startReal">Créer mon profil</button></div>`;
+  if (!db.seenAgeps && ui.tab === "repas") h += `<div class="card info" role="note"><div class="row" style="flex-wrap:nowrap;align-items:flex-start"><span class="grow small"><b>À savoir</b><br>Les produits hypoprotéinés AGEPS (pâtes, pain, biscuits… de l'onglet « Hypo ») ne comptent aucune part de Phé, conformément à la consigne. Leurs grammes et leurs calories sont enregistrés pour la diététicienne.</span><button class="btn" data-act="seenAgeps" style="min-height:38px;padding:6px 12px">J'ai compris</button></div></div>`;
   if (!storageOK) h += `<div class="banner"><span class="grow">Ce navigateur n'enregistre pas les données. Exportez une sauvegarde depuis l'onglet Profil.</span></div>`;
   return h;
 }
@@ -577,6 +579,7 @@ function openWeight(ref, idx){
   const STEP = portion ? 0.5 : 10, MAX = portion ? 10 : 500;
   const mealName = MEALS.find(m => m[0] === ui.meal)[1].toLowerCase();
   sheet(f.n, `
+    ${f.c === "H" && f.phe100 !== 0 ? `<div class="note small"><b>Aucune part de Phé comptée</b> pour ce produit (consigne AGEPS). Pesez-le quand même : les grammes et les calories servent à la diététicienne.</div>` : ""}
     <div class="muted small">${ruleTxt(f)}${f.t != null ? " · teneur " + TENEUR[f.t].toLowerCase() : ""}${!isToday(ui.day) ? " · " + frDate(ui.day) : ""}</div>
     <div class="grams"><button class="btn" data-step="${-STEP}" aria-label="Moins ${portion ? "une demi-" + (f.unit || "portion") : "10 g"}">−${portion ? "½" : "10"}</button><input type="text" id="wG" inputmode="decimal" aria-label="${portion ? "Nombre de " + unitOf(f, 2) : "Poids en grammes"}" value="${fmt(g)}"><button class="btn" data-step="${STEP}" aria-label="Plus ${portion ? "une demi-" + (f.unit || "portion") : "10 g"}">+${portion ? "½" : "10"}</button></div>
     <input type="range" id="wR" min="0" max="${MAX}" step="${portion ? 0.5 : 5}" value="${Math.min(MAX, g)}" aria-label="Quantité">
@@ -1212,6 +1215,7 @@ function viewProfil(p){
     <div class="row"><button class="btn grow" data-act="backup">Exporter</button><label class="btn grow" for="restoreFile">Restaurer</label><input type="file" id="restoreFile" accept=".json,application/json" hidden></div>
   </section>
   <section class="card"><div class="label">À propos</div>
+    <p class="small" style="margin:0"><b>Produits hypoprotéinés AGEPS.</b> Les produits hypoprotéinés AGEPS (pâtes, pain, biscuits… de l'onglet « Hypo ») ne comptent aucune part de Phé, conformément à la consigne. Leurs grammes et leurs calories sont enregistrés pour la diététicienne.</p>
     <p class="small" style="margin:0"><b>Outil indicatif.</b> Les calculs et graphiques ne remplacent ni l'avis de l'équipe médicale ni le régime prescrit. En cas de doute sur un aliment ou un résultat, demandez à votre diététicien(ne) ou à votre médecin.</p>
     <p class="small muted" style="margin:0">La table des aliments, la méthode de calcul des produits emballés et les recettes proviennent de l'application aPhetit (2015-2017), conçue avec la SFEIM et l'association Les Feux Follets. Ces données n'ont pas été mises à jour depuis. Usage personnel uniquement.</p>
     <a class="btn block" href="aliments.html" target="_blank" rel="noopener">Consulter la base d'aliments et recettes</a>
@@ -1354,6 +1358,7 @@ document.addEventListener("click", e => {
     case "editProfile": openProfile(false); break;
     case "newProfile": openProfile(true); break;
     case "startReal": openProfile(false); break;
+    case "seenAgeps": db.seenAgeps = true; save(); render(); break;
     case "switch": db.current = t.dataset.id; save(); render(); toast("Profil de " + P().prenom); break;
     case "delProfile": armed(t, "Confirmer : tout supprimer pour " + p.prenom, () => { db.profiles = db.profiles.filter(x => x.id !== p.id); db.current = db.profiles[0].id; save(); render(); toast("Profil supprimé"); }); break;
     case "backup": openBackup(); break;
