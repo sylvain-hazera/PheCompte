@@ -3,6 +3,7 @@
 Web-app installable (PWA) d'aide au régime de la phénylcétonurie : calcul des parts de phénylalanine, suivi du taux sanguin, recettes, convertisseur mg/dL ⇄ µmol/L.
 
 - `index.html` : l'application (fonctionne hors connexion une fois installée, données stockées uniquement sur l'appareil).
+- Journal des repas par date, note du jour (malade, fatigué…), journée type remise automatiquement, calendrier de suivi, rapport PDF jusqu'à 6 mois (jsPDF, dans `vendor/`).
 - `aliments.html` : la base d'aliments, les formules et les recettes, avec un outil de relecture pour les diététicien(ne)s.
 
 ## Construire
