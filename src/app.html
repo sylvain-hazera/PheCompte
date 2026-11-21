@@ -290,8 +290,16 @@ const catTag = f => isSub(f) ? "Sub" : f.c === "H" ? "Hyp" : f.c === "C" ? (f.pp
 /* calories : kcal pour 100 g (ou par portion pour un aliment compté en portions) ; null si non renseignées */
 const kcalOf = (f, g) => !f || f.kcal == null ? null : f.pp != null ? g * f.kcal : g * f.kcal / 100;
 const kcalRule = f => f.kcal == null ? "" : f.pp != null ? `${fmt(f.kcal, 0)} kcal/${f.unit || "portion"}` : `${fmt(f.kcal, 0)} kcal/100 g`;
-function mealStats(p, d, m){ const s = {hg:0, kc:0, kn:0}; d.repas[m].forEach(it => { const f = food(it.ref, p); if (isHypo(f)) s.hg += it.g; const k = kcalOf(f, it.g); if (k != null){ s.kc += k; s.kn++; } }); return s; }
-function dayStats(p, d){ return MEALS.reduce((a, [m]) => { const s = mealStats(p, d, m); return {hg:a.hg + s.hg, kc:a.kc + s.kc, kn:a.kn + s.kn}; }, {hg:0, kc:0, kn:0}); }
+function mealStats(p, d, m){ const s = {hg:0, kc:0, kn:0, km:0}; d.repas[m].forEach(it => { const f = food(it.ref, p); if (isHypo(f)) s.hg += it.g; const k = kcalOf(f, it.g); if (k != null){ s.kc += k; s.kn++; } else if (it.g > 0) s.km++; }); return s; }
+function dayStats(p, d){ return MEALS.reduce((a, [m]) => { const s = mealStats(p, d, m); return {hg:a.hg + s.hg, kc:a.kc + s.kc, kn:a.kn + s.kn, km:a.km + s.km}; }, {hg:0, kc:0, kn:0, km:0}); }
+/* cible calorique fixée par l'équipe : kcal/kg/j × poids ; statut seulement si toutes les calories du jour sont connues */
+const kcalTarget = p => p.poids && p.kcalKg ? Math.round(p.poids * p.kcalKg) : null;
+function kcalStatus(p, s){
+  const tg = kcalTarget(p); if (!tg || !s.kn) return null;
+  if (s.km) return ["", `Estimation incomplète : ${s.km} aliment${s.km > 1 ? "s" : ""} sans calories`];
+  const r = s.kc / tg;
+  return r < 0.9 ? ["st-lo", "Cible calorique non atteinte"] : r <= 1.2 ? ["st-in", "Cible calorique atteinte"] : ["st-hi", "Cible calorique largement dépassée"];
+}
 const statsTxt = s => [s.hg ? `Hypoprotéinés : ${fmt(s.hg, 0)} g` : "", s.kn ? `Calories saisies : ${fmt(s.kc, 0)} kcal` : ""].filter(Boolean).join(" · ");
 function dayEmpty(d){ return !d.note && !(d.tags || []).length && MEALS.every(([m]) => !d.repas[m].length); }
 /* jour daté : aujourd'hui est créé avec la journée type ; un jour passé n'est créé qu'à la première saisie */
@@ -405,6 +413,9 @@ function viewRepas(p){
     <div class="big num">${fmt(total)}<span>part${total > 1 ? "s" : ""}</span></div>
     <div class="small num">soit ${fmt(total * PART_MG, 0)} mg de phénylalanine (1 part = ${PART_MG} mg)</div>
     ${statsTxt(dayStats(p, d)) ? `<div class="small num">${statsTxt(dayStats(p, d))}</div>` : ""}
+    ${(() => { const s = dayStats(p, d), tg = kcalTarget(p), ks = kcalStatus(p, s); if (!tg || !s.kn) return ""; const pct = Math.min(100, s.kc / tg * 100);
+      return `<div class="row small num" style="gap:8px"><span class="grow">Calories : ${fmt(s.kc, 0)} / ${fmt(tg, 0)} kcal (${fmt(p.kcalKg)} kcal/kg × ${fmt(p.poids)} kg)</span>${ks && ks[0] ? `<span class="status ${ks[0]}">${ks[1]}</span>` : ""}</div>
+        ${ks && !ks[0] ? `<div class="small" style="opacity:.8">${ks[1]} : le total est sous-estimé.</div>` : ""}`; })()}
     ${goal}
   </section>
   <div class="seg" role="group" aria-label="Repas">${MEALS.map(([m, l]) => `<button data-act="meal" data-m="${m}" aria-pressed="${ui.meal===m}">${l}<b class="num">${fmt(sumMeal(p, d, m))}</b></button>`).join("")}</div>
@@ -857,6 +868,7 @@ async function buildPdf(p, from, to, detail){
   y += 6; doc.setFont("helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(...MUT);
   T(`Période du ${frDate(from)} au ${frDate(to)} (${N} jours) · édité le ${frDate(t)} avec PhéCompte`, M, y);
   y += 5; T(`Zone cible : ${p.seuilMin != null ? `${fmtVal(p.seuilMin, u)} à ${fmtVal(p.seuilMax, u)} ${unitLabel(u)}` : "non renseignée"} · Objectif : ${p.objectif ? fmt(p.objectif) + " parts/jour" : "non renseigné"} · 1 part = ${PART_MG} mg de Phé`, M, y);
+  if (p.poids || kcalTarget(p)){ y += 5; T(`Poids : ${p.poids ? fmt(p.poids) + " kg" + (p.poidsDate ? " (pesé le " + frDate(p.poidsDate) + ")" : "") : "non renseigné"}${kcalTarget(p) ? ` · Cible calorique : ${fmt(p.kcalKg)} kcal/kg/j = ${fmt(kcalTarget(p), 0)} kcal/j` : ""}`, M, y); }
 
   // chiffres clés
   y += 6;
@@ -949,14 +961,15 @@ async function buildPdf(p, from, to, detail){
     const note = [a, dayNoteTxt(d)].filter(Boolean).join("\n");
     if (!hasMeals(d)) return [lab, {content: note ? "Repas non saisis" : "Non renseigné", colSpan:6, styles:{textColor:MUT, fontStyle:"italic"}}, note].map(c => typeof c === "string" ? pdfT(c) : {...c, content:pdfT(c.content)});
     const s = dayStats(p, d);
-    return [lab, ...MEALS.map(([m]) => cell(d, m)), fmt(sumDay(p, d)), [s.hg ? `${fmt(s.hg, 0)} g` : "", s.kn ? `${fmt(s.kc, 0)} kcal*` : ""].filter(Boolean).join("\n"), note].map(pdfT);
+    return [lab, ...MEALS.map(([m]) => cell(d, m)), fmt(sumDay(p, d)), [s.hg ? `${fmt(s.hg, 0)} g` : "", s.kn ? `${fmt(s.kc, 0)} kcal*` : "", (() => { const ks = kcalStatus(p, s); return !ks ? "" : !ks[0] ? "incomplet" : ks[0] === "st-in" ? "cible OK" : ks[0] === "st-hi" ? "cible >120 %" : "cible <90 %"; })()].filter(Boolean).join("\n"), note].map(pdfT);
   });
   autoTable(doc, {...tableBase, startY:y,
     head:[["Date", "Petit déj.", "Déjeuner", "Goûter", "Dîner", "Total parts", "Hypo / kcal", "Note du jour"].map(pdfT)],
     body: rows, rowPageBreak:"avoid",
     styles:{...tableBase.styles, fontSize: detail ? 7 : 8},
     columnStyles:{0:{cellWidth:15, fontStyle:"bold"}, 5:{cellWidth:12, halign:"right", fontStyle:"bold"}, 6:{cellWidth:15, halign:"right"}, 7:{cellWidth:30}},
-    didParseCell: c => { if (c.section === "body" && c.column.index === 5 && p.objectif){ const v = parseNum(String(c.cell.raw).replace(/\s/g, "")); if (v > p.objectif) c.cell.styles.textColor = HIGH; } }});
+    didParseCell: c => { if (c.section === "body" && c.column.index === 6){ const v = String(c.cell.raw); if (v.includes("cible OK")) c.cell.styles.textColor = LOW; else if (v.includes(">120")) c.cell.styles.textColor = HIGH; else if (v.includes("<90")) c.cell.styles.textColor = MID; }
+      if (c.section === "body" && c.column.index === 5 && p.objectif){ const v = parseNum(String(c.cell.raw).replace(/\s/g, "")); if (v > p.objectif) c.cell.styles.textColor = HIGH; } }});
 
   // pied de page
   const n = doc.getNumberOfPages();
@@ -1184,6 +1197,7 @@ function viewProfil(p){
     <div class="list">
       <button class="item" data-act="seuils"><span class="grow"><span class="t">Zone cible</span><br><span class="s num">${p.seuilMin != null ? `${fmtVal(p.seuilMin, p.unit)} à ${fmtVal(p.seuilMax, p.unit)} ${unitLabel(p.unit)}` : "Non définie"}</span></span>›</button>
       <button class="item" data-act="editProfile"><span class="grow"><span class="t">Objectif de parts par jour</span><br><span class="s">${p.objectif ? fmt(p.objectif) + " parts" : "Non défini"}</span></span>›</button>
+      <button class="item" data-act="editProfile"><span class="grow"><span class="t">Poids et cible calorique</span><br><span class="s num">${p.poids ? `${fmt(p.poids)} kg${p.poidsDate ? " (pesé le " + frDate(p.poidsDate) + ")" : ""}` : "Poids non renseigné"}${kcalTarget(p) ? ` · ${fmt(p.kcalKg)} kcal/kg = ${fmt(kcalTarget(p), 0)} kcal/j` : ""}</span>${p.poidsDate && (new Date() - new Date(p.poidsDate)) / 864e5 > 60 ? `<br><span class="s" style="color:var(--mid)">Pesée de plus de 2 mois : pensez à mettre le poids à jour</span>` : ""}</span>›</button>
     </div>
   </section>
   <section class="card"><div class="label">Profils sur cet appareil</div><div class="list">
@@ -1209,6 +1223,10 @@ function openProfile(isNew){
     <div class="row" style="flex-wrap:nowrap"><label class="f grow">Prénom<input type="text" id="pPre" maxlength="30" value="${esc(p.isExample ? "" : p.prenom)}"></label><label class="f grow">Nom<input type="text" id="pNom" maxlength="30" value="${esc(p.nom)}"></label></div>
     <div class="row" style="flex-wrap:nowrap"><label class="f grow">Sexe<select id="pSexe"><option value="">—</option>${["Féminin","Masculin"].map(s => `<option ${p.sexe===s?"selected":""}>${s}</option>`).join("")}</select></label><label class="f grow">Date de naissance<input type="date" id="pNai" max="${todayISO()}" value="${esc(p.naissance)}"></label></div>
     <label class="f">Objectif de parts de Phé par jour (facultatif)<input type="text" id="pObj" inputmode="decimal" placeholder="Fixé par l'équipe médicale" value="${p.objectif ? fmt(p.objectif) : ""}"></label>
+    <div class="row" style="flex-wrap:nowrap;align-items:end"><label class="f grow">Poids (kg)<input type="text" id="pPoids" inputmode="decimal" value="${p.poids ? fmt(p.poids) : ""}" placeholder="Ex. : 13,5"></label>
+      <label class="f grow">Pesé le<input type="date" id="pPoidsD" max="${todayISO()}" value="${esc(p.poidsDate || "")}"></label></div>
+    <label class="f">Cible calorique (kcal par kg et par jour, facultatif)<input type="text" id="pKcalKg" inputmode="decimal" value="${p.kcalKg ? fmt(p.kcalKg) : ""}" placeholder="Fixée par la diététicienne"></label>
+    <div class="small muted" style="margin-top:-6px">Repère indicatif de l'OMS/FAO (2004) : environ 80 kcal/kg/j entre 1 et 4 ans, en baisse ensuite avec l'âge. La cible de votre enfant est fixée par la diététicienne. Statut : non atteinte sous 90 %, atteinte de 90 à 120 %, largement dépassée au-delà de 120 %.</div>
     <label class="row" style="flex-wrap:nowrap;gap:12px;cursor:pointer" for="pHypo"><input type="checkbox" id="pHypo" ${p.hypoPhe !== false ? "checked" : ""} style="width:24px;height:24px;flex:none;accent-color:var(--accent)"><span class="grow"><b>Compter la Phé des produits hypoprotéinés</b><br><span class="small muted">À décider avec l'équipe médicale. Décoché, ces produits comptent 0 part (leurs grammes et calories restent enregistrés).</span></span></label>
     <div id="pErr" class="err" role="alert"></div>
     <button class="btn primary block" id="pSave">${isNew ? "Créer le profil" : "Enregistrer"}</button>`, b => {
@@ -1231,6 +1249,10 @@ function openProfile(isNew){
         if (!pre){ b.querySelector("#pErr").textContent = "Indiquez au moins un prénom."; return; }
         const obj = parseNum(b.querySelector("#pObj").value);
         Object.assign(p, {prenom:pre, nom:b.querySelector("#pNom").value.trim(), sexe:b.querySelector("#pSexe").value, naissance:b.querySelector("#pNai").value, photo, objectif: isNaN(obj) || obj <= 0 ? null : obj, hypoPhe: b.querySelector("#pHypo").checked});
+        const pw = parseNum(b.querySelector("#pPoids").value), kk = parseNum(b.querySelector("#pKcalKg").value);
+        const newW = isNaN(pw) || pw <= 0 || pw > 200 ? null : pw;
+        p.poidsDate = newW ? (b.querySelector("#pPoidsD").value || (newW !== p.poids ? todayISO() : p.poidsDate) || todayISO()) : null;
+        p.poids = newW; p.kcalKg = isNaN(kk) || kk <= 0 || kk > 200 ? null : kk;
         if (isNew){ db.profiles.push(p); db.current = p.id; }
         if (p.isExample){ // turning the example into a real profile: start clean
           delete p.isExample; p.days = {}; p.routine = emptyRepas(); p.analyses = []; p.custom = []; p.favoris = []; p.seuilMin = p.seuilMax = null; p.objectif = isNaN(obj) || obj <= 0 ? null : obj;
