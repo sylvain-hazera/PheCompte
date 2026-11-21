@@ -84,6 +84,7 @@ textarea{min-height:120px;font:13px/1.4 ui-monospace,Menlo,monospace}
 .cat{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex:none;font:700 .8rem var(--f-display)}
 .cat.F{background:color-mix(in srgb,var(--mid) 20%,var(--surface));color:var(--mid)}
 .cat.L{background:color-mix(in srgb,var(--low) 20%,var(--surface));color:var(--low)}
+.cat.H{background:color-mix(in srgb,var(--sun) 28%,var(--surface));color:color-mix(in srgb,var(--sun) 55%,var(--ink))}
 .cat.C{background:color-mix(in srgb,var(--accent) 18%,var(--surface));color:var(--accent)}
 .parts{font:700 1rem var(--f-display);text-align:right;white-space:nowrap}
 .parts small{display:block;font:500 .78rem var(--f-body);color:var(--muted)}
@@ -243,8 +244,10 @@ function exampleProfile(){
   p.isExample = true; p.seuilMin = 2; p.seuilMax = 6; p.objectif = 14;
   const find = n => [...FOOD.values()].find(f => f.n.toLowerCase() === n);
   p.custom.push({ref:"c1", n:"Compote pomme-poire (pot)", w:Math.round(100*200/(3.2*0.3))/100, c:"C", lait:false, prot:0.3});
-  p.custom.push({ref:"c2", n:"Biberon de lait de croissance", pp:3, unit:"biberon", c:"C"});
-  p.routine.pdj.push({ref:"c2", g:1}); p.routine.gouter.push({ref:"c1", g:100});
+  p.custom.push({ref:"c2", n:"Biberon de lait de croissance", pp:3, unit:"biberon", c:"C", kcal:160});
+  p.custom.push({ref:"c3", n:"Pâtes hypoprotéinées", c:"H", w:null, kcal:355});
+  p.custom.push({ref:"c4", n:"Pain hypoprotéiné", c:"H", w:null, kcal:260});
+  p.routine.pdj.push({ref:"c2", g:1}); p.routine.gouter.push({ref:"c1", g:100}); p.routine.dej.push({ref:"c3", g:60}); p.routine.diner.push({ref:"c4", g:40});
   const extra = [["pdj","banane",60],["dej","carotte cuite",150],["dej","tomate crue",120],["gouter","pomme",120],["diner","haricot vert cuit",100],["diner","courgette",150]];
   for (let k = 20; k >= 0; k--){
     const day = {repas:emptyRepas(), note:"", tags:[]};
@@ -276,7 +279,15 @@ const isToday = iso => iso === todayISO();
 const partsOf = (f, g) => !f ? 0 : f.pp != null ? Math.round(100 * g * f.pp) / 100 : !f.w ? 0 : Math.round(100 * g / f.w) / 100;
 const unitOf = (f, g) => (f.unit || "portion") + (g > 1 ? "s" : "");
 const qtyTxt = (f, g) => f.pp != null ? `${fmt(g)} ${unitOf(f, g)}` : `${fmt(g, 0)} g`;
-const ruleTxt = f => f.pp != null ? `1 ${f.unit || "portion"} = ${fmt(f.pp)} part${f.pp > 1 ? "s" : ""}` : f.w ? `1 part = ${fmt(f.w)} g` : "sans Phé";
+const ruleTxt = f => f.pp != null ? `1 ${f.unit || "portion"} = ${fmt(f.pp)} part${f.pp > 1 ? "s" : ""}` : f.w ? `1 part = ${fmt(f.w)} g` : f.c === "H" ? "Phé non comptée" : "sans Phé";
+const isHypo = f => !!f && f.c === "H";
+const catTag = f => f.c === "H" ? "Hyp" : f.c === "C" ? (f.pp != null ? "Prt" : "Emb") : f.c === "F" ? "Fr" : "Lég";
+/* calories : kcal pour 100 g (ou par portion pour un aliment compté en portions) ; null si non renseignées */
+const kcalOf = (f, g) => !f || f.kcal == null ? null : f.pp != null ? g * f.kcal : g * f.kcal / 100;
+const kcalRule = f => f.kcal == null ? "" : f.pp != null ? `${fmt(f.kcal, 0)} kcal/${f.unit || "portion"}` : `${fmt(f.kcal, 0)} kcal/100 g`;
+function mealStats(p, d, m){ const s = {hg:0, kc:0, kn:0}; d.repas[m].forEach(it => { const f = food(it.ref, p); if (isHypo(f)) s.hg += it.g; const k = kcalOf(f, it.g); if (k != null){ s.kc += k; s.kn++; } }); return s; }
+function dayStats(p, d){ return MEALS.reduce((a, [m]) => { const s = mealStats(p, d, m); return {hg:a.hg + s.hg, kc:a.kc + s.kc, kn:a.kn + s.kn}; }, {hg:0, kc:0, kn:0}); }
+const statsTxt = s => [s.hg ? `Hypoprotéinés : ${fmt(s.hg, 0)} g` : "", s.kn ? `Calories saisies : ${fmt(s.kc, 0)} kcal` : ""].filter(Boolean).join(" · ");
 function dayEmpty(d){ return !d.note && !(d.tags || []).length && MEALS.every(([m]) => !d.repas[m].length); }
 /* jour daté : aujourd'hui est créé avec la journée type ; un jour passé n'est créé qu'à la première saisie */
 function dayData(p, iso, create){
@@ -370,8 +381,8 @@ function viewRepas(p){
   const list = items.length ? items.map((it, i) => {
     const f = food(it.ref, p), pt = partsOf(f, it.g);
     return `<button class="item" data-act="editItem" data-i="${i}">
-      <span class="cat ${f.c}">${f.c === "C" ? (f.pp != null ? "Prt" : "Emb") : f.c === "F" ? "Fr" : "Lég"}</span>
-      <span class="grow"><span class="t">${esc(f.n)}</span><br><span class="s num">${qtyTxt(f, it.g)}${f.pp != null ? "" : " · " + ruleTxt(f)}${rRefs.has(it.ref) ? ` · <span class="rt">${icon("repeat","i xs")}tous les jours</span>` : ""}</span></span>
+      <span class="cat ${f.c}">${catTag(f)}</span>
+      <span class="grow"><span class="t">${esc(f.n)}</span><br><span class="s num">${qtyTxt(f, it.g)}${f.pp != null ? "" : " · " + ruleTxt(f)}${kcalOf(f, it.g) != null ? " · " + fmt(kcalOf(f, it.g), 0) + " kcal" : ""}${rRefs.has(it.ref) ? ` · <span class="rt">${icon("repeat","i xs")}tous les jours</span>` : ""}</span></span>
       <span class="parts num">${fmt(pt)}<small>part${pt > 1 ? "s" : ""}</small></span></button>`;
   }).join("") : `<div class="empty">Aucun aliment pour ce repas.<br>Ajoutez ce qui a été mangé pour compter les parts.</div>`;
   const any = hasMeals(d);
@@ -388,10 +399,12 @@ function viewRepas(p){
     <div class="label">${today ? "Total de la journée" : "Total du " + frDate(iso)}</div>
     <div class="big num">${fmt(total)}<span>part${total > 1 ? "s" : ""}</span></div>
     <div class="small num">soit ${fmt(total * PART_MG, 0)} mg de phénylalanine (1 part = ${PART_MG} mg)</div>
+    ${statsTxt(dayStats(p, d)) ? `<div class="small num">${statsTxt(dayStats(p, d))}</div>` : ""}
     ${goal}
   </section>
   <div class="seg" role="group" aria-label="Repas">${MEALS.map(([m, l]) => `<button data-act="meal" data-m="${m}" aria-pressed="${ui.meal===m}">${l}<b class="num">${fmt(sumMeal(p, d, m))}</b></button>`).join("")}</div>
   <section class="card"><div class="list">${list}</div>
+    ${statsTxt(mealStats(p, d, ui.meal)) ? `<div class="small muted num" style="border-top:1px solid var(--line);padding-top:8px">${MEALS.find(x => x[0] === ui.meal)[1]} : ${statsTxt(mealStats(p, d, ui.meal))}</div>` : ""}
     <button class="btn primary block" data-act="addFood">${icon("plus")}Ajouter un aliment</button>
     ${!any && rCount && !today ? `<button class="btn block" data-act="routineApply">${icon("repeat")}Ajouter la journée type à ce jour</button>` : ""}
   </section>
@@ -428,7 +441,7 @@ document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet()
 
 function openAddFood(){
   const p = P();
-  const cats = [["F","Fruits"],["L","Légumes"],["E","Emballés"],["M","Mes aliments"]];
+  const cats = [["F","Fruits"],["L","Légumes"],["E","Emballés"],["H","Hypo"],["M","Mes aliments"]];
   const draw = () => {
     let body = `<div class="seg" role="group" aria-label="Type d'aliment">${cats.map(([k,l]) => `<button data-act="addCat" data-c="${k}" aria-pressed="${ui.addCat===k}">${l}</button>`).join("")}</div>`;
     if (ui.addCat === "F" || ui.addCat === "L"){
@@ -450,12 +463,26 @@ function openAddFood(){
         <label class="f">Nom du produit<input type="text" id="eNom" placeholder="Ex. : purée de carottes, biberon de lait de croissance" maxlength="60"></label>
         <label class="f" id="eProtF">Protéines pour 100 g (g)<input type="text" id="eProt" inputmode="decimal" placeholder="Ex. : 0,8"></label>
         <div class="row" id="ePpF" hidden style="flex-wrap:nowrap"><label class="f grow">Parts par portion<input type="text" id="ePp" inputmode="decimal" placeholder="Ex. : 3"></label><label class="f grow">Nom de la portion<input type="text" id="eUnit" maxlength="20" placeholder="biberon"></label></div>
+        <label class="f"><span id="eKcalL">Calories pour 100 g (kcal, facultatif)</span><input type="text" id="eKcal" inputmode="decimal" placeholder="Indiquées sur l'étiquette"></label>
         <div id="ePrev" class="note num">Saisissez la quantité de protéines.</div>
         <div id="eErr" class="err" role="alert"></div>
         <button class="btn primary block" data-act="saveCustom">Enregistrer et choisir la quantité</button>`;
+    } else if (ui.addCat === "H"){
+      const hy = p.custom.filter(c => !c.hidden && c.c === "H");
+      body += `<p class="small muted" style="margin:0">Pâtes, pain, farine, riz, biscuits… hypoprotéinés. Leurs quantités et leurs calories apparaissent dans le rapport PDF pour que la diététicienne puisse calculer l'apport calorique.</p>
+        ${hy.length ? `<div class="list">${hy.map(c => `<button class="item" data-act="pickFood" data-ref="${c.ref}"><span class="cat H">Hyp</span><span class="grow"><span class="t">${esc(c.n)}</span><br><span class="s num">${[kcalRule(c), ruleTxt(c)].filter(Boolean).join(" · ")}</span></span></button>`).join("")}</div>` : ""}
+        <details class="card" style="box-shadow:none" ${hy.length ? "" : "open"}><summary>Nouveau produit hypoprotéiné</summary>
+          <label class="f">Nom du produit<input type="text" id="hNom" maxlength="60" placeholder="Ex. : pâtes hypoprotéinées"></label>
+          <div class="row" style="flex-wrap:nowrap;align-items:end"><label class="f grow">Calories pour 100 g (kcal)<input type="text" id="hKcal" inputmode="decimal" placeholder="Ex. : 350"></label>
+          <label class="f grow">Phé pour 100 g (mg, facultatif)<input type="text" id="hPhe" inputmode="decimal" placeholder="Ex. : 12"></label></div>
+          <div class="small muted">Valeurs à lire sur l'emballage (calories souvent « pour 100 g de produit sec »). Laissez la Phé vide si votre équipe médicale ne la compte pas pour ce produit.</div>
+          <div id="hPrev" class="note small num"></div>
+          <div id="hErr" class="err" role="alert"></div>
+          <button class="btn primary block" data-act="saveHypo">Enregistrer et choisir la quantité</button>
+        </details>`;
     } else {
       const mine = p.custom.filter(c => !c.hidden);
-      body += mine.length ? `<div class="list">${mine.map(c => `<div class="row" style="flex-wrap:nowrap"><button class="item grow" data-act="pickFood" data-ref="${c.ref}"><span class="cat C">${c.pp != null ? "Prt" : "Emb"}</span><span class="grow"><span class="t">${esc(c.n)}</span><br><span class="s num">${ruleTxt(c)}${c.pp == null ? ` · ${c.lait ? "avec" : "sans"} lait` : ""}</span></span></button><button class="icon-btn" data-act="delCustom" data-ref="${c.ref}" aria-label="Retirer ${esc(c.n)} de Mes aliments">${icon("trash")}</button></div>`).join("")}</div>`
+      body += mine.length ? `<div class="list">${mine.map(c => `<div class="row" style="flex-wrap:nowrap"><button class="item grow" data-act="pickFood" data-ref="${c.ref}"><span class="cat ${c.c}">${catTag(c)}</span><span class="grow"><span class="t">${esc(c.n)}</span><br><span class="s num">${[ruleTxt(c), c.c === "C" && c.pp == null ? (c.lait ? "avec" : "sans") + " lait" : "", kcalRule(c)].filter(Boolean).join(" · ")}</span></span></button><button class="icon-btn" data-act="editCustom" data-ref="${c.ref}" aria-label="Modifier ${esc(c.n)}"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></button><button class="icon-btn" data-act="delCustom" data-ref="${c.ref}" aria-label="Retirer ${esc(c.n)} de Mes aliments">${icon("trash")}</button></div>`).join("")}</div>`
         : `<div class="empty">Les produits emballés et portions que vous ajoutez sont gardés ici pour la prochaine fois.</div>`;
     }
     document.getElementById("sheetBody").innerHTML = body;
@@ -463,12 +490,39 @@ function openAddFood(){
     if (s) s.addEventListener("input", () => { ui.search = s.value; const pos = s.selectionStart; draw(); const n = document.getElementById("foodSearch"); n.focus(); n.setSelectionRange(pos, pos); });
     const lait = document.getElementById("eLait");
     if (lait){
-      const upd = () => { const pp = lait.value === "pp"; document.getElementById("eProtF").hidden = pp; document.getElementById("ePpF").hidden = !pp; document.getElementById("ePrev").textContent = customCalc().msg; };
+      const upd = () => { const pp = lait.value === "pp"; document.getElementById("eProtF").hidden = pp; document.getElementById("ePpF").hidden = !pp; document.getElementById("eKcalL").textContent = pp ? "Calories par portion (kcal, facultatif)" : "Calories pour 100 g (kcal, facultatif)"; document.getElementById("ePrev").textContent = customCalc().msg; };
       ["eProt","ePp","eUnit"].forEach(id => document.getElementById(id).addEventListener("input", upd)); lait.addEventListener("change", upd);
     }
+    const hk = document.getElementById("hKcal");
+    if (hk){ const upd = () => { document.getElementById("hPrev").textContent = hypoCalc().msg; }; hk.addEventListener("input", upd); document.getElementById("hPhe").addEventListener("input", upd); upd(); }
   };
   openAddFood.draw = draw;
   sheet("Ajouter au " + MEALS.find(m => m[0] === ui.meal)[1].toLowerCase().replace("déj.", "déjeuner"), "", draw);
+}
+function optNum(id, max){ const s = document.getElementById(id).value.trim(); if (!s) return {v:null}; const v = parseNum(s); return isNaN(v) || v < 0 || v > max ? {err:true} : {v:Math.round(v * 10) / 10}; }
+function hypoCalc(){
+  const k = optNum("hKcal", 900), ph = optNum("hPhe", 2000);
+  if (k.err) return {ok:false, msg:"Les calories doivent être un nombre entre 0 et 900 kcal pour 100 g."};
+  if (ph.err) return {ok:false, msg:"La Phé doit être un nombre entre 0 et 2000 mg pour 100 g."};
+  const w = ph.v ? Math.round(100 * 2000 / ph.v) / 100 : null;
+  return {ok:true, kcal:k.v, phe100:ph.v, w, msg:[k.v != null ? `100 g = ${fmt(k.v, 0)} kcal` : "Calories non renseignées", w ? `1 part de Phé = ${fmt(w)} g` : "Phé non comptée"].join(" · ")};
+}
+function openEditCustom(ref){
+  const p = P(), c = p.custom.find(x => x.ref === ref); if (!c) return;
+  sheet("Modifier « " + c.n + " »", `
+    <label class="f">Nom<input type="text" id="cNom" maxlength="60" value="${esc(c.n)}"></label>
+    <label class="f">${c.pp != null ? `Calories par ${esc(c.unit || "portion")} (kcal)` : "Calories pour 100 g (kcal)"}<input type="text" id="cKcal" inputmode="decimal" value="${c.kcal != null ? fmt(c.kcal) : ""}" placeholder="Facultatif"></label>
+    <p class="small muted" style="margin:0">${esc(ruleTxt(c))}. Les parts ne se modifient pas ici, pour ne pas fausser l'historique : si la recette du produit change, créez un nouveau produit.</p>
+    <div id="cErr" class="err" role="alert"></div>
+    <button class="btn primary block" id="cSave">Enregistrer</button>`, b => {
+      b.querySelector("#cSave").addEventListener("click", () => {
+        const n = b.querySelector("#cNom").value.trim(), k = optNum("cKcal", c.pp != null ? 5000 : 900);
+        if (n.length < 2){ b.querySelector("#cErr").textContent = "Indiquez un nom."; return; }
+        if (k.err){ b.querySelector("#cErr").textContent = "Les calories doivent être un nombre positif."; return; }
+        c.n = n; if (k.v == null) delete c.kcal; else c.kcal = k.v;
+        save(); render(); ui.addCat = "M"; openAddFood(); toast("Produit mis à jour");
+      });
+    });
 }
 function customCalc(){
   const type = document.getElementById("eLait").value;
@@ -506,7 +560,7 @@ function openWeight(ref, idx){
     <button class="btn primary block" id="wSave">${editing ? "Enregistrer" : "Ajouter au " + mealName}</button>
     ${editing ? `<button class="btn danger block" id="wDel">Retirer du repas${isToday(ui.day) ? " d'aujourd'hui" : ""}</button>` : ""}`, b => {
       const gi = b.querySelector("#wG"), r = b.querySelector("#wR"), out = b.querySelector("#wP");
-      const upd = () => { const pt = partsOf(f, g); out.textContent = `${fmt(pt)} part${pt > 1 ? "s" : ""} · ${fmt(pt * PART_MG, 0)} mg`; };
+      const upd = () => { const pt = partsOf(f, g), k = kcalOf(f, g); out.textContent = `${fmt(pt)} part${pt > 1 ? "s" : ""} · ${fmt(pt * PART_MG, 0)} mg${k != null ? " · " + fmt(k, 0) + " kcal" : ""}`; };
       gi.addEventListener("input", () => { const v = parseNum(gi.value); g = isNaN(v) || v < 0 ? 0 : Math.min(portion ? 50 : 5000, v); r.value = Math.min(MAX, g); upd(); });
       r.addEventListener("input", () => { g = +r.value; gi.value = fmt(g); upd(); });
       b.querySelectorAll("[data-step]").forEach(x => x.addEventListener("click", () => {
@@ -624,7 +678,8 @@ function openDay(iso){
       ${dayNoteTxt(d) ? `${d.tags.length ? `<div class="row" style="gap:6px">${d.tags.map(t => `<span class="chip" aria-pressed="true">${esc(t)}</span>`).join("")}</div>` : ""}${d.note ? `<p style="margin:0;white-space:pre-wrap">${esc(d.note)}</p>` : ""}` : `<span class="small muted">Aucune note ce jour-là.</span>`}</div>
     <div class="card" style="box-shadow:none"><div class="label">Repas</div>
       ${hasMeals(d) ? `<div class="row"><b class="grow num" style="font:800 1.5rem var(--f-display)">${fmt(parts)} part${parts > 1 ? "s" : ""}</b><span class="small muted num">${fmt(parts * PART_MG, 0)} mg de Phé</span></div>
-      ${MEALS.map(([m, l]) => d.repas[m].length ? `<div class="small"><b>${l} (${fmt(sumMeal(p, d, m))})</b> : ${d.repas[m].map(it => { const f = food(it.ref, p); return esc(f.n) + " " + qtyTxt(f, it.g); }).join(", ")}</div>` : "").join("")}` : `<span class="small muted">Aucun repas saisi ce jour-là.</span>`}</div>
+      ${MEALS.map(([m, l]) => d.repas[m].length ? `<div class="small"><b>${l} (${fmt(sumMeal(p, d, m))})</b> : ${d.repas[m].map(it => { const f = food(it.ref, p); return esc(f.n) + " " + qtyTxt(f, it.g); }).join(", ")}</div>` : "").join("")}
+      ${statsTxt(dayStats(p, d)) ? `<div class="small muted num">${statsTxt(dayStats(p, d))}</div>` : ""}` : `<span class="small muted">Aucun repas saisi ce jour-là.</span>`}</div>
     <button class="btn primary block" data-act="gotoDay" data-iso="${iso}">Voir ou modifier ce jour</button>`);
 }
 
@@ -791,13 +846,15 @@ async function buildPdf(p, from, to, detail){
   // chiffres clés
   y += 6;
   const over = p.objectif ? partsArr.filter(v => v > p.objectif).length : null;
-  const boxes = [["Jours saisis", `${entered.length} / ${N}`], ["Moyenne", `${fmt(avg, 1)} parts/j`], ["Min. – max.", partsArr.length ? `${fmt(Math.min(...partsArr), 1)} – ${fmt(Math.max(...partsArr), 1)}` : "–"], ["Jours > objectif", over == null ? "–" : String(over)], ["Prises de sang", String(ans.length)]];
-  const bw = (CW - 4 * 3) / 5;
+  const st = entered.map(i => dayStats(p, p.days[i])), avgH = st.length ? st.reduce((s, x) => s + x.hg, 0) / st.length : 0;
+  const kDays = st.filter(x => x.kn), avgK = kDays.length ? kDays.reduce((s, x) => s + x.kc, 0) / kDays.length : 0;
+  const boxes = [["Jours saisis", `${entered.length} / ${N}`], [partsArr.length ? `Moyenne (${fmt(Math.min(...partsArr), 1)} à ${fmt(Math.max(...partsArr), 1)})` : "Moyenne", `${fmt(avg, 1)} parts/j`], ["Jours > objectif", over == null ? "–" : String(over)], ["Prises de sang", String(ans.length)], ["Hypoprotéinés moy./j", `${fmt(avgH, 0)} g`], ["Calories saisies moy./j*", kDays.length ? `${fmt(avgK, 0)} kcal` : "–"]];
+  const bw = (CW - 5 * 3) / 6;
   boxes.forEach(([l, v], i) => {
     const x = M + i * (bw + 3);
     doc.setFillColor(233, 239, 242); doc.roundedRect(x, y, bw, 16, 2, 2, "F");
-    doc.setFont("helvetica", "bold"); doc.setFontSize(12.5); doc.setTextColor(...INK); T(v, x + bw / 2, y + 7.5, {align:"center"});
-    doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(...MUT); T(l, x + bw / 2, y + 12.5, {align:"center"});
+    doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(...INK); T(v, x + bw / 2, y + 7.5, {align:"center"});
+    doc.setFont("helvetica", "normal"); doc.setFontSize(6.5); doc.setTextColor(...MUT); T(l, x + bw / 2, y + 12.5, {align:"center"});
   });
   y += 22;
 
@@ -865,19 +922,25 @@ async function buildPdf(p, from, to, detail){
 
   // journal quotidien
   section("Journal quotidien");
-  const cell = (d, m) => { if (!d.repas[m].length) return ""; const tot = fmt(sumMeal(p, d, m)) + " p."; return detail ? tot + "\n" + d.repas[m].map(it => { const f = food(it.ref, p); return `${f.n} ${qtyTxt(f, it.g)} (${fmt(partsOf(f, it.g))})`; }).join("\n") : tot; };
+  doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(...MUT);
+  T("Dans chaque repas : parts de Phé (p.), puis aliments avec leurs parts. Hyp. = aliment hypoprotéiné.", M, y + 2.5);
+  T("* Calories : uniquement les aliments dont les calories ont été saisies (produits emballés, portions, hypoprotéinés) ; les fruits et légumes de la base n'en ont pas.", M, y + 6);
+  y += 8;
+  const cell = (d, m) => { if (!d.repas[m].length) return ""; const s = mealStats(p, d, m); const tot = fmt(sumMeal(p, d, m)) + " p." + (s.hg ? ` · hyp. ${fmt(s.hg, 0)} g` : "") + (s.kn ? ` · ${fmt(s.kc, 0)} kcal` : "");
+    return detail ? tot + "\n" + d.repas[m].map(it => { const f = food(it.ref, p), k = kcalOf(f, it.g); return `${isHypo(f) ? "Hyp. " : ""}${f.n} ${qtyTxt(f, it.g)} (${fmt(partsOf(f, it.g))}${k != null ? ` ; ${fmt(k, 0)} kcal` : ""})`; }).join("\n") : tot; };
   const rows = isos.map(i => {
     const d = p.days[i], lab = cap(new Date(i + "T12:00").toLocaleDateString("fr-FR", {weekday:"short"})).replace(".", "") + " " + frDate(i).slice(0, 5);
     const a = ans.filter(x => x.date === i).map(x => `Prise de sang : ${fmtVal(x.mg, u)} ${unitLabel(u)}`).join("\n");
     const note = [a, dayNoteTxt(d)].filter(Boolean).join("\n");
-    if (!hasMeals(d)) return [lab, {content: note ? "Repas non saisis" : "Non renseigné", colSpan:5, styles:{textColor:MUT, fontStyle:"italic"}}, note].map(c => typeof c === "string" ? pdfT(c) : {...c, content:pdfT(c.content)});
-    return [lab, ...MEALS.map(([m]) => cell(d, m)), fmt(sumDay(p, d)), note].map(pdfT);
+    if (!hasMeals(d)) return [lab, {content: note ? "Repas non saisis" : "Non renseigné", colSpan:6, styles:{textColor:MUT, fontStyle:"italic"}}, note].map(c => typeof c === "string" ? pdfT(c) : {...c, content:pdfT(c.content)});
+    const s = dayStats(p, d);
+    return [lab, ...MEALS.map(([m]) => cell(d, m)), fmt(sumDay(p, d)), [s.hg ? `${fmt(s.hg, 0)} g` : "", s.kn ? `${fmt(s.kc, 0)} kcal*` : ""].filter(Boolean).join("\n"), note].map(pdfT);
   });
   autoTable(doc, {...tableBase, startY:y,
-    head:[["Date", "Petit déj.", "Déjeuner", "Goûter", "Dîner", "Total", "Note du jour"].map(pdfT)],
+    head:[["Date", "Petit déj.", "Déjeuner", "Goûter", "Dîner", "Total parts", "Hypo / kcal", "Note du jour"].map(pdfT)],
     body: rows, rowPageBreak:"avoid",
     styles:{...tableBase.styles, fontSize: detail ? 7 : 8},
-    columnStyles:{0:{cellWidth:17, fontStyle:"bold"}, 5:{cellWidth:12, halign:"right", fontStyle:"bold"}, 6:{cellWidth:38}},
+    columnStyles:{0:{cellWidth:15, fontStyle:"bold"}, 5:{cellWidth:12, halign:"right", fontStyle:"bold"}, 6:{cellWidth:15, halign:"right"}, 7:{cellWidth:30}},
     didParseCell: c => { if (c.section === "body" && c.column.index === 5 && p.objectif){ const v = parseNum(String(c.cell.raw).replace(/\s/g, "")); if (v > p.objectif) c.cell.styles.textColor = HIGH; } }});
 
   // pied de page
@@ -1198,9 +1261,22 @@ document.addEventListener("click", e => {
       const nom = document.getElementById("eNom").value.trim(), r = customCalc(), err = document.getElementById("eErr");
       if (nom.length < 3){ err.textContent = "Le nom doit contenir au moins 3 lettres."; break; }
       if (!r.ok){ err.textContent = r.msg; break; }
+      const kc = optNum("eKcal", r.pp != null ? 5000 : 900);
+      if (kc.err){ err.textContent = "Les calories doivent être un nombre positif."; break; }
       const ref = "c" + uid();
-      p.custom.push(r.pp != null ? {ref, n:nom, pp:r.pp, unit:r.unit, c:"C"} : {ref, n:nom, w:r.w, c:"C", lait:r.lait, prot:r.prot}); save(); openWeight(ref); break;
+      const c = r.pp != null ? {ref, n:nom, pp:r.pp, unit:r.unit, c:"C"} : {ref, n:nom, w:r.w, c:"C", lait:r.lait, prot:r.prot};
+      if (kc.v != null) c.kcal = kc.v;
+      p.custom.push(c); save(); openWeight(ref); break;
     }
+    case "saveHypo": {
+      const nom = document.getElementById("hNom").value.trim(), r = hypoCalc(), err = document.getElementById("hErr");
+      if (nom.length < 2){ err.textContent = "Indiquez le nom du produit."; break; }
+      if (!r.ok){ err.textContent = r.msg; break; }
+      const ref = "c" + uid(), c = {ref, n:nom, c:"H", w:r.w};
+      if (r.kcal != null) c.kcal = r.kcal; if (r.phe100 != null) c.phe100 = r.phe100;
+      p.custom.push(c); save(); openWeight(ref); break;
+    }
+    case "editCustom": openEditCustom(t.dataset.ref); break;
     case "delCustom": armed(t, "Retirer ?", () => {
       const c = p.custom.find(x => x.ref === t.dataset.ref); if (!c) return;
       c.hidden = true; MEALS.forEach(([m]) => { p.routine[m] = p.routine[m].filter(x => x.ref !== c.ref); });
