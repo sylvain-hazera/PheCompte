@@ -152,6 +152,16 @@ details summary{cursor:pointer;font-weight:600}
   </section>
 
   <section style="display:grid;gap:12px">
+    <h2>Produits hypoprotéinés</h2>
+    <p class="small muted" id="hypoNote"></p>
+    <p class="small">Le poids d'une part est calculé ainsi : <span class="formula">2000 ÷ Phé pour 100 g</span>. Quand la Phé n'est pas publiée, le produit compte 0 part. Les familles peuvent aussi choisir de ne pas compter la Phé de ces produits (réglage du profil).</p>
+    <div class="scroll"><table id="htbl">
+      <thead><tr><th>Produit</th><th>Catégorie</th><th class="n">kcal / 100 g</th><th class="n">Protéines / 100 g</th><th class="n">Phé / 100 g (mg)</th><th class="n">1 part =</th><th>Remarque et source</th><th class="c-cmt noprint">Relecture</th><th class="c-cmt noprint">Commentaire</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </section>
+
+  <section style="display:grid;gap:12px">
     <h2>Recettes</h2>
     <p class="small muted">Valeurs pour la recette entière, telles qu'affichées dans l'application. Les recettes de la communauté sont proposées par les familles ; leur Phé est calculée automatiquement à partir des ingrédients. Seules les recettes déjà validées figurent ici. Les propositions en attente se trouvent dans les issues GitHub du projet, marquées « recette » : elles sont publiées quand l'étiquette « validée » est ajoutée.</p>
     <div class="scroll"><table class="rec" id="rtbl">
@@ -207,7 +217,7 @@ function drawRecipes(){
     <td>${esc(r.t)}${r.src ? `<br><span class="small" style="color:${r.statut === "validee" ? "var(--low)" : "var(--mid)"}">${r.statut === "validee" ? "Communauté · validée" : "Communauté · non vérifiée"}</span>${r.url ? ` · <a class="small" href="${esc(r.url)}" target="_blank" rel="noopener">issue</a>` : ""}` : ""}</td><td class="n">${esc(r.parts)}</td><td class="n">${fmt(r.phe, 0)}</td><td class="n">${fmt(r.kcal, 0)}</td>${stCell(id)}</tr>`; }).join("");
 }
 function progress(){
-  const ids = [...foods.map(f => f.id), ...RECS().map(r => "r" + r.id), "formules"];
+  const ids = [...foods.map(f => f.id), ...HYPO.map(h => h.id), ...RECS().map(r => "r" + r.id), "formules"];
   const ok = ids.filter(i => rev[i] && rev[i].s === "ok").length, ko = ids.filter(i => rev[i] && rev[i].s === "ko").length;
   document.getElementById("progress").innerHTML = `<b>${ok + ko} / ${ids.length}</b> lignes relues · <span style="color:var(--low)">${ok} correctes</span> · <span style="color:var(--high)">${ko} à corriger</span>`;
   document.querySelectorAll('[data-id="formules"][data-v]').forEach(b => b.setAttribute("aria-pressed", (rev.formules||{}).s === b.dataset.v));
@@ -233,6 +243,7 @@ function csv(){
   const line = (type, id, name, val) => { const r = rev[id]; if (r && (r.s || r.c)) out += [type, q(name), q(val), r.s === "ok" ? "Correct" : r.s === "ko" ? "À corriger" : "", q(r.c || "")].join(";") + "\n"; };
   line("Formules", "formules", "Produits emballés", "50 / 32 / 38 mg Phé par g de protéines");
   foods.slice().sort((a, b) => a.n.localeCompare(b.n, "fr")).forEach(f => line(CAT[f.c], f.id, f.n, `1 part = ${fmt(f.w)} g (${TEN[f.t]})`));
+  HYPO.forEach(h => line("Hypoprotéiné", h.id, h.n, `${h.kcal ?? "?"} kcal, ${h.prot} g prot., ${h.phe ?? "Phé ?"} mg Phé /100 g (${h.base})`));
   RECS().forEach(r => line(r.src ? "Recette communauté" : "Recette", "r" + r.id, r.n, `${r.parts} parts, ${r.phe} mg Phé`));
   return out;
 }
@@ -250,10 +261,17 @@ let clrArmed = false;
 document.getElementById("clr").addEventListener("click", e => {
   if (!clrArmed){ clrArmed = true; e.target.textContent = "Confirmer l'effacement"; setTimeout(() => { clrArmed = false; e.target.textContent = "Effacer mes réponses"; }, 4000); return; }
   rev = {_who: rev._who}; persist(); clrArmed = false; e.target.textContent = "Effacer mes réponses";
-  document.querySelector('[data-id="formules"].cmt').value = ""; drawFoods(); drawRecipes(); toast("Réponses effacées");
+  document.querySelector('[data-id="formules"].cmt').value = ""; drawFoods(); drawRecipes(); drawHypo(); toast("Réponses effacées");
 });
 document.querySelector('[data-id="formules"].cmt').value = (rev.formules || {}).c || "";
-drawFoods(); drawRecipes();
+function drawHypo(){
+  document.getElementById("hypoNote").textContent = HYPO_NOTE;
+  document.querySelector("#htbl tbody").innerHTML = HYPO.map(h => { const s = (rev[h.id]||{}).s || ""; return `<tr class="${s}">
+    <td class="name">${esc(h.n)}<br><span class="small muted">${esc(h.marque)}${h.unit ? ` · 1 ${esc(h.unit)} = ${fmt(h.uw)} ${h.base === "pour 100 ml" ? "ml" : "g"}` : ""}</span></td><td>${esc(h.cat)}</td>
+    <td class="n">${h.kcal != null ? fmt(h.kcal, 0) : "–"}${h.base === "sec" ? "<br><span class=\"small muted\">sec</span>" : h.base === "pour 100 ml" ? "<br><span class=\"small muted\">/100 ml</span>" : ""}</td><td class="n">${fmt(h.prot, 2)}</td><td class="n">${h.phe != null ? fmt(h.phe) : "non publiée"}</td>
+    <td class="n">${h.phe ? fmt(2000 / h.phe, 0) + " g" : "–"}</td><td class="small">${esc(h.rq || "")} <a href="${esc(h.src)}" target="_blank" rel="noopener">source</a></td>${stCell(h.id)}</tr>`; }).join("");
+}
+drawFoods(); drawRecipes(); drawHypo();
 fetch("recettes-communaute.json", {cache:"no-cache"}).then(r => r.ok ? r.json() : []).then(d => { if (Array.isArray(d) && d.length){ COMM = d; document.getElementById("nRec").textContent = RECS().length; drawRecipes(); progress(); } }).catch(() => {});
 </script>
 </body>

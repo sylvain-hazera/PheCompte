@@ -203,6 +203,10 @@ const uid = () => Math.random().toString(36).slice(2, 9);
 const framed = (() => { try { return window.self !== window.top; } catch(e) { return true; } })();
 
 const FOOD = new Map(ALIMENTS.map(([id, n, w, t, c]) => ["a"+id, {ref:"a"+id, n, w, t, c}]));
+/* catalogue des produits hypoprotéinés (data/hypo-catalogue.json) */
+const HYPO_FOODS = (typeof HYPO !== "undefined" ? HYPO : []).map(h => ({ref:h.id, n:h.n, marque:h.marque, cat:h.cat, c:"H", kcal:h.kcal, prot:h.prot, phe100:h.phe,
+  w: h.phe ? Math.round(100 * 2000 / h.phe) / 100 : null, base:h.base, unit:h.unit, uw:h.uw, src:h.src, rq:h.rq, cata:true}));
+HYPO_FOODS.forEach(f => FOOD.set(f.ref, f));
 
 /* ---------- storage ---------- */
 let storageOK = true;
@@ -245,9 +249,8 @@ function exampleProfile(){
   const find = n => [...FOOD.values()].find(f => f.n.toLowerCase() === n);
   p.custom.push({ref:"c1", n:"Compote pomme-poire (pot)", w:Math.round(100*200/(3.2*0.3))/100, c:"C", lait:false, prot:0.3});
   p.custom.push({ref:"c2", n:"Biberon de lait de croissance", pp:3, unit:"biberon", c:"C", kcal:160});
-  p.custom.push({ref:"c3", n:"Pâtes hypoprotéinées", c:"H", w:null, kcal:355});
-  p.custom.push({ref:"c4", n:"Pain hypoprotéiné", c:"H", w:null, kcal:260});
-  p.routine.pdj.push({ref:"c2", g:1}); p.routine.gouter.push({ref:"c1", g:100}); p.routine.dej.push({ref:"c3", g:60}); p.routine.diner.push({ref:"c4", g:40});
+
+  p.routine.pdj.push({ref:"c2", g:1}); p.routine.gouter.push({ref:"c1", g:100}); p.routine.dej.push({ref:"h-coquillettes-taranis", g:60}); p.routine.diner.push({ref:"h-petits-pains-taranis", g:45});
   const extra = [["pdj","banane",60],["dej","carotte cuite",150],["dej","tomate crue",120],["gouter","pomme",120],["diner","haricot vert cuit",100],["diner","courgette",150]];
   for (let k = 20; k >= 0; k--){
     const day = {repas:emptyRepas(), note:"", tags:[]};
@@ -269,19 +272,21 @@ db.profiles.forEach(migrate);
 const P = () => db.profiles.find(p => p.id === db.current) || db.profiles[0];
 
 function food(ref, p = P()){
-  if (ref.startsWith("a")) return FOOD.get(ref);
+  if (FOOD.has(ref)) return FOOD.get(ref);
   return p.custom.find(c => c.ref === ref) || {ref, n:"Aliment supprimé", w:null, c:"C"};
 }
 const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
 const localISO = d => new Date(d.getTime() - d.getTimezoneOffset()*6e4).toISOString().slice(0,10);
 const isoShift = (iso, n) => { const d = new Date(iso + "T12:00"); d.setDate(d.getDate() + n); return localISO(d); };
 const isToday = iso => iso === todayISO();
-const partsOf = (f, g) => !f ? 0 : f.pp != null ? Math.round(100 * g * f.pp) / 100 : !f.w ? 0 : Math.round(100 * g / f.w) / 100;
+const hypoCounted = () => P().hypoPhe !== false;
+const partsOf = (f, g) => !f ? 0 : f.c === "H" && !hypoCounted() ? 0 : f.pp != null ? Math.round(100 * g * f.pp) / 100 : !f.w ? 0 : Math.round(100 * g / f.w) / 100;
 const unitOf = (f, g) => (f.unit || "portion") + (g > 1 ? "s" : "");
 const qtyTxt = (f, g) => f.pp != null ? `${fmt(g)} ${unitOf(f, g)}` : `${fmt(g, 0)} g`;
-const ruleTxt = f => f.pp != null ? `1 ${f.unit || "portion"} = ${fmt(f.pp)} part${f.pp > 1 ? "s" : ""}` : f.w ? `1 part = ${fmt(f.w)} g` : f.c === "H" ? "Phé non comptée" : "sans Phé";
-const isHypo = f => !!f && f.c === "H";
-const catTag = f => f.c === "H" ? "Hyp" : f.c === "C" ? (f.pp != null ? "Prt" : "Emb") : f.c === "F" ? "Fr" : "Lég";
+const ruleTxt = f => f.c === "H" && !hypoCounted() ? "Phé non comptée (réglage du profil)" : f.pp != null ? `1 ${f.unit || "portion"} = ${fmt(f.pp)} part${f.pp > 1 ? "s" : ""}` : f.w ? `1 part = ${fmt(f.w)} g` : f.c === "H" ? (f.cata && f.phe100 === 0 ? "sans Phé" : f.cata && f.phe100 == null ? "Phé non publiée" : "Phé non comptée") : "sans Phé";
+const isSub = f => !!f && f.cat === "Substituts et compléments";
+const isHypo = f => !!f && f.c === "H" && !isSub(f);
+const catTag = f => isSub(f) ? "Sub" : f.c === "H" ? "Hyp" : f.c === "C" ? (f.pp != null ? "Prt" : "Emb") : f.c === "F" ? "Fr" : "Lég";
 /* calories : kcal pour 100 g (ou par portion pour un aliment compté en portions) ; null si non renseignées */
 const kcalOf = (f, g) => !f || f.kcal == null ? null : f.pp != null ? g * f.kcal : g * f.kcal / 100;
 const kcalRule = f => f.kcal == null ? "" : f.pp != null ? `${fmt(f.kcal, 0)} kcal/${f.unit || "portion"}` : `${fmt(f.kcal, 0)} kcal/100 g`;
@@ -469,9 +474,16 @@ function openAddFood(){
         <button class="btn primary block" data-act="saveCustom">Enregistrer et choisir la quantité</button>`;
     } else if (ui.addCat === "H"){
       const hy = p.custom.filter(c => !c.hidden && c.c === "H");
-      body += `<p class="small muted" style="margin:0">Pâtes, pain, farine, riz, biscuits… hypoprotéinés. Leurs quantités et leurs calories apparaissent dans le rapport PDF pour que la diététicienne puisse calculer l'apport calorique.</p>
-        ${hy.length ? `<div class="list">${hy.map(c => `<button class="item" data-act="pickFood" data-ref="${c.ref}"><span class="cat H">Hyp</span><span class="grow"><span class="t">${esc(c.n)}</span><br><span class="s num">${[kcalRule(c), ruleTxt(c)].filter(Boolean).join(" · ")}</span></span></button>`).join("")}</div>` : ""}
-        <details class="card" style="box-shadow:none" ${hy.length ? "" : "open"}><summary>Nouveau produit hypoprotéiné</summary>
+      const q = ui.search.trim().toLowerCase();
+      const match = f => !q || (f.n + " " + (f.marque || "")).toLowerCase().includes(q);
+      const row = f => `<button class="item" data-act="pickFood" data-ref="${f.ref}"><span class="cat H">${catTag(f)}</span><span class="grow"><span class="t">${esc(f.n)}</span><br><span class="s num">${[f.kcal != null ? fmt(f.kcal, 0) + " kcal/100 " + (f.base === "pour 100 ml" ? "ml" : "g") + (f.base === "sec" ? " (sec)" : "") : "", ruleTxt(f)].filter(Boolean).join(" · ")}</span></span></button>`;
+      const mine = hy.filter(match), cats = [...new Set(HYPO_FOODS.map(f => f.cat))];
+      let list = mine.length ? `<div class="letter">Mes produits</div>${mine.map(row).join("")}` : "";
+      cats.forEach(c => { const r = HYPO_FOODS.filter(f => f.cat === c && match(f)); if (r.length) list += `<div class="letter">${esc(c)}</div>${r.map(row).join("")}`; });
+      body += `<input type="search" id="foodSearch" placeholder="Rechercher un produit ou une marque" value="${esc(ui.search)}" autocomplete="off">
+        <p class="small muted" style="margin:0">Pâtes, pain, biscuits, substituts… Les grammes et les calories apparaissent dans le rapport PDF pour la diététicienne. ${esc(typeof HYPO_NOTE !== "undefined" ? HYPO_NOTE : "")}</p>
+        <div class="list" id="foodList">${list || `<div class="empty">Aucun produit pour « ${esc(ui.search)} ».</div>`}</div>
+        <details class="card" style="box-shadow:none"><summary>Produit absent de la liste ? Créez-le</summary>
           <label class="f">Nom du produit<input type="text" id="hNom" maxlength="60" placeholder="Ex. : pâtes hypoprotéinées"></label>
           <div class="row" style="flex-wrap:nowrap;align-items:end"><label class="f grow">Calories pour 100 g (kcal)<input type="text" id="hKcal" inputmode="decimal" placeholder="Ex. : 350"></label>
           <label class="f grow">Phé pour 100 g (mg, facultatif)<input type="text" id="hPhe" inputmode="decimal" placeholder="Ex. : 12"></label></div>
@@ -548,14 +560,16 @@ function openWeight(ref, idx){
   const p = P(), f = food(ref, p), editing = idx != null, portion = f.pp != null;
   const cur = dayData(p, ui.day);
   const inRoutine = p.routine[ui.meal].some(x => x.ref === ref);
-  let g = editing ? cur.repas[ui.meal][idx].g : portion ? 1 : 100;
+  let g = editing ? cur.repas[ui.meal][idx].g : portion ? 1 : f.uw || 100;
   const STEP = portion ? 0.5 : 10, MAX = portion ? 10 : 500;
   const mealName = MEALS.find(m => m[0] === ui.meal)[1].toLowerCase();
   sheet(f.n, `
     <div class="muted small">${ruleTxt(f)}${f.t != null ? " · teneur " + TENEUR[f.t].toLowerCase() : ""}${!isToday(ui.day) ? " · " + frDate(ui.day) : ""}</div>
     <div class="grams"><button class="btn" data-step="${-STEP}" aria-label="Moins ${portion ? "une demi-" + (f.unit || "portion") : "10 g"}">−${portion ? "½" : "10"}</button><input type="text" id="wG" inputmode="decimal" aria-label="${portion ? "Nombre de " + unitOf(f, 2) : "Poids en grammes"}" value="${fmt(g)}"><button class="btn" data-step="${STEP}" aria-label="Plus ${portion ? "une demi-" + (f.unit || "portion") : "10 g"}">+${portion ? "½" : "10"}</button></div>
     <input type="range" id="wR" min="0" max="${MAX}" step="${portion ? 0.5 : 5}" value="${Math.min(MAX, g)}" aria-label="Quantité">
-    <div class="note row"><span class="grow">${portion ? cap(unitOf(f, 2)) : "Grammes consommés"}</span><b class="num" id="wP"></b></div>
+    ${f.uw ? `<div class="chips">${[0.5, 1, 2, 3].map(n => `<button class="chip" type="button" data-units="${n}">${n === 0.5 ? "½" : n} ${esc(f.unit)}${n > 1 && !/s$/.test(f.unit) ? "s" : ""} (${fmt(n * f.uw)} ${f.base === "pour 100 ml" ? "ml" : "g"})</button>`).join("")}</div>` : ""}
+    <div class="note row"><span class="grow">${portion ? cap(unitOf(f, 2)) : f.cat === "Pâtes, riz, semoule" ? "Grammes (poids sec, avant cuisson)" : f.base === "pour 100 ml" ? "Millilitres" : "Grammes consommés"}</span><b class="num" id="wP"></b></div>
+    ${f.cata ? `<div class="small muted">${esc(f.marque)} · ${f.kcal != null ? fmt(f.kcal, 0) + " kcal" : "kcal ?"}, ${fmt(f.prot)} g de protéines, ${f.phe100 != null ? fmt(f.phe100) + " mg de Phé" : "Phé non publiée"} pour 100 ${f.base === "pour 100 ml" ? "ml" : "g"}${f.base === "sec" ? " (sec)" : ""}. ${f.rq ? esc(f.rq.replace(/\.?$/, ".")) + " " : ""}Valeurs à vérifier sur l'emballage · <a href="${esc(f.src)}" target="_blank" rel="noopener">source</a></div>` : ""}
     <label class="row" style="flex-wrap:nowrap;gap:12px;cursor:pointer" for="wRoutine"><input type="checkbox" id="wRoutine" ${inRoutine ? "checked" : ""} style="width:24px;height:24px;flex:none;accent-color:var(--accent)"><span class="grow"><b>Tous les jours</b><br><span class="small muted">Remettre automatiquement au ${mealName} chaque jour avec cette quantité (journée type)</span></span></label>
     <button class="btn primary block" id="wSave">${editing ? "Enregistrer" : "Ajouter au " + mealName}</button>
     ${editing ? `<button class="btn danger block" id="wDel">Retirer du repas${isToday(ui.day) ? " d'aujourd'hui" : ""}</button>` : ""}`, b => {
@@ -563,6 +577,7 @@ function openWeight(ref, idx){
       const upd = () => { const pt = partsOf(f, g), k = kcalOf(f, g); out.textContent = `${fmt(pt)} part${pt > 1 ? "s" : ""} · ${fmt(pt * PART_MG, 0)} mg${k != null ? " · " + fmt(k, 0) + " kcal" : ""}`; };
       gi.addEventListener("input", () => { const v = parseNum(gi.value); g = isNaN(v) || v < 0 ? 0 : Math.min(portion ? 50 : 5000, v); r.value = Math.min(MAX, g); upd(); });
       r.addEventListener("input", () => { g = +r.value; gi.value = fmt(g); upd(); });
+      b.querySelectorAll("[data-units]").forEach(x => x.addEventListener("click", () => { g = Math.round(+x.dataset.units * f.uw * 10) / 10; gi.value = fmt(g); r.value = Math.min(MAX, g); upd(); }));
       b.querySelectorAll("[data-step]").forEach(x => x.addEventListener("click", () => {
         g = Math.max(0, portion ? Math.round((g + +x.dataset.step) * 2) / 2 : Math.round(g + +x.dataset.step)); gi.value = fmt(g); r.value = Math.min(MAX, g); upd(); }));
       b.querySelector("#wSave").addEventListener("click", () => {
@@ -923,11 +938,11 @@ async function buildPdf(p, from, to, detail){
   // journal quotidien
   section("Journal quotidien");
   doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(...MUT);
-  T("Dans chaque repas : parts de Phé (p.), puis aliments avec leurs parts. Hyp. = aliment hypoprotéiné.", M, y + 2.5);
+  T("Dans chaque repas : parts de Phé (p.), puis aliments avec leurs parts. Hyp. = aliment hypoprotéiné ; Sub. = substitut ou complément (mélange d'acides aminés, Duocal...).", M, y + 2.5);
   T("* Calories : uniquement les aliments dont les calories ont été saisies (produits emballés, portions, hypoprotéinés) ; les fruits et légumes de la base n'en ont pas.", M, y + 6);
   y += 8;
   const cell = (d, m) => { if (!d.repas[m].length) return ""; const s = mealStats(p, d, m); const tot = fmt(sumMeal(p, d, m)) + " p." + (s.hg ? ` · hyp. ${fmt(s.hg, 0)} g` : "") + (s.kn ? ` · ${fmt(s.kc, 0)} kcal` : "");
-    return detail ? tot + "\n" + d.repas[m].map(it => { const f = food(it.ref, p), k = kcalOf(f, it.g); return `${isHypo(f) ? "Hyp. " : ""}${f.n} ${qtyTxt(f, it.g)} (${fmt(partsOf(f, it.g))}${k != null ? ` ; ${fmt(k, 0)} kcal` : ""})`; }).join("\n") : tot; };
+    return detail ? tot + "\n" + d.repas[m].map(it => { const f = food(it.ref, p), k = kcalOf(f, it.g); return `${isHypo(f) ? "Hyp. " : isSub(f) ? "Sub. " : ""}${f.n} ${qtyTxt(f, it.g)} (${fmt(partsOf(f, it.g))}${k != null ? ` ; ${fmt(k, 0)} kcal` : ""})`; }).join("\n") : tot; };
   const rows = isos.map(i => {
     const d = p.days[i], lab = cap(new Date(i + "T12:00").toLocaleDateString("fr-FR", {weekday:"short"})).replace(".", "") + " " + frDate(i).slice(0, 5);
     const a = ans.filter(x => x.date === i).map(x => `Prise de sang : ${fmtVal(x.mg, u)} ${unitLabel(u)}`).join("\n");
@@ -1194,6 +1209,7 @@ function openProfile(isNew){
     <div class="row" style="flex-wrap:nowrap"><label class="f grow">Prénom<input type="text" id="pPre" maxlength="30" value="${esc(p.isExample ? "" : p.prenom)}"></label><label class="f grow">Nom<input type="text" id="pNom" maxlength="30" value="${esc(p.nom)}"></label></div>
     <div class="row" style="flex-wrap:nowrap"><label class="f grow">Sexe<select id="pSexe"><option value="">—</option>${["Féminin","Masculin"].map(s => `<option ${p.sexe===s?"selected":""}>${s}</option>`).join("")}</select></label><label class="f grow">Date de naissance<input type="date" id="pNai" max="${todayISO()}" value="${esc(p.naissance)}"></label></div>
     <label class="f">Objectif de parts de Phé par jour (facultatif)<input type="text" id="pObj" inputmode="decimal" placeholder="Fixé par l'équipe médicale" value="${p.objectif ? fmt(p.objectif) : ""}"></label>
+    <label class="row" style="flex-wrap:nowrap;gap:12px;cursor:pointer" for="pHypo"><input type="checkbox" id="pHypo" ${p.hypoPhe !== false ? "checked" : ""} style="width:24px;height:24px;flex:none;accent-color:var(--accent)"><span class="grow"><b>Compter la Phé des produits hypoprotéinés</b><br><span class="small muted">À décider avec l'équipe médicale. Décoché, ces produits comptent 0 part (leurs grammes et calories restent enregistrés).</span></span></label>
     <div id="pErr" class="err" role="alert"></div>
     <button class="btn primary block" id="pSave">${isNew ? "Créer le profil" : "Enregistrer"}</button>`, b => {
       b.querySelector("#pPhoto").addEventListener("change", e => {
@@ -1214,7 +1230,7 @@ function openProfile(isNew){
         const pre = b.querySelector("#pPre").value.trim();
         if (!pre){ b.querySelector("#pErr").textContent = "Indiquez au moins un prénom."; return; }
         const obj = parseNum(b.querySelector("#pObj").value);
-        Object.assign(p, {prenom:pre, nom:b.querySelector("#pNom").value.trim(), sexe:b.querySelector("#pSexe").value, naissance:b.querySelector("#pNai").value, photo, objectif: isNaN(obj) || obj <= 0 ? null : obj});
+        Object.assign(p, {prenom:pre, nom:b.querySelector("#pNom").value.trim(), sexe:b.querySelector("#pSexe").value, naissance:b.querySelector("#pNai").value, photo, objectif: isNaN(obj) || obj <= 0 ? null : obj, hypoPhe: b.querySelector("#pHypo").checked});
         if (isNew){ db.profiles.push(p); db.current = p.id; }
         if (p.isExample){ // turning the example into a real profile: start clean
           delete p.isExample; p.days = {}; p.routine = emptyRepas(); p.analyses = []; p.custom = []; p.favoris = []; p.seuilMin = p.seuilMax = null; p.objectif = isNaN(obj) || obj <= 0 ? null : obj;
