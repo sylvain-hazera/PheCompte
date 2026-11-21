@@ -281,11 +281,11 @@ const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
 const localISO = d => new Date(d.getTime() - d.getTimezoneOffset()*6e4).toISOString().slice(0,10);
 const isoShift = (iso, n) => { const d = new Date(iso + "T12:00"); d.setDate(d.getDate() + n); return localISO(d); };
 const isToday = iso => iso === todayISO();
-const hypoCounted = () => P().hypoPhe !== false;
-const partsOf = (f, g) => !f ? 0 : f.c === "H" && !hypoCounted() ? 0 : f.pp != null ? Math.round(100 * g * f.pp) / 100 : !f.w ? 0 : Math.round(100 * g / f.w) / 100;
+/* consigne : les produits hypoprotéinés (AGEPS) ne comptent jamais de parts ; seuls grammes et calories sont suivis */
+const partsOf = (f, g) => !f ? 0 : f.c === "H" ? 0 : f.pp != null ? Math.round(100 * g * f.pp) / 100 : !f.w ? 0 : Math.round(100 * g / f.w) / 100;
 const unitOf = (f, g) => (f.unit || "portion") + (g > 1 ? "s" : "");
 const qtyTxt = (f, g) => f.pp != null ? `${fmt(g)} ${unitOf(f, g)}` : `${fmt(g, 0)} g`;
-const ruleTxt = f => f.c === "H" && !hypoCounted() ? "Phé non comptée (réglage du profil)" : f.pp != null ? `1 ${f.unit || "portion"} = ${fmt(f.pp)} part${f.pp > 1 ? "s" : ""}` : f.w ? `1 part = ${fmt(f.w)} g` : f.c === "H" ? (f.cata && f.phe100 === 0 ? "sans Phé" : f.cata && f.phe100 == null ? "Phé non publiée" : "Phé non comptée") : "sans Phé";
+const ruleTxt = f => f.c === "H" ? (f.phe100 === 0 ? "sans Phé" : "parts non comptées (consigne AGEPS)") : f.pp != null ? `1 ${f.unit || "portion"} = ${fmt(f.pp)} part${f.pp > 1 ? "s" : ""}` : f.w ? `1 part = ${fmt(f.w)} g` : f.c === "H" ? (f.cata && f.phe100 === 0 ? "sans Phé" : f.cata && f.phe100 == null ? "Phé non publiée" : "Phé non comptée") : "sans Phé";
 const isSub = f => !!f && f.cat === "Substituts et compléments";
 const isHypo = f => !!f && f.c === "H" && !isSub(f);
 const catTag = f => isSub(f) ? "Sub" : f.c === "H" ? "Hyp" : f.c === "C" ? (f.pp != null ? "Prt" : "Emb") : f.c === "F" ? "Fr" : "Lég";
@@ -494,13 +494,13 @@ function openAddFood(){
       let list = mine.length ? `<div class="letter">Mes produits</div>${mine.map(row).join("")}` : "";
       cats.forEach(c => { const r = HYPO_FOODS.filter(f => f.cat === c && match(f)); if (r.length) list += `<div class="letter">${esc(c)}</div>${r.map(row).join("")}`; });
       body += `<input type="search" id="foodSearch" placeholder="Rechercher un produit ou une marque" value="${esc(ui.search)}" autocomplete="off">
-        <p class="small muted" style="margin:0">Pâtes, pain, biscuits, substituts… Les grammes et les calories apparaissent dans le rapport PDF pour la diététicienne. ${esc(typeof HYPO_NOTE !== "undefined" ? HYPO_NOTE : "")}</p>
+        <p class="small muted" style="margin:0"><b>Conformément à la consigne, ces produits AGEPS ne comptent pas de parts de Phé.</b> Leurs grammes et leurs calories sont enregistrés et apparaissent dans le rapport PDF pour la diététicienne. ${esc(typeof HYPO_NOTE !== "undefined" ? HYPO_NOTE : "")}</p>
         <div class="list" id="foodList">${list || `<div class="empty">Aucun produit pour « ${esc(ui.search)} ».</div>`}</div>
         <details class="card" style="box-shadow:none"><summary>Produit absent de la liste ? Créez-le</summary>
           <label class="f">Nom du produit<input type="text" id="hNom" maxlength="60" placeholder="Ex. : pâtes hypoprotéinées"></label>
           <div class="row" style="flex-wrap:nowrap;align-items:end"><label class="f grow">Calories pour 100 g (kcal)<input type="text" id="hKcal" inputmode="decimal" placeholder="Ex. : 350"></label>
-          <label class="f grow">Phé pour 100 g (mg, facultatif)<input type="text" id="hPhe" inputmode="decimal" placeholder="Ex. : 12"></label></div>
-          <div class="small muted">Valeurs à lire sur l'emballage (calories souvent « pour 100 g de produit sec »). Laissez la Phé vide si votre équipe médicale ne la compte pas pour ce produit.</div>
+</div>
+          <div class="small muted">Valeurs à lire sur l'emballage (calories souvent « pour 100 g de produit sec »). Comme les autres produits AGEPS, il ne comptera pas de parts de Phé.</div>
           <div id="hPrev" class="note small num"></div>
           <div id="hErr" class="err" role="alert"></div>
           <button class="btn primary block" data-act="saveHypo">Enregistrer et choisir la quantité</button>
@@ -519,18 +519,18 @@ function openAddFood(){
       ["eProt","ePp","eUnit"].forEach(id => document.getElementById(id).addEventListener("input", upd)); lait.addEventListener("change", upd);
     }
     const hk = document.getElementById("hKcal");
-    if (hk){ const upd = () => { document.getElementById("hPrev").textContent = hypoCalc().msg; }; hk.addEventListener("input", upd); document.getElementById("hPhe").addEventListener("input", upd); upd(); }
+    if (hk){ const upd = () => { document.getElementById("hPrev").textContent = hypoCalc().msg; }; hk.addEventListener("input", upd); upd(); }
   };
   openAddFood.draw = draw;
   sheet("Ajouter au " + MEALS.find(m => m[0] === ui.meal)[1].toLowerCase().replace("déj.", "déjeuner"), "", draw);
 }
 function optNum(id, max){ const s = document.getElementById(id).value.trim(); if (!s) return {v:null}; const v = parseNum(s); return isNaN(v) || v < 0 || v > max ? {err:true} : {v:Math.round(v * 10) / 10}; }
 function hypoCalc(){
-  const k = optNum("hKcal", 900), ph = optNum("hPhe", 2000);
+  const k = optNum("hKcal", 900), ph = {v:null};
   if (k.err) return {ok:false, msg:"Les calories doivent être un nombre entre 0 et 900 kcal pour 100 g."};
   if (ph.err) return {ok:false, msg:"La Phé doit être un nombre entre 0 et 2000 mg pour 100 g."};
   const w = ph.v ? Math.round(100 * 2000 / ph.v) / 100 : null;
-  return {ok:true, kcal:k.v, phe100:ph.v, w, msg:[k.v != null ? `100 g = ${fmt(k.v, 0)} kcal` : "Calories non renseignées", w ? `1 part de Phé = ${fmt(w)} g` : "Phé non comptée"].join(" · ")};
+  return {ok:true, kcal:k.v, phe100:ph.v, w, msg:[k.v != null ? `100 g = ${fmt(k.v, 0)} kcal` : "Calories non renseignées", "parts de Phé non comptées"].join(" · ")};
 }
 function openEditCustom(ref){
   const p = P(), c = p.custom.find(x => x.ref === ref); if (!c) return;
@@ -583,7 +583,7 @@ function openWeight(ref, idx){
     ${f.uw ? `<div class="chips">${[0.5, 1, 2, 3].map(n => `<button class="chip" type="button" data-units="${n}">${n === 0.5 ? "½" : n} ${esc(f.unit)}${n > 1 && !/s$/.test(f.unit) ? "s" : ""} (${fmt(n * f.uw)} ${f.base === "pour 100 ml" ? "ml" : "g"})</button>`).join("")}</div>` : ""}
     <div class="note row"><span class="grow">${portion ? cap(unitOf(f, 2)) : f.cat === "Pâtes, riz, semoule" ? "Grammes (poids sec, avant cuisson)" : f.base === "pour 100 ml" ? "Millilitres" : "Grammes consommés"}</span><b class="num" id="wP"></b></div>
     ${f.ciq ? `<div class="small muted">Calories : ${fmt(f.kcal, 0)} kcal/100 g, d'après Ciqual 2020 « ${esc(f.ciq.nom)} »${f.ciq.calc ? " (calculées à partir des nutriments)" : ""}${f.ciq.approx ? " (aliment le plus proche)" : ""}.</div>` : f.c === "F" || f.c === "L" ? `<div class="small muted">Calories non disponibles pour cet aliment.</div>` : ""}
-    ${f.cata ? `<div class="small muted">${esc(f.marque)} · ${f.kcal != null ? fmt(f.kcal, 0) + " kcal" : "kcal ?"}, ${fmt(f.prot)} g de protéines, ${f.phe100 != null ? fmt(f.phe100) + " mg de Phé" : "Phé non publiée"} pour 100 ${f.base === "pour 100 ml" ? "ml" : "g"}${f.base === "sec" ? " (sec)" : ""}. ${f.rq ? esc(f.rq.replace(/\.?$/, ".")) + " " : ""}Valeurs à vérifier sur l'emballage · <a href="${esc(f.src)}" target="_blank" rel="noopener">source</a></div>` : ""}
+    ${f.cata ? `<div class="small muted">${esc(f.marque)} · ${f.kcal != null ? fmt(f.kcal, 0) + " kcal" : "kcal ?"}, ${fmt(f.prot)} g de protéines, ${f.phe100 != null ? fmt(f.phe100) + " mg de Phé (non comptée)" : "Phé non publiée"} pour 100 ${f.base === "pour 100 ml" ? "ml" : "g"}${f.base === "sec" ? " (sec)" : ""}. ${f.rq ? esc(f.rq.replace(/\.?$/, ".")) + " " : ""}Valeurs à vérifier sur l'emballage · <a href="${esc(f.src)}" target="_blank" rel="noopener">source</a></div>` : ""}
     <label class="row" style="flex-wrap:nowrap;gap:12px;cursor:pointer" for="wRoutine"><input type="checkbox" id="wRoutine" ${inRoutine ? "checked" : ""} style="width:24px;height:24px;flex:none;accent-color:var(--accent)"><span class="grow"><b>Tous les jours</b><br><span class="small muted">Remettre automatiquement au ${mealName} chaque jour avec cette quantité (journée type)</span></span></label>
     <button class="btn primary block" id="wSave">${editing ? "Enregistrer" : "Ajouter au " + mealName}</button>
     ${editing ? `<button class="btn danger block" id="wDel">Retirer du repas${isToday(ui.day) ? " d'aujourd'hui" : ""}</button>` : ""}`, b => {
@@ -871,6 +871,7 @@ async function buildPdf(p, from, to, detail){
   y += 6; doc.setFont("helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(...MUT);
   T(`Période du ${frDate(from)} au ${frDate(to)} (${N} jours) · édité le ${frDate(t)} avec PhéCompte`, M, y);
   y += 5; T(`Zone cible : ${p.seuilMin != null ? `${fmtVal(p.seuilMin, u)} à ${fmtVal(p.seuilMax, u)} ${unitLabel(u)}` : "non renseignée"} · Objectif : ${p.objectif ? fmt(p.objectif) + " parts/jour" : "non renseigné"} · 1 part = ${PART_MG} mg de Phé`, M, y);
+  y += 5; T("Produits hypoprotéinés AGEPS : grammes et calories seulement, aucune part de Phé comptée (consigne).", M, y);
   if (p.poids || kcalTarget(p)){ y += 5; T(`Poids : ${p.poids ? fmt(p.poids) + " kg" + (p.poidsDate ? " (pesé le " + frDate(p.poidsDate) + ")" : "") : "non renseigné"}${kcalTarget(p) ? ` · Cible calorique : ${fmt(p.kcalKg)} kcal/kg/j = ${fmt(kcalTarget(p), 0)} kcal/j` : ""}`, M, y); }
 
   // chiffres clés
@@ -1230,7 +1231,6 @@ function openProfile(isNew){
       <label class="f grow">Pesé le<input type="date" id="pPoidsD" max="${todayISO()}" value="${esc(p.poidsDate || "")}"></label></div>
     <label class="f">Cible calorique (kcal par kg et par jour, facultatif)<input type="text" id="pKcalKg" inputmode="decimal" value="${p.kcalKg ? fmt(p.kcalKg) : ""}" placeholder="Fixée par la diététicienne"></label>
     <div class="small muted" style="margin-top:-6px">Repère indicatif de l'OMS/FAO (2004) : environ 80 kcal/kg/j entre 1 et 4 ans, en baisse ensuite avec l'âge. La cible de votre enfant est fixée par la diététicienne. Statut : non atteinte sous 90 %, atteinte de 90 à 120 %, largement dépassée au-delà de 120 %.</div>
-    <label class="row" style="flex-wrap:nowrap;gap:12px;cursor:pointer" for="pHypo"><input type="checkbox" id="pHypo" ${p.hypoPhe !== false ? "checked" : ""} style="width:24px;height:24px;flex:none;accent-color:var(--accent)"><span class="grow"><b>Compter la Phé des produits hypoprotéinés</b><br><span class="small muted">À décider avec l'équipe médicale. Décoché, ces produits comptent 0 part (leurs grammes et calories restent enregistrés).</span></span></label>
     <div id="pErr" class="err" role="alert"></div>
     <button class="btn primary block" id="pSave">${isNew ? "Créer le profil" : "Enregistrer"}</button>`, b => {
       b.querySelector("#pPhoto").addEventListener("change", e => {
@@ -1251,7 +1251,7 @@ function openProfile(isNew){
         const pre = b.querySelector("#pPre").value.trim();
         if (!pre){ b.querySelector("#pErr").textContent = "Indiquez au moins un prénom."; return; }
         const obj = parseNum(b.querySelector("#pObj").value);
-        Object.assign(p, {prenom:pre, nom:b.querySelector("#pNom").value.trim(), sexe:b.querySelector("#pSexe").value, naissance:b.querySelector("#pNai").value, photo, objectif: isNaN(obj) || obj <= 0 ? null : obj, hypoPhe: b.querySelector("#pHypo").checked});
+        Object.assign(p, {prenom:pre, nom:b.querySelector("#pNom").value.trim(), sexe:b.querySelector("#pSexe").value, naissance:b.querySelector("#pNai").value, photo, objectif: isNaN(obj) || obj <= 0 ? null : obj});
         const pw = parseNum(b.querySelector("#pPoids").value), kk = parseNum(b.querySelector("#pKcalKg").value);
         const newW = isNaN(pw) || pw <= 0 || pw > 200 ? null : pw;
         p.poidsDate = newW ? (b.querySelector("#pPoidsD").value || (newW !== p.poids ? todayISO() : p.poidsDate) || todayISO()) : null;
