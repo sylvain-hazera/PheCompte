@@ -1,0 +1,1112 @@
+{
+ "source": "Anses, Table de composition nutritionnelle des aliments Ciqual 2020 (copie data.gouv.fr), licence ouverte Etalab",
+ "note": "Énergie pour 100 g. « calc » : calculée à partir des macronutriments Ciqual (coefficients du règlement UE 1169/2011), la valeur d'énergie étant absente de la copie. « approx » : aliment Ciqual le plus proche (ex. fruits au sirop : macédoine au sirop égouttée).",
+ "aliments": {
+  "a0": {
+   "kcal": 101.0,
+   "code": 13016,
+   "nom": "Fruit de la passion ou maracudja, pulpe et pépins, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a2": {
+   "kcal": 66.2,
+   "code": 13549,
+   "nom": "Kumquat, sans pépin, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a4": {
+   "kcal": 45.9,
+   "code": 13000,
+   "nom": "Abricot, dénoyauté, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a5": {
+   "kcal": 90.5,
+   "code": 13005,
+   "nom": "Banane, pulpe, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a6": {
+   "kcal": 37.2,
+   "code": 13063,
+   "nom": "Figue de Barbarie, pulpe et graines, crue",
+   "calc": true,
+   "approx": false
+  },
+  "a7": {
+   "kcal": 77.6,
+   "code": 13706,
+   "nom": "Macédoine ou cocktail ou salade de fruits, au sirop, appertisé, égoutté",
+   "calc": true,
+   "approx": true
+  },
+  "a8": {
+   "kcal": 28.7,
+   "code": 13054,
+   "nom": "Carambole, pulpe, crue",
+   "calc": true,
+   "approx": false
+  },
+  "a9": {
+   "kcal": 71.3,
+   "code": 13007,
+   "nom": "Cassis, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a10": {
+   "kcal": 68.5,
+   "code": 13019,
+   "nom": "Groseille, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a11": {
+   "kcal": 60.5,
+   "code": 13021,
+   "nom": "Kiwi, pulpe et graines, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a12": {
+   "kcal": 66.7,
+   "code": 13126,
+   "nom": "Sureau, baie, crue",
+   "calc": true,
+   "approx": false
+  },
+  "a13": {
+   "kcal": 47.3,
+   "code": 13029,
+   "nom": "Mûre (de ronce), crue",
+   "calc": false,
+   "approx": false
+  },
+  "a14": {
+   "kcal": 49.2,
+   "code": 13015,
+   "nom": "Framboise, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a15": {
+   "kcal": 39.8,
+   "code": 13040,
+   "nom": "Pomelo (dit Pamplemousse), pulpe, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a17": {
+   "kcal": 81.0,
+   "code": 13023,
+   "nom": "Litchi, pulpe, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a18": {
+   "kcal": 77.6,
+   "code": 13706,
+   "nom": "Macédoine ou cocktail ou salade de fruits, au sirop, appertisé, égoutté",
+   "calc": true,
+   "approx": true
+  },
+  "a19": {
+   "kcal": 62.0,
+   "code": 13083,
+   "nom": "Goyave, pulpe, crue",
+   "calc": true,
+   "approx": false
+  },
+  "a20": {
+   "kcal": 45.5,
+   "code": 13034,
+   "nom": "Orange, pulpe, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a21": {
+   "kcal": 80.6,
+   "code": 13018,
+   "nom": "Grenade, pulpe et pépins, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a22": {
+   "kcal": 77.6,
+   "code": 13706,
+   "nom": "Macédoine ou cocktail ou salade de fruits, au sirop, appertisé, égoutté",
+   "calc": true,
+   "approx": true
+  },
+  "a23": {
+   "kcal": 68.6,
+   "code": 13066,
+   "nom": "Kaki, pulpe, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a24": {
+   "kcal": 72.9,
+   "code": 13714,
+   "nom": "Abricot au sirop, appertisé, égoutté",
+   "calc": true,
+   "approx": false
+  },
+  "a25": {
+   "kcal": 27.6,
+   "code": 13009,
+   "nom": "Citron, pulpe, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a26": {
+   "kcal": 47.3,
+   "code": 13024,
+   "nom": "Clémentine ou Mandarine, pulpe, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a27": {
+   "kcal": 47.3,
+   "code": 13024,
+   "nom": "Clémentine ou Mandarine, pulpe, crue",
+   "calc": false,
+   "approx": true
+  },
+  "a28": {
+   "kcal": 55.7,
+   "code": 13008,
+   "nom": "Cerise, dénoyautée, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a29": {
+   "kcal": 62.7,
+   "code": 13026,
+   "nom": "Melon cantaloup (par ex.: Charentais, de Cavaillon) pulpe, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a30": {
+   "kcal": 57.7,
+   "code": 13028,
+   "nom": "Myrtille, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a31": {
+   "kcal": 77.6,
+   "code": 13706,
+   "nom": "Macédoine ou cocktail ou salade de fruits, au sirop, appertisé, égoutté",
+   "calc": true,
+   "approx": true
+  },
+  "a32": {
+   "kcal": 76.9,
+   "code": 13027,
+   "nom": "Mirabelle, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a33": {
+   "kcal": 77.6,
+   "code": 13706,
+   "nom": "Macédoine ou cocktail ou salade de fruits, au sirop, appertisé, égoutté",
+   "calc": true,
+   "approx": true
+  },
+  "a34": {
+   "kcal": 54.4,
+   "code": 13002,
+   "nom": "Ananas, pulpe, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a35": {
+   "kcal": 40.2,
+   "code": 13067,
+   "nom": "Citron vert ou Lime, pulpe, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a36": {
+   "kcal": 77.6,
+   "code": 13706,
+   "nom": "Macédoine ou cocktail ou salade de fruits, au sirop, appertisé, égoutté",
+   "calc": true,
+   "approx": true
+  },
+  "a37": {
+   "kcal": 38.6,
+   "code": 13014,
+   "nom": "Fraise, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a38": {
+   "kcal": 48.5,
+   "code": 13043,
+   "nom": "Pêche, pulpe et peau, crue",
+   "calc": true,
+   "approx": false
+  },
+  "a39": {
+   "kcal": 69.4,
+   "code": 13112,
+   "nom": "Raisin, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a40": {
+   "kcal": 69.4,
+   "code": 13012,
+   "nom": "Figue, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a41": {
+   "kcal": 77.6,
+   "code": 13706,
+   "nom": "Macédoine ou cocktail ou salade de fruits, au sirop, appertisé, égoutté",
+   "calc": true,
+   "approx": true
+  },
+  "a42": {
+   "kcal": 21.7,
+   "code": 13047,
+   "nom": "Rhubarbe, tige, crue",
+   "calc": true,
+   "approx": false
+  },
+  "a43": {
+   "kcal": 77.6,
+   "code": 13706,
+   "nom": "Macédoine ou cocktail ou salade de fruits, au sirop, appertisé, égoutté",
+   "calc": true,
+   "approx": true
+  },
+  "a44": {
+   "kcal": 38.9,
+   "code": 13036,
+   "nom": "Pastèque, pulpe, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a45": {
+   "kcal": 77.6,
+   "code": 13706,
+   "nom": "Macédoine ou cocktail ou salade de fruits, au sirop, appertisé, égoutté",
+   "calc": true,
+   "approx": true
+  },
+  "a47": {
+   "kcal": 51.7,
+   "code": 13100,
+   "nom": "Prune, crue",
+   "calc": true,
+   "approx": false
+  },
+  "a49": {
+   "kcal": 63.6,
+   "code": 13730,
+   "nom": "Pêche au sirop léger, appertisée, égouttée",
+   "calc": true,
+   "approx": false
+  },
+  "a50": {
+   "kcal": 60.3,
+   "code": 13010,
+   "nom": "Coing, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a51": {
+   "kcal": 46.6,
+   "code": 13030,
+   "nom": "Nectarine ou brugnon, pulpe et peau, crue",
+   "calc": true,
+   "approx": false
+  },
+  "a52": {
+   "kcal": 46.6,
+   "code": 13030,
+   "nom": "Nectarine ou brugnon, pulpe et peau, crue",
+   "calc": true,
+   "approx": false
+  },
+  "a53": {
+   "kcal": 58.3,
+   "code": 13037,
+   "nom": "Poire, pulpe et peau, crue",
+   "calc": true,
+   "approx": false
+  },
+  "a54": {
+   "kcal": 77.6,
+   "code": 13706,
+   "nom": "Macédoine ou cocktail ou salade de fruits, au sirop, appertisé, égoutté",
+   "calc": true,
+   "approx": true
+  },
+  "a55": {
+   "kcal": 73.9,
+   "code": 13025,
+   "nom": "Mangue, pulpe, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a56": {
+   "kcal": 70.0,
+   "code": 13718,
+   "nom": "Ananas au sirop léger, appertisé, égoutté",
+   "calc": true,
+   "approx": false
+  },
+  "a57": {
+   "kcal": 77.6,
+   "code": 13706,
+   "nom": "Macédoine ou cocktail ou salade de fruits, au sirop, appertisé, égoutté",
+   "calc": true,
+   "approx": true
+  },
+  "a58": {
+   "kcal": 53.8,
+   "code": 13039,
+   "nom": "Pomme, pulpe et peau, crue",
+   "calc": true,
+   "approx": false
+  },
+  "a59": {
+   "kcal": 42.2,
+   "code": 13035,
+   "nom": "Papaye, pulpe, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a60": {
+   "kcal": 64.9,
+   "code": 13734,
+   "nom": "Poire au sirop léger, appertisée, égouttée",
+   "calc": false,
+   "approx": false
+  },
+  "a61": {
+   "kcal": 352.0,
+   "code": 9100,
+   "nom": "Riz blanc, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a62": {
+   "kcal": 205.0,
+   "code": 13004,
+   "nom": "Avocat, pulpe, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a63": {
+   "kcal": 545.0,
+   "code": 4004,
+   "nom": "Chips de pommes de terre nature ou aromatisées, standard",
+   "calc": false,
+   "approx": false
+  },
+  "a64": {
+   "kcal": 29.0,
+   "code": 20069,
+   "nom": "Chou vert, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a65": {
+   "kcal": 29.7,
+   "code": 11003,
+   "nom": "Ciboule ou Ciboulette, fraîche",
+   "calc": false,
+   "approx": false
+  },
+  "a66": {
+   "kcal": 67.3,
+   "code": 20072,
+   "nom": "Petits pois, crus",
+   "calc": true,
+   "approx": false
+  },
+  "a67": {
+   "kcal": 40.4,
+   "code": 20231,
+   "nom": "Crosne, surgelé, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a68": {
+   "kcal": 45.7,
+   "code": 20052,
+   "nom": "Artichaut, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a69": {
+   "kcal": 36.0,
+   "code": 20057,
+   "nom": "Brocoli, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a70": {
+   "kcal": 28.7,
+   "code": 20059,
+   "nom": "Épinard, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a71": {
+   "kcal": 106.0,
+   "code": 20066,
+   "nom": "Maïs doux, appertisé, égoutté",
+   "calc": false,
+   "approx": false
+  },
+  "a72": {
+   "kcal": 23.2,
+   "code": 20111,
+   "nom": "Oseille, crue",
+   "calc": true,
+   "approx": false
+  },
+  "a73": {
+   "kcal": 49.1,
+   "code": 20038,
+   "nom": "Pissenlit, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a74": {
+   "kcal": 15.0,
+   "code": 20022,
+   "nom": "Cresson de fontaine, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a75": {
+   "kcal": 16.4,
+   "code": 20004,
+   "nom": "Bette ou blette, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a76": {
+   "kcal": 86.3,
+   "code": 4101,
+   "nom": "Patate douce, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a77": {
+   "kcal": 31.6,
+   "code": 20160,
+   "nom": "Champignon, cèpe, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a78": {
+   "kcal": 28.0,
+   "code": 20056,
+   "nom": "Champignon de Paris ou champignon de couche, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a79": {
+   "kcal": 16.8,
+   "code": 20099,
+   "nom": "Mâche, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a80": {
+   "kcal": 50.1,
+   "code": 20058,
+   "nom": "Chou de Bruxelles, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a81": {
+   "kcal": 44.8,
+   "code": 20173,
+   "nom": "Pois mange-tout ou pois gourmand, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a82": {
+   "kcal": 80.5,
+   "code": 4003,
+   "nom": "Pomme de terre, bouillie/cuite à l'eau",
+   "calc": false,
+   "approx": false
+  },
+  "a83": {
+   "kcal": 35.1,
+   "code": 20198,
+   "nom": "Bambou, pousse, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a84": {
+   "kcal": 35.1,
+   "code": 20018,
+   "nom": "Coeur de palmier, appertisé, égoutté",
+   "calc": true,
+   "approx": false
+  },
+  "a85": {
+   "kcal": 28.8,
+   "code": 20280,
+   "nom": "Chou romanesco ou brocoli à pomme, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a86": {
+   "kcal": 188.2,
+   "code": 15024,
+   "nom": "Châtaigne, crue",
+   "calc": true,
+   "approx": false
+  },
+  "a87": {
+   "kcal": 143.6,
+   "code": 15039,
+   "nom": "Châtaigne ou Marron, appertisé",
+   "calc": true,
+   "approx": false
+  },
+  "a89": {
+   "kcal": 29.5,
+   "code": 20183,
+   "nom": "Haricot mungo germé ou pousse de \"soja\", cru",
+   "calc": true,
+   "approx": false
+  },
+  "a90": {
+   "kcal": 32.1,
+   "code": 20061,
+   "nom": "Haricot vert, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a91": {
+   "kcal": 36.1,
+   "code": 20195,
+   "nom": "Haricot beurre, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a92": {
+   "kcal": 32.6,
+   "code": 20269,
+   "nom": "Haricot plat, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a93": {
+   "kcal": 107.0,
+   "code": 53200,
+   "nom": "Taro, tubercule, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a94": {
+   "kcal": 99.2,
+   "code": 20068,
+   "nom": "Tomate, concentré, appertisé",
+   "calc": false,
+   "approx": false
+  },
+  "a95": {
+   "kcal": 22.4,
+   "code": 58103,
+   "nom": "Gombo, fruit, cuit",
+   "calc": true,
+   "approx": false
+  },
+  "a96": {
+   "kcal": 111.0,
+   "code": 53502,
+   "nom": "Igname, épluchée, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a97": {
+   "kcal": 16.1,
+   "code": 20163,
+   "nom": "Chicorée verte, crue",
+   "calc": true,
+   "approx": false
+  },
+  "a98": {
+   "kcal": 15.1,
+   "code": 20031,
+   "nom": "Laitue, crue",
+   "calc": true,
+   "approx": false
+  },
+  "a99": {
+   "kcal": 18.9,
+   "code": 20162,
+   "nom": "Chicorée rouge, crue",
+   "calc": true,
+   "approx": false
+  },
+  "a100": {
+   "kcal": 23.5,
+   "code": 20073,
+   "nom": "Asperge, pelée, crue",
+   "calc": true,
+   "approx": false
+  },
+  "a101": {
+   "kcal": 26.2,
+   "code": 20016,
+   "nom": "Chou-fleur, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a102": {
+   "kcal": 33.1,
+   "code": 20103,
+   "nom": "Champignon, chanterelle ou girolle, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a104": {
+   "kcal": 44.5,
+   "code": 20151,
+   "nom": "Piment, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a105": {
+   "kcal": 60.7,
+   "code": 20196,
+   "nom": "Topinambour, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a106": {
+   "kcal": 14.2,
+   "code": 20090,
+   "nom": "Scarole, crue",
+   "calc": true,
+   "approx": false
+  },
+  "a107": {
+   "kcal": 29.4,
+   "code": 20030,
+   "nom": "Haricot vert, cuit",
+   "calc": false,
+   "approx": false
+  },
+  "a108": {
+   "kcal": 29.4,
+   "code": 20030,
+   "nom": "Haricot vert, cuit",
+   "calc": false,
+   "approx": true
+  },
+  "a109": {
+   "kcal": 34.6,
+   "code": 20318,
+   "nom": "Haricot beurre, bouilli/cuit à l'eau",
+   "calc": false,
+   "approx": false
+  },
+  "a110": {
+   "kcal": 58.3,
+   "code": 20181,
+   "nom": "Panais, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a111": {
+   "kcal": 17.9,
+   "code": 20188,
+   "nom": "Bambou, pousses, appertisées, égouttées",
+   "calc": true,
+   "approx": true
+  },
+  "a112": {
+   "kcal": 32.3,
+   "code": 20039,
+   "nom": "Poireau, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a113": {
+   "kcal": 42.8,
+   "code": 20003,
+   "nom": "Betterave rouge, cuite",
+   "calc": false,
+   "approx": false
+  },
+  "a114": {
+   "kcal": 29.3,
+   "code": 20055,
+   "nom": "Céleri-rave, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a115": {
+   "kcal": 34.9,
+   "code": 20310,
+   "nom": "Chou rouge, cuit à l'étouffée",
+   "calc": false,
+   "approx": false
+  },
+  "a116": {
+   "kcal": 67.9,
+   "code": 20046,
+   "nom": "Salsifis, cuit",
+   "calc": true,
+   "approx": false
+  },
+  "a117": {
+   "kcal": 16.0,
+   "code": 20167,
+   "nom": "Chou chinois ou pak-choi ou pé-tsai, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a118": {
+   "kcal": 16.5,
+   "code": 20020,
+   "nom": "Courgette, pulpe et peau, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a119": {
+   "kcal": 103.3,
+   "code": 11016,
+   "nom": "Raifort, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a121": {
+   "kcal": 25.1,
+   "code": 20065,
+   "nom": "Chou-rave, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a122": {
+   "kcal": 21.2,
+   "code": 20053,
+   "nom": "Aubergine, crue",
+   "calc": true,
+   "approx": false
+  },
+  "a123": {
+   "kcal": 40.2,
+   "code": 20009,
+   "nom": "Carotte, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a124": {
+   "kcal": 32.7,
+   "code": 20804,
+   "nom": "Christophine à peau blanche, pulpe, cuite à la vapeur, prélevée à la Martinique",
+   "calc": true,
+   "approx": false
+  },
+  "a125": {
+   "kcal": 49.3,
+   "code": 20260,
+   "nom": "Tomate, coulis, appertisé (purée de tomates mi-réduite à 11%)",
+   "calc": true,
+   "approx": false
+  },
+  "a126": {
+   "kcal": 29.9,
+   "code": 20166,
+   "nom": "Citrouille, pulpe, crue",
+   "calc": true,
+   "approx": false
+  },
+  "a127": {
+   "kcal": 19.9,
+   "code": 20044,
+   "nom": "Potiron, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a128": {
+   "kcal": 44.5,
+   "code": 20151,
+   "nom": "Piment, cru",
+   "calc": true,
+   "approx": true
+  },
+  "a129": {
+   "kcal": 33.9,
+   "code": 20201,
+   "nom": "Rutabaga, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a130": {
+   "kcal": 36.5,
+   "code": 20116,
+   "nom": "Chou blanc, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a131": {
+   "kcal": 39.0,
+   "code": 20034,
+   "nom": "Oignon, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a132": {
+   "kcal": 24.6,
+   "code": 20040,
+   "nom": "Poireau, cuit",
+   "calc": true,
+   "approx": false
+  },
+  "a133": {
+   "kcal": 26.8,
+   "code": 20041,
+   "nom": "Poivron, vert, jaune ou rouge, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a134": {
+   "kcal": 131.0,
+   "code": 53201,
+   "nom": "Taro, tubercule, cuit",
+   "calc": false,
+   "approx": false
+  },
+  "a135": {
+   "kcal": 31.1,
+   "code": 20289,
+   "nom": "Tomate, pulpe et peau, rôtie/cuite au four",
+   "calc": false,
+   "approx": false
+  },
+  "a136": {
+   "kcal": 125.0,
+   "code": 53101,
+   "nom": "Banane plantain, cuite",
+   "calc": false,
+   "approx": false
+  },
+  "a137": {
+   "kcal": 105.0,
+   "code": 54500,
+   "nom": "Fruit à pain, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a138": {
+   "kcal": 30.0,
+   "code": 20014,
+   "nom": "Chou rouge, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a139": {
+   "kcal": 12.8,
+   "code": 20024,
+   "nom": "Céleri branche, cuit",
+   "calc": true,
+   "approx": false
+  },
+  "a140": {
+   "kcal": 12.8,
+   "code": 20024,
+   "nom": "Céleri branche, cuit",
+   "calc": true,
+   "approx": true
+  },
+  "a141": {
+   "kcal": 25.9,
+   "code": 20096,
+   "nom": "Potiron, cuit",
+   "calc": true,
+   "approx": true
+  },
+  "a142": {
+   "kcal": 25.9,
+   "code": 20096,
+   "nom": "Potiron, cuit",
+   "calc": true,
+   "approx": false
+  },
+  "a143": {
+   "kcal": 14.5,
+   "code": 20045,
+   "nom": "Radis rouge, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a144": {
+   "kcal": 20.2,
+   "code": 20026,
+   "nom": "Endive, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a145": {
+   "kcal": 19.3,
+   "code": 20047,
+   "nom": "Tomate, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a146": {
+   "kcal": 18.9,
+   "code": 20008,
+   "nom": "Carotte, cuite",
+   "calc": false,
+   "approx": false
+  },
+  "a147": {
+   "kcal": 17.6,
+   "code": 20023,
+   "nom": "Céleri branche, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a148": {
+   "kcal": 17.6,
+   "code": 20023,
+   "nom": "Céleri branche, cru",
+   "calc": false,
+   "approx": true
+  },
+  "a149": {
+   "kcal": 21.8,
+   "code": 20028,
+   "nom": "Fenouil, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a150": {
+   "kcal": 29.2,
+   "code": 20089,
+   "nom": "Radis noir, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a151": {
+   "kcal": 83.0,
+   "code": 20197,
+   "nom": "Salsifis noir, ou scorsonère d'Espagne, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a152": {
+   "kcal": 15.6,
+   "code": 20019,
+   "nom": "Concombre, pulpe et peau, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a153": {
+   "kcal": 26.5,
+   "code": 20064,
+   "nom": "Navet, pelé, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a154": {
+   "kcal": 25.0,
+   "code": 20033,
+   "nom": "Navet, cuit",
+   "calc": true,
+   "approx": false
+  },
+  "a155": {
+   "kcal": 19.4,
+   "code": 11004,
+   "nom": "Cornichon, au vinaigre",
+   "calc": false,
+   "approx": false
+  },
+  "a156": {
+   "kcal": 77.6,
+   "code": 13706,
+   "nom": "Macédoine ou cocktail ou salade de fruits, au sirop, appertisé, égoutté",
+   "calc": true,
+   "approx": true
+  },
+  "a157": {
+   "kcal": 101.0,
+   "code": 13016,
+   "nom": "Fruit de la passion ou maracudja, pulpe et pépins, cru",
+   "calc": false,
+   "approx": true
+  },
+  "a158": {
+   "kcal": 48.6,
+   "code": 13107,
+   "nom": "Poire, pulpe, crue",
+   "calc": true,
+   "approx": true
+  },
+  "a159": {
+   "kcal": 111.0,
+   "code": 11000,
+   "nom": "Ail, cru",
+   "calc": false,
+   "approx": false
+  },
+  "a160": {
+   "kcal": 14.9,
+   "code": 20139,
+   "nom": "Courge, crue",
+   "calc": true,
+   "approx": false
+  },
+  "a161": {
+   "kcal": 63.6,
+   "code": 20097,
+   "nom": "Échalote, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a162": {
+   "kcal": 31.6,
+   "code": 20160,
+   "nom": "Champignon, cèpe, cru",
+   "calc": false,
+   "approx": true
+  },
+  "a163": {
+   "kcal": 31.6,
+   "code": 20160,
+   "nom": "Champignon, cèpe, cru",
+   "calc": false,
+   "approx": true
+  },
+  "a164": {
+   "kcal": 23.2,
+   "code": 20159,
+   "nom": "Champignon, oronge vraie, crue",
+   "calc": false,
+   "approx": false
+  },
+  "a165": {
+   "kcal": 25.5,
+   "code": 20114,
+   "nom": "Champignon, pleurote, crue",
+   "calc": false,
+   "approx": false
+  }
+ }
+}

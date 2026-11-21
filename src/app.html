@@ -203,6 +203,8 @@ const uid = () => Math.random().toString(36).slice(2, 9);
 const framed = (() => { try { return window.self !== window.top; } catch(e) { return true; } })();
 
 const FOOD = new Map(ALIMENTS.map(([id, n, w, t, c]) => ["a"+id, {ref:"a"+id, n, w, t, c}]));
+/* calories des fruits et légumes : Ciqual 2020 (data/kcal-fruits-legumes.json) */
+if (typeof KCAL_FL !== "undefined") for (const [ref, k] of Object.entries(KCAL_FL)){ const f = FOOD.get(ref); if (f){ f.kcal = k.kcal; f.ciq = k; } }
 /* catalogue des produits hypoprotéinés (data/hypo-catalogue.json) */
 const HYPO_FOODS = (typeof HYPO !== "undefined" ? HYPO : []).map(h => ({ref:h.id, n:h.n, marque:h.marque, cat:h.cat, c:"H", kcal:h.kcal, prot:h.prot, phe100:h.phe,
   w: h.phe ? Math.round(100 * 2000 / h.phe) / 100 : null, base:h.base, unit:h.unit, uw:h.uw, src:h.src, rq:h.rq, cata:true}));
@@ -300,7 +302,7 @@ function kcalStatus(p, s){
   const r = s.kc / tg;
   return r < 0.9 ? ["st-lo", "Cible calorique non atteinte"] : r <= 1.2 ? ["st-in", "Cible calorique atteinte"] : ["st-hi", "Cible calorique largement dépassée"];
 }
-const statsTxt = s => [s.hg ? `Hypoprotéinés : ${fmt(s.hg, 0)} g` : "", s.kn ? `Calories saisies : ${fmt(s.kc, 0)} kcal` : ""].filter(Boolean).join(" · ");
+const statsTxt = s => [s.hg ? `Hypoprotéinés : ${fmt(s.hg, 0)} g` : "", s.kn ? `Calories connues : ${fmt(s.kc, 0)} kcal` : ""].filter(Boolean).join(" · ");
 function dayEmpty(d){ return !d.note && !(d.tags || []).length && MEALS.every(([m]) => !d.repas[m].length); }
 /* jour daté : aujourd'hui est créé avec la journée type ; un jour passé n'est créé qu'à la première saisie */
 function dayData(p, iso, create){
@@ -467,7 +469,7 @@ function openAddFood(){
       for (const f of rows){
         const L = f.n[0].toUpperCase().normalize("NFD")[0];
         if (L !== last && !q){ list += `<div class="letter">${L}</div>`; last = L; }
-        list += `<button class="item" data-act="pickFood" data-ref="${f.ref}"><span class="dot d${f.t}" title="Teneur ${TENEUR[f.t]}"></span><span class="grow t">${esc(f.n)}</span><span class="s num">1 part = ${fmt(f.w)} g</span></button>`;
+        list += `<button class="item" data-act="pickFood" data-ref="${f.ref}"><span class="dot d${f.t}" title="Teneur ${TENEUR[f.t]}"></span><span class="grow t">${esc(f.n)}</span><span class="s num" style="text-align:right">1 part = ${fmt(f.w)} g${f.kcal != null ? `<br>${fmt(f.kcal, 0)} kcal/100 g` : ""}</span></button>`;
       }
       body += `<input type="search" id="foodSearch" placeholder="Rechercher un ${ui.addCat === "F" ? "fruit" : "légume"}" value="${esc(ui.search)}" autocomplete="off">
         <div class="legend"><span><i class="dot d0"></i>Faible</span><span><i class="dot d1"></i>Moyenne</span><span><i class="dot d2"></i>Forte</span><span>teneur en Phé</span></div>
@@ -580,6 +582,7 @@ function openWeight(ref, idx){
     <input type="range" id="wR" min="0" max="${MAX}" step="${portion ? 0.5 : 5}" value="${Math.min(MAX, g)}" aria-label="Quantité">
     ${f.uw ? `<div class="chips">${[0.5, 1, 2, 3].map(n => `<button class="chip" type="button" data-units="${n}">${n === 0.5 ? "½" : n} ${esc(f.unit)}${n > 1 && !/s$/.test(f.unit) ? "s" : ""} (${fmt(n * f.uw)} ${f.base === "pour 100 ml" ? "ml" : "g"})</button>`).join("")}</div>` : ""}
     <div class="note row"><span class="grow">${portion ? cap(unitOf(f, 2)) : f.cat === "Pâtes, riz, semoule" ? "Grammes (poids sec, avant cuisson)" : f.base === "pour 100 ml" ? "Millilitres" : "Grammes consommés"}</span><b class="num" id="wP"></b></div>
+    ${f.ciq ? `<div class="small muted">Calories : ${fmt(f.kcal, 0)} kcal/100 g, d'après Ciqual 2020 « ${esc(f.ciq.nom)} »${f.ciq.calc ? " (calculées à partir des nutriments)" : ""}${f.ciq.approx ? " (aliment le plus proche)" : ""}.</div>` : f.c === "F" || f.c === "L" ? `<div class="small muted">Calories non disponibles pour cet aliment.</div>` : ""}
     ${f.cata ? `<div class="small muted">${esc(f.marque)} · ${f.kcal != null ? fmt(f.kcal, 0) + " kcal" : "kcal ?"}, ${fmt(f.prot)} g de protéines, ${f.phe100 != null ? fmt(f.phe100) + " mg de Phé" : "Phé non publiée"} pour 100 ${f.base === "pour 100 ml" ? "ml" : "g"}${f.base === "sec" ? " (sec)" : ""}. ${f.rq ? esc(f.rq.replace(/\.?$/, ".")) + " " : ""}Valeurs à vérifier sur l'emballage · <a href="${esc(f.src)}" target="_blank" rel="noopener">source</a></div>` : ""}
     <label class="row" style="flex-wrap:nowrap;gap:12px;cursor:pointer" for="wRoutine"><input type="checkbox" id="wRoutine" ${inRoutine ? "checked" : ""} style="width:24px;height:24px;flex:none;accent-color:var(--accent)"><span class="grow"><b>Tous les jours</b><br><span class="small muted">Remettre automatiquement au ${mealName} chaque jour avec cette quantité (journée type)</span></span></label>
     <button class="btn primary block" id="wSave">${editing ? "Enregistrer" : "Ajouter au " + mealName}</button>
@@ -875,7 +878,7 @@ async function buildPdf(p, from, to, detail){
   const over = p.objectif ? partsArr.filter(v => v > p.objectif).length : null;
   const st = entered.map(i => dayStats(p, p.days[i])), avgH = st.length ? st.reduce((s, x) => s + x.hg, 0) / st.length : 0;
   const kDays = st.filter(x => x.kn), avgK = kDays.length ? kDays.reduce((s, x) => s + x.kc, 0) / kDays.length : 0;
-  const boxes = [["Jours saisis", `${entered.length} / ${N}`], [partsArr.length ? `Moyenne (${fmt(Math.min(...partsArr), 1)} à ${fmt(Math.max(...partsArr), 1)})` : "Moyenne", `${fmt(avg, 1)} parts/j`], ["Jours > objectif", over == null ? "–" : String(over)], ["Prises de sang", String(ans.length)], ["Hypoprotéinés moy./j", `${fmt(avgH, 0)} g`], ["Calories saisies moy./j*", kDays.length ? `${fmt(avgK, 0)} kcal` : "–"]];
+  const boxes = [["Jours saisis", `${entered.length} / ${N}`], [partsArr.length ? `Moyenne (${fmt(Math.min(...partsArr), 1)} à ${fmt(Math.max(...partsArr), 1)})` : "Moyenne", `${fmt(avg, 1)} parts/j`], ["Jours > objectif", over == null ? "–" : String(over)], ["Prises de sang", String(ans.length)], ["Hypoprotéinés moy./j", `${fmt(avgH, 0)} g`], ["Calories moy./j*", kDays.length ? `${fmt(avgK, 0)} kcal` : "–"]];
   const bw = (CW - 5 * 3) / 6;
   boxes.forEach(([l, v], i) => {
     const x = M + i * (bw + 3);
@@ -951,7 +954,7 @@ async function buildPdf(p, from, to, detail){
   section("Journal quotidien");
   doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(...MUT);
   T("Dans chaque repas : parts de Phé (p.), puis aliments avec leurs parts. Hyp. = aliment hypoprotéiné ; Sub. = substitut ou complément (mélange d'acides aminés, Duocal...).", M, y + 2.5);
-  T("* Calories : uniquement les aliments dont les calories ont été saisies (produits emballés, portions, hypoprotéinés) ; les fruits et légumes de la base n'en ont pas.", M, y + 6);
+  T("* Calories : fruits et légumes d'après Ciqual 2020 (Anses), produits hypoprotéinés d'après les fabricants, autres produits saisis par la famille. Jours « incomplet » : au moins un aliment sans calories.", M, y + 6);
   y += 8;
   const cell = (d, m) => { if (!d.repas[m].length) return ""; const s = mealStats(p, d, m); const tot = fmt(sumMeal(p, d, m)) + " p." + (s.hg ? ` · hyp. ${fmt(s.hg, 0)} g` : "") + (s.kn ? ` · ${fmt(s.kc, 0)} kcal` : "");
     return detail ? tot + "\n" + d.repas[m].map(it => { const f = food(it.ref, p), k = kcalOf(f, it.g); return `${isHypo(f) ? "Hyp. " : isSub(f) ? "Sub. " : ""}${f.n} ${qtyTxt(f, it.g)} (${fmt(partsOf(f, it.g))}${k != null ? ` ; ${fmt(k, 0)} kcal` : ""})`; }).join("\n") : tot; };
