@@ -102,8 +102,8 @@ textarea{min-height:120px;font:13px/1.4 ui-monospace,Menlo,monospace}
 .chart text{fill:var(--muted);font:11px var(--f-body)}
 /* tab bar */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:25;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
-nav.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
-.tab{appearance:none;border:0;background:transparent;display:grid;justify-items:center;gap:2px;padding:9px 2px 8px;font-size:.72rem;font-weight:600;color:var(--muted);cursor:pointer}
+nav.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(6,minmax(0,1fr))}
+.tab{appearance:none;border:0;background:transparent;display:grid;justify-items:center;gap:2px;padding:9px 0 8px;font-size:.68rem;min-width:0;overflow:hidden;text-overflow:ellipsis;font-weight:600;color:var(--muted);cursor:pointer}
 .tab[aria-current="page"]{color:var(--accent)}
 .tab[aria-current="page"] svg.i{stroke-width:2.4}
 /* sheet */
@@ -195,7 +195,7 @@ const ICONS = {
   repeat:'<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>',
   trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'
 };
-const TABS = [["repas","Repas"],["suivi","Suivi"],["recettes","Recettes"],["trouvailles","Trouvailles"],["profil","Profil"]];
+const TABS = [["repas","Repas"],["suivi","Suivi"],["recettes","Recettes"],["trouvailles","Trouvailles"],["convertir","Convertir"],["profil","Profil"]];
 const icon = (n, cls="i") => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt = (n, d=2) => Number(n).toLocaleString("fr-FR", {maximumFractionDigits:d});
@@ -343,7 +343,7 @@ function status(p, mg){
 const ui = {tab:"repas", meal:"pdj", range:"6m", recType:"Tout", recQ:"", recIng:[], recipe:null, addCat:"F", search:"", day:todayISO(), follow:true, cal:todayISO().slice(0, 7)};
 document.addEventListener("visibilitychange", () => { if (!document.hidden && ui.follow && ui.day !== todayISO()){ ui.day = todayISO(); render(); } });
 const hashTabs = TABS.map(t => t[0]);
-function route(){ const h = location.hash.slice(1); ui.tab = h === "convertir" ? "suivi" : hashTabs.includes(h) ? h : "repas"; render(); }
+function route(){ const h = location.hash.slice(1); ui.tab = hashTabs.includes(h) ? h : "repas"; render(); }
 window.addEventListener("hashchange", route);
 window.addEventListener("resize", () => { if (ui.tab === "suivi") drawChart(); });
 
@@ -366,13 +366,13 @@ function render(){
   const av = document.getElementById("hdrAvatar");
   av.innerHTML = p.photo ? `<img src="${esc(p.photo)}" alt="">` : esc(initials(p));
   av.setAttribute("aria-label", "Profil de " + p.prenom);
-  const titles = {repas:["Parts de Phé", "Calcul de la journée"], suivi:["Suivi sanguin", "Taux de phénylalanine"], recettes:["Recettes","Pauvres en protéines"], trouvailles:["Trouvailles","Où trouver les produits hypoprotéinés"], profil:["Profil", p.prenom + (p.nom ? " " + p.nom : "")]};
+  const titles = {repas:["Parts de Phé", "Calcul de la journée"], suivi:["Suivi sanguin", "Taux de phénylalanine"], recettes:["Recettes","Pauvres en protéines"], trouvailles:["Trouvailles","Où trouver les produits hypoprotéinés"], convertir:["Convertir","mg/dL ⇄ µmol/L"], profil:["Profil", p.prenom + (p.nom ? " " + p.nom : "")]};
   const [t, s] = titles[ui.tab];
   document.getElementById("title").innerHTML = `${esc(t)}<small>${esc(s)}</small>`;
   const v = document.getElementById("view");
-  v.innerHTML = banners(p) + ({repas:viewRepas, suivi:viewSuivi, recettes:viewRecettes, trouvailles:viewTrouvailles, profil:viewProfil}[ui.tab])(p);
+  v.innerHTML = banners(p) + ({repas:viewRepas, suivi:viewSuivi, recettes:viewRecettes, trouvailles:viewTrouvailles, convertir:viewConvertir, profil:viewProfil}[ui.tab])(p);
   if (ui.tab === "suivi") drawChart();
-  if (ui.tab === "suivi") bindConv();
+  if (ui.tab === "convertir") bindConv();
 }
 function banners(p){
   let h = "";
@@ -699,8 +699,7 @@ function viewSuivi(p){
       <span class="dot ${s ? (s[0]==="st-in" ? "d0" : s[0]==="st-hi" ? "d2" : "d1") : ""}"></span>
       <span class="grow"><span class="t num">${frDate(a.date)}</span>${a.note ? `<br><span class="s">${esc(a.note)}</span>` : ""}${notesBefore(p, a.date).map(([i, n]) => `<br><span class="s" style="color:var(--mid)">Note du ${frDate(i).slice(0, 5)} : ${esc(n)}</span>`).join("")}</span>
       <span class="parts num">${fmtVal(a.mg, u)}<small>${unitLabel(u)}</small></span></button>`; }).join("") : `<div class="empty">Ajoutez le résultat de votre dernière prise de sang pour commencer le suivi.</div>`}
-  </div></section>
-  ${viewConvertir()}`;
+  </div></section>`;
 }
 function drawChart(){
   const el = document.getElementById("chart"); if (!el) return;
@@ -1474,12 +1473,13 @@ async function sendRecipeAnon(btn){
 /* ---------- Convertir ---------- */
 function viewConvertir(){
   const rows = [2, 4, 6, 8, 10, 15, 20].map(v => `<tr><td>${fmt(v)} mg/dL</td><td>${fmt(Math.round(v * UMOL))} µmol/L</td></tr>`).join("");
-  return `<section class="card"><div class="label">Convertir mg/dL ⇄ µmol/L</div>
+  return `<section class="card">
     <div class="conv"><label class="f">mg/dL<input type="text" id="cMg" inputmode="decimal" value="4"></label><span class="eq">=</span><label class="f">µmol/L<input type="text" id="cUm" inputmode="decimal" value="${fmt(4 * UMOL)}"></label></div>
     <div class="small muted">1 mg/dL (ou mg/100 mL) = ${fmt(UMOL)} µmol/L, d'après la masse molaire de la phénylalanine (165,19 g/mol).</div>
   </section>
-    <details><summary class="small">Repères</summary><div style="overflow-x:auto"><table class="ref"><thead><tr><th>mg/dL</th><th>µmol/L</th></tr></thead><tbody>${rows}</tbody></table></div></details>
-  </section>`;
+  </section>
+  <section class="card"><div class="label">Repères</div><div style="overflow-x:auto"><table class="ref"><thead><tr><th>mg/dL</th><th>µmol/L</th></tr></thead><tbody>${rows}</tbody></table></div></section>
+  <section class="card"><div class="label">Les parts</div><p style="margin:0">1 part de Phé = ${PART_MG} mg de phénylalanine. Le nombre de parts autorisé par jour est fixé par l'équipe médicale.</p></section>`;
 }
 function bindConv(){
   const a = document.getElementById("cMg"), b = document.getElementById("cUm");
