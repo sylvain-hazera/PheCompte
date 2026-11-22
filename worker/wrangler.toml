@@ -2,9 +2,15 @@ name = "phecompte-api"
 main = "src/index.js"
 compatibility_date = "2024-11-01"
 
+# récapitulatif e-mail : 19 h et 20 h UTC, le service n'envoie qu'à 21 h heure de Paris (heure d'été / d'hiver)
+[triggers]
+crons = ["0 19 * * *", "0 20 * * *"]
+
 [vars]
 ALLOWED_ORIGINS = "https://sylvain-hazera.github.io"
 GITHUB_REPO = "sylvain-hazera/PheCompte"
+SITE_URL = "https://sylvain-hazera.github.io/PheCompte/"
+ADMIN_URL = "https://phecompte-api.sylvain-hazera.workers.dev/admin"
 
 [[d1_databases]]
 binding = "DB"

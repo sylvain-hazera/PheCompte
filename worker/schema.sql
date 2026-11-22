@@ -39,3 +39,5 @@ CREATE TABLE IF NOT EXISTS recettes (
   ip_hash TEXT
 );
 CREATE INDEX IF NOT EXISTS recettes_statut ON recettes (statut, created);
+-- réglages internes (ex. date du dernier récapitulatif envoyé)
+CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT);
