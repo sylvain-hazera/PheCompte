@@ -527,6 +527,10 @@ function viewRepas(p){
     ${statsTxt(mealStats(p, d, ui.meal)) ? `<div class="small muted num" style="border-top:1px solid var(--line);padding-top:8px">${MEALS.find(x => x[0] === ui.meal)[1]} : ${statsTxt(mealStats(p, d, ui.meal))}</div>` : ""}
     <button class="btn primary block" data-act="addFood">${icon("plus")}Ajouter un aliment</button>
     <button class="btn block" data-act="useRecipe">${icon("recettes")}Utiliser une recette</button>
+    ${(() => { const prev = p.days[isoShift(iso, -1)], its = prev ? prev.repas[ui.meal] : []; if (!its || !its.length) return "";
+      const missing = its.filter(x => !items.some(y => y.ref === x.ref && y.g === x.g)); if (!missing.length) return "";
+      const pt = Math.round(100 * missing.reduce((s, x) => s + partsOf(food(x.ref, p), x.g), 0)) / 100, ml = MEALS.find(m => m[0] === ui.meal)[1].toLowerCase().replace("déj.", "déjeuner");
+      return `<button class="btn block" data-act="copyPrevMeal">${icon("repeat")}Reprendre le ${ml} de la veille (${missing.length} aliment${missing.length > 1 ? "s" : ""}, ${fmt(pt)} part${pt > 1 ? "s" : ""})</button>`; })()}
     ${!any && rCount && !today ? `<button class="btn block" data-act="routineApply">${icon("repeat")}Ajouter la journée type à ce jour</button>` : ""}
   </section>
   <section class="card">
@@ -1804,6 +1808,9 @@ document.addEventListener("click", e => {
       c.hidden = true; MEALS.forEach(([m]) => { p.routine[m] = p.routine[m].filter(x => x.ref !== c.ref); });
       save(); openAddFood.draw(); render(); toast("Retiré de Mes aliments (l'historique est conservé)"); }); break;
     case "moveDay": openMoveDay(); break;
+    case "copyPrevMeal": { const prev = p.days[isoShift(ui.day, -1)]; if (!prev) break; const d = dayData(p, ui.day, true), cur = d.repas[ui.meal];
+      const add = prev.repas[ui.meal].filter(x => !cur.some(y => y.ref === x.ref && y.g === x.g)).map(x => ({ref:x.ref, g:x.g}));
+      d.repas[ui.meal] = [...cur, ...add]; delete d.auto; save(); render(); toast(`${add.length} aliment${add.length > 1 ? "s" : ""} repris de la veille`); break; }
     case "fixMigrated": ui.day = p.migratedDay; ui.follow = isToday(ui.day); render(); openMoveDay(); break;
     case "okMigrated": delete p.migratedDay; save(); render(); break;
     case "clearDay": armed(t, "Confirmer : vider les 4 repas de ce jour", () => { const d = dayData(p, ui.day, true); MEALS.forEach(([m]) => d.repas[m] = []); save(); render(); toast("Repas du jour vidés"); }); break;
