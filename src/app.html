@@ -459,11 +459,11 @@ function openUseRecipe(){
     b.querySelectorAll("[data-pick]").forEach(x => x.addEventListener("click", () => drawPick(allRecipes().find(r => String(r.id) === x.dataset.pick))));
   };
   const drawPick = r => {
-    const b = document.getElementById("sheetBody"), perso = r.src === "perso", w0 = recipeWeight(r), totParts = r.phe / PART_MG;
+    const b = document.getElementById("sheetBody"), perso = r.src === "perso", w0 = recipeWeight(r), totParts = perso ? parseNum(String(r.parts).replace(/\s/g, "")) : r.phe / PART_MG;
     const sumIng = perso ? Math.round(r.payload.ing.reduce((s, x) => s + (x.g || 0), 0)) : null;
     b.innerHTML = `<button class="btn ghost" data-back="1" style="justify-self:start">${icon("back")}Autre recette</button>
       <div><div class="label">${recType(r)}</div><h3 style="font-size:1.25rem">${esc(r.n)}</h3>
-      <div class="small muted num">Recette entière : ${fmt(totParts)} parts (${fmt(r.phe, 0)} mg de Phé)${r.kcal ? ` · ${fmt(r.kcal, 0)} kcal` : ""}</div></div>
+      <div class="small muted num">Recette entière : ${fmt(totParts)} parts (${fmt(totParts * PART_MG, 0)} mg de Phé)${r.kcal ? ` · ${fmt(r.kcal, 0)} kcal` : ""}</div></div>
       <label class="f">Poids total du plat préparé (g)<input type="text" id="urTot" inputmode="decimal" value="${w0 ? dec(w0) : ""}" placeholder="Pesez le plat entier"></label>
       <div class="small muted" style="margin-top:-6px">${perso ? `Par défaut : somme des ingrédients (${fmt(sumIng, 0)} g). Si possible, pesez le plat une fois cuit : la cuisson fait perdre de l'eau.` : "Pesez le plat entier une fois préparé."}</div>
       <label class="f">Quantité mangée (g)<input type="text" id="urEat" inputmode="decimal" placeholder="Ex. : 150"></label>
@@ -487,7 +487,7 @@ function openUseRecipe(){
       const v = calc(); if (!v){ b.querySelector("#urErr").textContent = "Indiquez le poids total du plat et la quantité mangée, en grammes."; return; }
       if (v.E > v.T * 1.05){ b.querySelector("#urErr").textContent = "La quantité mangée dépasse le poids total du plat."; return; }
       // aliment « recette » figé (poids d'une part et kcal/100 g) pour que l'historique ne change pas si la recette est modifiée
-      const w = r.phe > 0 ? Math.round(100 * v.T * PART_MG / r.phe) / 100 : null, kc = r.kcal ? Math.round(10 * r.kcal / v.T * 100) / 10 : null;
+      const w = totParts > 0 ? Math.round(100 * v.T / totParts) / 100 : null, kc = r.kcal ? Math.round(10 * r.kcal / v.T * 100) / 10 : null;
       let f = p.custom.find(c => c.c === "R" && c.recipeId === String(r.id) && c.w === w && (c.kcal ?? null) === kc && c.n === "Recette : " + r.n);
       if (!f){ f = {ref:"c" + uid(), n:"Recette : " + r.n, c:"R", w, recipeId:String(r.id), rw:v.T, hidden:true}; if (kc != null) f.kcal = kc; p.custom.push(f); }
       if (perso && b.querySelector("#urMem") && b.querySelector("#urMem").checked){ r.poids = v.T; }
@@ -1120,6 +1120,7 @@ function viewRecipe(p, r){
 
 /* proposer une recette */
 const ING_MODES = [["base","Fruit ou légume de la base"],["prot","Produit emballé (protéines)"],["phe","Phé indiquée sur l'étiquette"],["zero","Sans Phé (sucre, huile, eau…)"]];
+const ING_SHORT = {prot:"produit emballé", phe:"Phé indiquée sur l'étiquette", zero:"sans Phé"};
 const FOOD_BY_NAME = new Map([...FOOD.values()].map(f => [f.n.toLowerCase(), f]));
 const blankIng = () => ({nom:"", g:"", mode:"base", ref:"", prot:"", lait:true, phe100:""});
 let draft;
@@ -1198,7 +1199,7 @@ function propCompute(){
     else { tot += v; out.textContent = `${fmt(v / PART_MG)} part${v / PART_MG > 1 ? "s" : ""} · ${fmt(v, 0)} mg`; out.style.color = ""; }
   });
   const el = document.getElementById("propTotal");
-  if (el) el.innerHTML = `${fmt(Math.round(tot / PART_MG * 10) / 10, 1)} parts <span style="font-size:1rem;font-weight:600">· ${fmt(tot, 0)} mg de Phé${ok ? "" : " (incomplet)"}</span>`;
+  if (el) el.innerHTML = `${fmt(Math.round(tot / PART_MG * 100) / 100, 2)} parts <span style="font-size:1rem;font-weight:600">· ${fmt(tot, 0)} mg de Phé${ok ? "" : " (incomplet)"}</span>`;
   return {tot, ok};
 }
 function draftPayload(){
@@ -1221,10 +1222,10 @@ function draftPayload(){
 }
 /* recette personnelle, enregistrée sur le téléphone (db.mesRecettes, incluse dans la sauvegarde) */
 function recipeFromPayload(y, id, date){
-  const det = y.ing.map(x => { const v = ingPhe(x); return {txt:`${fmt(x.g)} g ${x.nom}` + (x.mode === "base" ? "" : ` (${ING_MODES.find(m => m[0] === x.mode)[1].toLowerCase()})`), parts: isNaN(v) ? null : Math.round(v / PART_MG * 100) / 100}; });
+  const det = y.ing.map(x => { const v = ingPhe(x); return {txt:`${fmt(x.g)} g ${x.nom}` + (x.mode === "base" ? "" : ` (${ING_SHORT[x.mode]})`), parts: isNaN(v) ? null : Math.round(v / PART_MG * 100) / 100}; });
   const tot = y.ing.reduce((s, x) => s + (ingPhe(x) || 0), 0);
   return {id, src:"perso", n:y.n, t:y.t, lv:y.lv, min:y.min, p:y.p, kcal:y.kcal, ing:det.map(x => x.txt), ingDetail:det, k:[], et:y.et,
-    phe:Math.round(tot), parts:fmt(Math.round(tot / PART_MG * 10) / 10, 1), auteur:y.auteur, date, payload:y};
+    phe:Math.round(tot), parts:fmt(Math.round(tot / PART_MG * 100) / 100, 2), auteur:y.auteur, date, payload:y};
 }
 function saveRecipe(){
   const y = draftPayload(); if (!y) return;
