@@ -50,3 +50,15 @@ jobs:
             V="${!S}"
             if [ -n "$V" ]; then printf '%s' "$V" | npx --yes wrangler@3.112.0 secret put "$S"; else echo "::warning::Secret $S absent : fonction correspondante désactivée"; fi
           done
+      - name: Vérifier le service en ligne
+        working-directory: .
+        run: |
+          U=https://phecompte-api.sylvain-hazera.workers.dev
+          sleep 5
+          curl -fsS "$U/sante"; echo
+          curl -fsS -H "Origin: https://sylvain-hazera.github.io" -D - -o /tmp/t.json "$U/trouvailles" | grep -i "access-control-allow-origin"
+          python3 -c "import json;d=json.load(open('/tmp/t.json'));print('trouvailles :',len(d['trouvailles']))"
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST -H "Origin: https://sylvain-hazera.github.io" -H "Content-Type: application/json" -d '{"token":"faux","item":{"product":"Test","prot":1,"ou":"magasin","store":"Test","city":"Test"}}' "$U/trouvailles")
+          echo "Envoi sans vérification anti-robot -> HTTP $code (403 attendu)"; test "$code" = "403"
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST -H "Content-Type: application/json" -d '{}' "$U/admin/trouvailles/abcdefabcdef")
+          echo "Modération sans mot de passe -> HTTP $code (401 attendu)"; test "$code" = "401"
