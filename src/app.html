@@ -1280,7 +1280,7 @@ ${JSON.stringify(payload, null, 1)}
 
 /* ---------- Service en ligne (Cloudflare) : trouvailles et recettes anonymes ---------- */
 const API = "";                 // adresse du service, ex. https://phecompte-api.xxx.workers.dev
-const TURNSTILE_SITEKEY = "";   // clé publique Turnstile (anti-robot)
+const TURNSTILE_SITEKEY = "0x4AAAAAAGNKO7ht5Vor2a_f";   // clé publique Turnstile (anti-robot)
 const FIND_TYPES = ["Pâtes, riz, semoule", "Pain, biscottes", "Biscuits, gâteaux", "Farines, préparations", "Desserts", "Boissons, substituts de lait", "Plats", "Autre"];
 const CAT_TO_TYPE = {"Pâtes, riz, semoule":"Pâtes, riz, semoule", "Pain":"Pain, biscottes", "Biscuits et apéritif":"Biscuits, gâteaux", "Desserts et gâteaux":"Desserts", "Farines et préparations":"Farines, préparations", "Boissons et substituts de lait":"Boissons, substituts de lait", "Plats":"Plats", "Céréales du petit déjeuner":"Autre"};
 let FINDS = null, findsState = "";
