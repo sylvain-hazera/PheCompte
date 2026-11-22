@@ -1005,10 +1005,11 @@ async function shareFile(text, name, type){
 const REPO = "sylvain-hazera/PheCompte";
 let COMM = [];
 try { COMM = JSON.parse(localStorage.getItem("phecompte.comm") || "[]"); if (!Array.isArray(COMM)) COMM = []; } catch(e){ COMM = []; }
-const allRecipes = () => [...RECETTES, ...COMM];
+const mesRecettes = () => Array.isArray(db.mesRecettes) ? db.mesRecettes : (db.mesRecettes = []);
+const allRecipes = () => [...mesRecettes(), ...RECETTES, ...COMM];
 const rid = s => /^\d+$/.test(s) ? +s : s;
 const recType = r => ({"Plat principal":"Plats","Entrée":"Entrées","Dessert":"Desserts","Pain":"Pains"}[r.t] || r.t);
-const badge = r => !r.src ? "" : r.statut === "validee"
+const badge = r => !r.src ? "" : r.src === "perso" ? `<span class="status st-lo">Ma recette · enregistrée sur ce téléphone, non vérifiée</span>` : r.statut === "validee"
   ? `<span class="status st-in">Validée par une diététicienne</span>` : `<span class="status st-lo">Communauté · non vérifiée</span>`;
 function loadCommunity(){
   fetch("recettes-communaute.json", {cache:"no-cache"}).then(r => r.ok ? r.json() : Promise.reject()).then(d => {
@@ -1020,21 +1021,21 @@ function loadCommunity(){
 function viewRecettes(p){
   if (ui.recipe != null){ const r = allRecipes().find(x => x.id === ui.recipe); if (r) return viewRecipe(p, r); ui.recipe = null; }
   const q = ui.recQ.trim().toLowerCase(), all = allRecipes();
-  const rows = all.filter(r => (ui.recType === "Tout" || (ui.recType === "Favoris" ? p.favoris.includes(r.id) : ui.recType === "Communauté" ? !!r.src : recType(r) === ui.recType))
+  const rows = all.filter(r => (ui.recType === "Tout" || (ui.recType === "Favoris" ? p.favoris.includes(r.id) : ui.recType === "Communauté" ? r.src === "communaute" : ui.recType === "Mes recettes" ? r.src === "perso" : recType(r) === ui.recType))
     && (!q || r.n.toLowerCase().includes(q) || r.ing.some(i => i.toLowerCase().includes(q)))
     && ui.recIng.every(k => (r.k || []).includes(k)));
   const keys = [...new Set(all.flatMap(r => r.k || []))].sort((a, b) => a.localeCompare(b, "fr"));
   return `
-  <button class="btn primary block" data-act="propose">${icon("plus")}Proposer une recette</button>
+  <button class="btn primary block" data-act="newRecipe">${icon("plus")}Ajouter une recette</button>
   <input type="search" id="recQ" placeholder="Rechercher une recette ou un ingrédient" value="${esc(ui.recQ)}" autocomplete="off">
-  <div class="chips">${["Tout","Entrées","Plats","Desserts","Pains","Communauté","Favoris"].map(t => `<button class="chip" data-act="recType" data-t="${t}" aria-pressed="${ui.recType===t}">${t === "Favoris" ? "★ Favoris" : t === "Communauté" ? `Communauté (${COMM.length})` : t}</button>`).join("")}</div>
+  <div class="chips">${["Tout","Mes recettes","Entrées","Plats","Desserts","Pains","Communauté","Favoris"].map(t => `<button class="chip" data-act="recType" data-t="${t}" aria-pressed="${ui.recType===t}">${t === "Favoris" ? "★ Favoris" : t === "Communauté" ? `Communauté (${COMM.length})` : t === "Mes recettes" ? `Mes recettes (${mesRecettes().length})` : t}</button>`).join("")}</div>
   ${keys.length ? `<details ${ui.recIng.length ? "open" : ""} class="card"><summary>Filtrer par ingrédient${ui.recIng.length ? ` (${ui.recIng.length}/2)` : ""}</summary>
     <div class="row" style="gap:6px">${keys.map(k => `<button class="chip" data-act="recIng" data-k="${esc(k)}" aria-pressed="${ui.recIng.includes(k)}" ${!ui.recIng.includes(k) && ui.recIng.length >= 2 ? "disabled" : ""}>${esc(k[0].toUpperCase() + k.slice(1))}</button>`).join("")}</div>
   </details>` : ""}
   <section class="card"><div class="list">${rows.length ? rows.map(r => `<button class="item" data-act="recipe" data-id="${esc(r.id)}">
-      <span class="grow"><span class="t">${p.favoris.includes(r.id) ? "★ " : ""}${esc(r.n)}</span><br><span class="s">${recType(r)} · ${esc(r.lv)} · ${esc(r.min)} min${r.src ? (r.statut === "validee" ? " · ✓ validée" : " · communauté, non vérifiée") : ""}</span></span>
+      <span class="grow"><span class="t">${p.favoris.includes(r.id) ? "★ " : ""}${esc(r.n)}</span><br><span class="s">${recType(r)} · ${esc(r.lv)} · ${esc(r.min)} min${r.src === "perso" ? " · ma recette" : r.src ? (r.statut === "validee" ? " · ✓ validée" : " · communauté, non vérifiée") : ""}</span></span>
       <span class="parts num">${esc(r.parts)}<small>parts</small></span></button>`).join("")
-    : `<div class="empty">${ui.recType === "Favoris" && !q ? "Ajoutez des recettes en favori avec l'étoile." : ui.recType === "Communauté" && !q ? "Aucune recette de la communauté validée pour l'instant. Proposez la vôtre !" : "Aucune recette ne correspond."}</div>`}</div></section>
+    : `<div class="empty">${ui.recType === "Favoris" && !q ? "Ajoutez des recettes en favori avec l'étoile." : ui.recType === "Communauté" && !q ? "Aucune recette de la communauté validée pour l'instant. Proposez la vôtre !" : ui.recType === "Mes recettes" && !q ? "Vos recettes, enregistrées sur ce téléphone, apparaîtront ici. Touchez « Ajouter une recette »." : "Aucune recette ne correspond."}</div>`}</div></section>
   <p class="small muted" style="margin:0">Valeurs pour la recette entière. Divisez par le nombre de portions servies.</p>`;
 }
 function viewRecipe(p, r){
@@ -1046,13 +1047,15 @@ function viewRecipe(p, r){
     ${r.src ? `<div class="row">${badge(r)}</div>` : ""}
     <div class="label">${recType(r)} · ${esc(r.lv)} · ${esc(r.min)} min de préparation${r.p ? " · " + esc(r.p) + " pers." : ""}</div>
     <h2>${esc(r.n)}</h2>
-    ${r.src ? `<div class="small muted">Proposée par ${esc(r.auteur || "un membre")}${r.date ? " le " + longDate(r.date) : ""}</div>` : ""}
+    ${r.src === "perso" ? `<div class="small muted">Enregistrée le ${longDate(r.date)}${r.maj && r.maj !== r.date ? ", modifiée le " + longDate(r.maj) : ""}. Incluse dans la sauvegarde (Profil → Sauvegarde).</div>` : r.src ? `<div class="small muted">Proposée par ${esc(r.auteur || "un membre")}${r.date ? " le " + longDate(r.date) : ""}</div>` : ""}
     <div class="facts num"><div><b>${esc(r.parts)}</b><span>parts de Phé</span></div><div><b>${fmt(r.phe, 0)}</b><span>mg de Phé</span></div><div><b>${r.kcal ? fmt(r.kcal, 0) : "–"}</b><span>kcal</span></div></div>
     <div class="small muted">Pour la recette entière.${r.src ? " Phé calculée automatiquement à partir des ingrédients." : ""}</div>
-    ${r.src && r.statut !== "validee" ? `<div class="warn small">Cette recette n'a pas encore été vérifiée par une diététicienne. Contrôlez les quantités avant de l'utiliser.</div>` : ""}
+    ${r.src === "communaute" && r.statut !== "validee" ? `<div class="warn small">Cette recette n'a pas encore été vérifiée par une diététicienne. Contrôlez les quantités avant de l'utiliser.</div>` : ""}
     <h3>Ingrédients</h3><ul class="ing">${det ? det.map(d => `<li>${esc(d.txt)}${d.parts != null ? ` <span class="muted num">(${fmt(d.parts)} part${d.parts > 1 ? "s" : ""})</span>` : ""}</li>`).join("") : r.ing.map(i => `<li>${esc(i)}</li>`).join("")}</ul>
     <h3>Préparation</h3><ol class="steps">${r.et.map(e => `<li>${esc(e)}</li>`).join("")}</ol>
     ${r.url ? `<a class="btn block" href="${esc(r.url)}" target="_blank" rel="noopener">Commenter ou signaler une erreur (GitHub)</a>` : ""}
+    ${r.src === "perso" ? `<div class="row"><button class="btn grow" data-act="editRecipe" data-id="${esc(r.id)}">Modifier</button><button class="btn grow" data-act="shareRecipe" data-id="${esc(r.id)}">Proposer à la communauté</button></div>
+      <button class="btn danger block" data-act="delRecipe" data-id="${esc(r.id)}">Supprimer cette recette</button>` : ""}
   </article>`;
 }
 
@@ -1085,10 +1088,17 @@ function ingRow(x, i){
     <div class="row" style="flex-wrap:nowrap"><input type="text" inputmode="decimal" data-i="${i}" data-f="g" placeholder="Quantité en g" value="${esc(x.g)}" aria-label="Quantité en grammes" style="max-width:150px"><span class="grow small muted num" id="ingOut${i}"></span></div>
   </div>`;
 }
+const dec = v => String(v).replace(".", ",");
+const emptyDraft = () => ({n:"", t:"Plat principal", lv:"Moyen", p:"", min:"", kcal:"", auteur:"", ing:[blankIng()], et:""});
+function draftFrom(r){
+  const y = r.payload;
+  return {editId:r.id, n:y.n, t:y.t, lv:y.lv, p:y.p || "", min:String(y.min), kcal:y.kcal ? String(y.kcal) : "", auteur:y.auteur || "",
+    ing:y.ing.map(x => ({nom:x.nom, g:dec(x.g), mode:x.mode, ref:x.ref || "", prot:x.prot != null ? dec(x.prot) : "", lait:x.lait !== false, phe100:x.phe100 != null ? dec(x.phe100) : ""})), et:y.et.join("\n")};
+}
 function openPropose(){
   const d = draft;
-  sheet("Proposer une recette", `
-    <div class="note small">La recette est envoyée sur GitHub, où le texte est public. Elle apparaîtra dans l'application une fois vérifiée par une diététicienne. Un compte GitHub gratuit est nécessaire. N'indiquez pas d'informations personnelles.</div>
+  sheet(d.editId ? "Modifier la recette" : "Nouvelle recette", `
+    <div class="note small"><b>Enregistrer dans mes recettes</b> la garde sur ce téléphone, sans compte, et l'inclut dans la sauvegarde. Vous pourrez aussi, si vous le souhaitez, la <b>proposer à la communauté</b> : elle sera envoyée sur GitHub (compte gratuit, texte public) et publiée après vérification par une diététicienne.</div>
     <label class="f">Nom de la recette<input type="text" data-f="n" maxlength="80" value="${esc(d.n)}" placeholder="Ex. : Gratin de courgettes"></label>
     <div class="row" style="flex-wrap:nowrap"><label class="f grow">Type<select data-f="t">${["Entrée","Plat principal","Dessert","Pain"].map(t => `<option ${d.t === t ? "selected" : ""}>${t}</option>`).join("")}</select></label>
       <label class="f grow">Niveau<select data-f="lv">${["Facile","Moyen","Difficile"].map(t => `<option ${d.lv === t ? "selected" : ""}>${t}</option>`).join("")}</select></label></div>
@@ -1101,7 +1111,8 @@ function openPropose(){
     <label class="f">Étapes (une par ligne)<textarea data-f="et" style="font:inherit;min-height:140px" placeholder="Préchauffer le four à 180 °C.&#10;Couper les courgettes en rondelles.">${esc(d.et)}</textarea></label>
     <label class="f">Votre prénom ou pseudo (facultatif)<input type="text" data-f="auteur" maxlength="40" value="${esc(d.auteur)}"></label>
     <div id="propErr" class="err" role="alert"></div>
-    <button class="btn primary block" data-act="propReady">Préparer l'envoi</button>
+    <button class="btn primary block" data-act="saveRecipe">${d.editId ? "Enregistrer les modifications" : "Enregistrer dans mes recettes"}</button>
+    <button class="btn block" data-act="propReady">Proposer à la communauté (GitHub)</button>
     <button class="btn ghost" data-act="propClear">Effacer le brouillon</button>
     <div id="propSend"></div>`, b => {
       b.addEventListener("input", onPropInput); b.addEventListener("change", onPropInput); propCompute();
@@ -1131,7 +1142,7 @@ function propCompute(){
   if (el) el.innerHTML = `${fmt(Math.round(tot / PART_MG * 10) / 10, 1)} parts <span style="font-size:1rem;font-weight:600">· ${fmt(tot, 0)} mg de Phé${ok ? "" : " (incomplet)"}</span>`;
   return {tot, ok};
 }
-function propReady(){
+function draftPayload(){
   const d = draft, err = document.getElementById("propErr"), out = document.getElementById("propSend");
   const ing = d.ing.filter(x => x.nom.trim() || x.g);
   const steps = d.et.split("\n").map(s => s.trim()).filter(Boolean);
@@ -1142,12 +1153,33 @@ function propReady(){
   if (ing.some(x => !x.nom.trim() || isNaN(ingPhe(x)))) problems.push("complétez chaque ingrédient (nom, quantité et valeur demandée)");
   if (!steps.length) problems.push("décrivez au moins une étape");
   if (isNaN(min) || min < 0 || min > 1440) problems.push("indiquez le temps de préparation en minutes");
-  if (problems.length){ err.textContent = "Pour continuer, " + problems.join(", ") + "."; out.innerHTML = ""; return; }
+  if (problems.length){ err.textContent = "Pour continuer, " + problems.join(", ") + "."; out.innerHTML = ""; return null; }
   err.textContent = "";
   const clean = s => String(s).replace(/`/g, "'").trim();
-  const payload = {v:1, n:clean(d.n), t:d.t, lv:d.lv, min, p:clean(d.p).slice(0, 3), kcal: parseInt(d.kcal, 10) > 0 ? parseInt(d.kcal, 10) : null, auteur:clean(d.auteur),
+  return {v:1, n:clean(d.n), t:d.t, lv:d.lv, min, p:clean(d.p).slice(0, 3), kcal: parseInt(d.kcal, 10) > 0 ? parseInt(d.kcal, 10) : null, auteur:clean(d.auteur),
     ing: ing.map(x => { const o = {nom:clean(x.nom), g:parseNum(x.g), mode:x.mode}; if (x.mode === "base") o.ref = x.ref; if (x.mode === "prot"){ o.prot = parseNum(x.prot); o.lait = x.lait; } if (x.mode === "phe") o.phe100 = parseNum(x.phe100); return o; }),
     et: steps.map(clean)};
+}
+/* recette personnelle, enregistrée sur le téléphone (db.mesRecettes, incluse dans la sauvegarde) */
+function recipeFromPayload(y, id, date){
+  const det = y.ing.map(x => { const v = ingPhe(x); return {txt:`${fmt(x.g)} g ${x.nom}` + (x.mode === "base" ? "" : ` (${ING_MODES.find(m => m[0] === x.mode)[1].toLowerCase()})`), parts: isNaN(v) ? null : Math.round(v / PART_MG * 100) / 100}; });
+  const tot = y.ing.reduce((s, x) => s + (ingPhe(x) || 0), 0);
+  return {id, src:"perso", n:y.n, t:y.t, lv:y.lv, min:y.min, p:y.p, kcal:y.kcal, ing:det.map(x => x.txt), ingDetail:det, k:[], et:y.et,
+    phe:Math.round(tot), parts:fmt(Math.round(tot / PART_MG * 10) / 10, 1), auteur:y.auteur, date, payload:y};
+}
+function saveRecipe(){
+  const y = draftPayload(); if (!y) return;
+  const list = mesRecettes(), old = draft.editId && list.find(r => r.id === draft.editId);
+  const r = recipeFromPayload(y, old ? old.id : "m-" + uid(), old ? old.date : todayISO());
+  if (old){ r.maj = todayISO(); list[list.indexOf(old)] = r; } else list.unshift(r);
+  save(); draft = emptyDraft(); saveDraft(); closeSheet();
+  ui.recipe = r.id; render(); window.scrollTo(0, 0); toast(old ? "Recette mise à jour" : "Recette enregistrée sur ce téléphone");
+}
+function propReady(){
+  const d = draft, err = document.getElementById("propErr"), out = document.getElementById("propSend");
+  const payload = draftPayload(); if (!payload) return;
+  const clean = s => String(s).replace(/`/g, "'").trim();
+  const ing = payload.ing, steps = payload.et, min = payload.min;
   const tot = ing.reduce((s, x) => s + ingPhe(x), 0);
   const body = `<!-- phecompte-recette v1 -->
 ### ${payload.n}
@@ -1271,7 +1303,7 @@ function openProfile(isNew){
 function openBackup(){
   const data = JSON.stringify({app:"PhéCompte", version:1, exportedAt:new Date().toISOString(), ...db});
   sheet("Exporter une sauvegarde", `
-    <p class="small muted" style="margin:0">Ce fichier contient tous les profils, repas et résultats. Gardez-le en lieu sûr : il contient des données de santé.</p>
+    <p class="small muted" style="margin:0">Ce fichier contient tous les profils, repas, résultats et vos recettes. Gardez-le en lieu sûr : il contient des données de santé.</p>
     ${framed ? "" : `<button class="btn primary block" id="bShare">Partager ou enregistrer le fichier</button>`}
     <button class="btn block" id="bCopy">Copier le contenu</button>
     <textarea id="bText" readonly aria-label="Sauvegarde">${esc(data)}</textarea>`, b => {
@@ -1283,7 +1315,9 @@ function restore(text){
   try {
     const d = JSON.parse(text);
     if (!Array.isArray(d.profiles) || !d.profiles.length || !d.profiles.every(p => p.id && (p.repas || p.days) && Array.isArray(p.analyses))) throw 0;
-    db = {profiles:d.profiles, current:d.profiles.some(p => p.id === d.current) ? d.current : d.profiles[0].id};
+    const keep = mesRecettes(), imp = Array.isArray(d.mesRecettes) ? d.mesRecettes.filter(r => r && r.id && r.payload) : [];
+    db = {profiles:d.profiles, current:d.profiles.some(p => p.id === d.current) ? d.current : d.profiles[0].id, seenAgeps: !!(d.seenAgeps || db.seenAgeps),
+      mesRecettes:[...imp, ...keep.filter(r => !imp.some(x => x.id === r.id))]};
     db.profiles.forEach(migrate);
     save(); render(); toast(`${db.profiles.length} profil${db.profiles.length > 1 ? "s" : ""} restauré${db.profiles.length > 1 ? "s" : ""}`);
   } catch(e){ toast("Ce fichier n'est pas une sauvegarde PhéCompte valide"); }
@@ -1348,6 +1382,11 @@ document.addEventListener("click", e => {
     case "recipe": ui.recipe = rid(t.dataset.id); render(); window.scrollTo(0, 0); break;
     case "recBack": ui.recipe = null; render(); break;
     case "propose": openPropose(); break;
+    case "newRecipe": if (draft.editId) draft = emptyDraft(); openPropose(); break;
+    case "saveRecipe": saveRecipe(); break;
+    case "editRecipe": { const r = mesRecettes().find(x => x.id === t.dataset.id); if (r){ draft = draftFrom(r); saveDraft(); openPropose(); } break; }
+    case "shareRecipe": { const r = mesRecettes().find(x => x.id === t.dataset.id); if (r){ draft = draftFrom(r); saveDraft(); openPropose(); propReady(); setTimeout(() => { const s = document.getElementById("propSend"); if (s) s.scrollIntoView({block:"center"}); }, 50); } break; }
+    case "delRecipe": armed(t, "Confirmer la suppression", () => { const id = t.dataset.id; db.mesRecettes = mesRecettes().filter(x => x.id !== id); db.profiles.forEach(pp => pp.favoris = pp.favoris.filter(f => f !== id)); ui.recipe = null; save(); render(); toast("Recette supprimée"); }); break;
     case "ingAdd": draft.ing.push(blankIng()); saveDraft(); redrawIngs(); document.getElementById("propSend").innerHTML = ""; break;
     case "ingDel": draft.ing.splice(+t.dataset.i, 1); if (!draft.ing.length) draft.ing.push(blankIng()); saveDraft(); redrawIngs(); document.getElementById("propSend").innerHTML = ""; break;
     case "propReady": propReady(); break;
