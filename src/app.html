@@ -136,6 +136,8 @@ table.ref td:first-child,table.ref th:first-child{text-align:left}
 .banner .btn{min-height:38px;padding:7px 12px;background:var(--sun-ink);color:var(--sun);border:0}
 details summary{cursor:pointer;font-weight:700}
 .small{font-size:.85rem}
+input,select,textarea{min-width:0;max-width:100%}.row>.f{min-width:0}.sheet-b{overflow-x:hidden}
+.find{gap:8px}.find a,.card a:not(.btn){color:var(--accent)}.find.old{opacity:.7}
 .card.info{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 35%,var(--line));box-shadow:none}
 .daynav{display:flex;align-items:center;gap:6px;padding:8px;grid-template-columns:none}
 .daynav .pick{position:relative;display:grid;text-align:center;line-height:1.25;padding-block:4px}
@@ -183,6 +185,7 @@ const ICONS = {
   suivi:'<path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/>',
   recettes:'<path d="M6 13.9a4 4 0 1 1 2.9-6.6 5 5 0 0 1 9.3 2A3.5 3.5 0 0 1 18 16H6z"/><path d="M6 16v4h12v-4"/>',
   convertir:'<path d="M7 7h12l-3-3M17 17H5l3 3"/>',
+  trouvailles:'<path d="M3 9l1.5-5h15L21 9"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/><path d="M3 9h18"/>',
   profil:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
   close:'<path d="M18 6 6 18M6 6l12 12"/>',
   plus:'<path d="M12 5v14M5 12h14"/>',
@@ -192,7 +195,7 @@ const ICONS = {
   repeat:'<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>',
   trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'
 };
-const TABS = [["repas","Repas"],["suivi","Suivi"],["recettes","Recettes"],["convertir","Convertir"],["profil","Profil"]];
+const TABS = [["repas","Repas"],["suivi","Suivi"],["recettes","Recettes"],["trouvailles","Trouvailles"],["profil","Profil"]];
 const icon = (n, cls="i") => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt = (n, d=2) => Number(n).toLocaleString("fr-FR", {maximumFractionDigits:d});
@@ -340,7 +343,7 @@ function status(p, mg){
 const ui = {tab:"repas", meal:"pdj", range:"6m", recType:"Tout", recQ:"", recIng:[], recipe:null, addCat:"F", search:"", day:todayISO(), follow:true, cal:todayISO().slice(0, 7)};
 document.addEventListener("visibilitychange", () => { if (!document.hidden && ui.follow && ui.day !== todayISO()){ ui.day = todayISO(); render(); } });
 const hashTabs = TABS.map(t => t[0]);
-function route(){ const h = location.hash.slice(1); ui.tab = hashTabs.includes(h) ? h : "repas"; render(); }
+function route(){ const h = location.hash.slice(1); ui.tab = h === "convertir" ? "suivi" : hashTabs.includes(h) ? h : "repas"; render(); }
 window.addEventListener("hashchange", route);
 window.addEventListener("resize", () => { if (ui.tab === "suivi") drawChart(); });
 
@@ -363,13 +366,13 @@ function render(){
   const av = document.getElementById("hdrAvatar");
   av.innerHTML = p.photo ? `<img src="${esc(p.photo)}" alt="">` : esc(initials(p));
   av.setAttribute("aria-label", "Profil de " + p.prenom);
-  const titles = {repas:["Parts de Phé", "Calcul de la journée"], suivi:["Suivi sanguin", "Taux de phénylalanine"], recettes:["Recettes","Pauvres en protéines"], convertir:["Convertir","mg/dL ⇄ µmol/L"], profil:["Profil", p.prenom + (p.nom ? " " + p.nom : "")]};
+  const titles = {repas:["Parts de Phé", "Calcul de la journée"], suivi:["Suivi sanguin", "Taux de phénylalanine"], recettes:["Recettes","Pauvres en protéines"], trouvailles:["Trouvailles","Où trouver les produits hypoprotéinés"], profil:["Profil", p.prenom + (p.nom ? " " + p.nom : "")]};
   const [t, s] = titles[ui.tab];
   document.getElementById("title").innerHTML = `${esc(t)}<small>${esc(s)}</small>`;
   const v = document.getElementById("view");
-  v.innerHTML = banners(p) + ({repas:viewRepas, suivi:viewSuivi, recettes:viewRecettes, convertir:viewConvertir, profil:viewProfil}[ui.tab])(p);
+  v.innerHTML = banners(p) + ({repas:viewRepas, suivi:viewSuivi, recettes:viewRecettes, trouvailles:viewTrouvailles, profil:viewProfil}[ui.tab])(p);
   if (ui.tab === "suivi") drawChart();
-  if (ui.tab === "convertir") bindConv();
+  if (ui.tab === "suivi") bindConv();
 }
 function banners(p){
   let h = "";
@@ -696,7 +699,8 @@ function viewSuivi(p){
       <span class="dot ${s ? (s[0]==="st-in" ? "d0" : s[0]==="st-hi" ? "d2" : "d1") : ""}"></span>
       <span class="grow"><span class="t num">${frDate(a.date)}</span>${a.note ? `<br><span class="s">${esc(a.note)}</span>` : ""}${notesBefore(p, a.date).map(([i, n]) => `<br><span class="s" style="color:var(--mid)">Note du ${frDate(i).slice(0, 5)} : ${esc(n)}</span>`).join("")}</span>
       <span class="parts num">${fmtVal(a.mg, u)}<small>${unitLabel(u)}</small></span></button>`; }).join("") : `<div class="empty">Ajoutez le résultat de votre dernière prise de sang pour commencer le suivi.</div>`}
-  </div></section>`;
+  </div></section>
+  ${viewConvertir()}`;
 }
 function drawChart(){
   const el = document.getElementById("chart"); if (!el) return;
@@ -1262,23 +1266,213 @@ ${JSON.stringify(payload, null, 1)}
   const title = "[Recette] " + payload.n;
   const full = `https://github.com/${REPO}/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
   const tooLong = full.length > 7500;
-  out.innerHTML = `<div class="card" style="gap:10px">
+  out.innerHTML = (API ? `<div class="card" style="gap:10px"><b>Envoi anonyme, sans compte</b>
+    <span class="small">La recette est transmise sans nom ni adresse. Elle apparaîtra dans l'application après vérification par une diététicienne.</span>
+    <div id="anonTs" hidden></div><div id="anonErr" class="err" role="alert"></div>
+    <button class="btn primary block" data-act="sendAnon">Envoyer anonymement</button></div>
+    <details class="small"><summary>Ou via un compte GitHub</summary>` : "") + `<div class="card" style="gap:10px">
     <b>Dernière étape</b>
     <span class="small">${tooLong ? "La recette est longue : copiez le texte ci-dessous, puis ouvrez GitHub et collez-le dans la description avant de cliquer sur « Create » / « Submit new issue »." : "GitHub va s'ouvrir avec la recette déjà remplie. Connectez-vous si besoin puis cliquez sur « Create » (ou « Submit new issue »). Elle apparaîtra dans l'application après validation par une diététicienne."}</span>
     <a class="btn primary block" href="${esc(tooLong ? `https://github.com/${REPO}/issues/new?title=${encodeURIComponent(title)}` : full)}" target="_blank" rel="noopener" data-act="propSent">Ouvrir GitHub</a>
     <button class="btn block" data-act="propCopy">Copier le texte de la recette</button>
-    <textarea id="propText" readonly aria-label="Texte de la recette">${esc(body)}</textarea></div>`;
+    <textarea id="propText" readonly aria-label="Texte de la recette">${esc(body)}</textarea></div>` + (API ? "</details>" : "");
+}
+
+/* ---------- Service en ligne (Cloudflare) : trouvailles et recettes anonymes ---------- */
+const API = "";                 // adresse du service, ex. https://phecompte-api.xxx.workers.dev
+const TURNSTILE_SITEKEY = "";   // clé publique Turnstile (anti-robot)
+const FIND_TYPES = ["Pâtes, riz, semoule", "Pain, biscottes", "Biscuits, gâteaux", "Farines, préparations", "Desserts", "Boissons, substituts de lait", "Plats", "Autre"];
+const CAT_TO_TYPE = {"Pâtes, riz, semoule":"Pâtes, riz, semoule", "Pain":"Pain, biscottes", "Biscuits et apéritif":"Biscuits, gâteaux", "Desserts et gâteaux":"Desserts", "Farines et préparations":"Farines, préparations", "Boissons et substituts de lait":"Boissons, substituts de lait", "Plats":"Plats", "Céréales du petit déjeuner":"Autre"};
+let FINDS = null, findsState = "";
+try { const c = JSON.parse(localStorage.getItem("phecompte.finds") || "null"); if (c && Array.isArray(c.list)) { FINDS = c.list; findsState = "cache:" + c.at; } } catch(e){}
+const findF = {q:"", ou:"Tout", type:""};
+async function api(path, opts){
+  const r = await fetch(API + path, {...opts, headers:{"Content-Type":"application/json"}});
+  const d = await r.json().catch(() => ({ok:false, error:"Réponse illisible du service."}));
+  if (!r.ok || !d.ok) throw new Error(d.error || "Le service n'a pas répondu.");
+  return d;
+}
+function loadFinds(force){
+  if (!API) return;
+  if (!force && findsState === "loading") return;
+  findsState = "loading";
+  api("/trouvailles").then(d => {
+    FINDS = d.trouvailles; findsState = "ok";
+    try { localStorage.setItem("phecompte.finds", JSON.stringify({at:new Date().toISOString(), list:FINDS})); } catch(e){}
+  }).catch(() => { findsState = FINDS ? "offline" : "error"; }).finally(() => { if (ui.tab === "trouvailles" && !document.getElementById("sheetRoot").innerHTML) render(); });
+}
+/* Turnstile : script chargé à la demande ; le widget n'apparaît que si une vérification est nécessaire */
+let tsLoading;
+function turnstileReady(){
+  if (window.turnstile) return Promise.resolve();
+  if (!tsLoading) tsLoading = new Promise((res, rej) => { const s = document.createElement("script"); s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"; s.onload = () => res(); s.onerror = () => rej(new Error("Vérification anti-robot indisponible (connexion ?).")); document.head.appendChild(s); });
+  return tsLoading;
+}
+async function turnstileToken(el){
+  if (!TURNSTILE_SITEKEY) return "dev";
+  await turnstileReady();
+  return new Promise((res, rej) => {
+    el.innerHTML = ""; el.hidden = false;
+    window.turnstile.render(el, {sitekey:TURNSTILE_SITEKEY, language:"fr", appearance:"interaction-only", callback:t => res(t), "error-callback":() => rej(new Error("Vérification anti-robot échouée : réessayez.")), "expired-callback":() => rej(new Error("Vérification expirée : réessayez."))});
+  });
+}
+const votedKey = () => "phecompte.avis." + todayISO();
+function voted(){ try { return JSON.parse(localStorage.getItem(votedKey()) || "{}"); } catch(e){ return {}; } }
+function viewTrouvailles(p){
+  if (!API) return `<section class="card"><b>Trouvailles : bientôt disponible</b><span class="small muted">Le partage des magasins où trouver des produits hypoprotéinés sera activé dès que le service en ligne sera en place.</span></section>`;
+  if (FINDS === null && findsState !== "error") loadFinds();
+  if (findsState === "" || (findsState.startsWith("cache") && navigator.onLine)) loadFinds();
+  const q = findF.q.trim().toLowerCase(), v = voted();
+  const list = (FINDS || []).filter(x => (findF.ou === "Tout" || (findF.ou === "Magasins" ? x.ou === "magasin" : x.ou === "web")) && (!findF.type || x.type === findF.type)
+    && (!q || [x.product, x.brand, x.store, x.city, x.cp].join(" ").toLowerCase().includes(q)));
+  const row = x => {
+    const old = x.gone > 0 && x.gone >= x.seen;
+    return `<article class="card find${old ? " old" : ""}">
+      <div class="row" style="flex-wrap:nowrap;align-items:flex-start"><div class="grow"><b>${esc(x.product)}</b><div class="small muted">${[x.brand, x.type].filter(Boolean).map(esc).join(" · ")}</div></div>${old ? `<span class="status st-lo">Peut-être plus disponible</span>` : ""}</div>
+      <div class="small">${x.ou === "web" ? `Sur le web : <a href="${esc(x.url)}" target="_blank" rel="noopener nofollow">${esc(x.store || x.url)}</a>` : `En magasin : <b>${esc(x.store)}</b>, ${esc(x.city)}${x.cp ? " (" + esc(x.cp) + ")" : ""}`}</div>
+      <div class="small num">${fmt(x.prot)} g de protéines${x.kcal != null ? ` · ${fmt(x.kcal, 0)} kcal` : ""} pour 100 g${x.weight_g ? ` · paquet de ${fmt(x.weight_g, 0)} g` : ""}${x.price != null ? ` · ${Number(x.price).toLocaleString("fr-FR", {minimumFractionDigits:2, maximumFractionDigits:2})} €` : ""}</div>
+      ${x.note ? `<div class="small muted">« ${esc(x.note)} »</div>` : ""}
+      <div class="small muted">Vu le ${frDate(x.last_seen.slice(0, 10))} · confirmé ${x.seen} fois${x.gone ? ` · plus disponible signalé ${x.gone} fois` : ""}</div>
+      <div class="row" style="gap:6px">
+        <button class="btn" data-act="findVote" data-id="${x.id}" data-k="vu" ${v[x.id] ? "disabled" : ""} style="min-height:38px;padding:6px 10px">Je l'ai vu aussi</button>
+        <button class="btn" data-act="findVote" data-id="${x.id}" data-k="absent" ${v[x.id] ? "disabled" : ""} style="min-height:38px;padding:6px 10px">Plus disponible</button>
+        <button class="btn ghost" data-act="findAdd" data-id="${x.id}" style="min-height:38px">${icon("plus")}Mes aliments</button>
+      </div></article>`;
+  };
+  return `<section class="card info"><div class="small">Partagez les magasins et sites où vous trouvez des produits hypoprotéinés. <b>Anonyme, sans compte.</b> Les valeurs sont celles des étiquettes : chaque famille fait son calcul.</div>
+    <button class="btn primary block" data-act="findNew">${icon("plus")}Signaler une trouvaille</button></section>
+  <input type="search" id="findQ" placeholder="Produit, marque, magasin, ville ou code postal" value="${esc(findF.q)}" autocomplete="off">
+  <div class="chips">${["Tout","Magasins","Web"].map(k => `<button class="chip" data-act="findOu" data-k="${k}" aria-pressed="${findF.ou === k}">${k}</button>`).join("")}</div>
+    <select id="findType" aria-label="Type de produit"><option value="">Tous types de produits</option>${FIND_TYPES.map(t => `<option ${findF.type === t ? "selected" : ""}>${t}</option>`).join("")}</select></div>
+  ${findsState === "offline" || findsState.startsWith("cache") ? `<div class="small muted">Hors connexion : dernière liste enregistrée sur le téléphone.</div>` : ""}
+  ${findsState === "error" ? `<div class="warn small">Impossible de charger les trouvailles. Vérifiez la connexion. <button class="btn ghost" data-act="findReload" style="min-height:0;padding:0 4px">Réessayer</button></div>` : ""}
+  ${FINDS === null && findsState === "loading" ? `<div class="empty">Chargement…</div>` : list.length ? list.map(row).join("") : FINDS ? `<div class="empty">${FINDS.length ? "Aucune trouvaille ne correspond." : "Aucune trouvaille pour l'instant. Soyez le premier à en signaler une !"}</div>` : ""}`;
+}
+function openFindNew(){
+  const scan = "BarcodeDetector" in window && navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
+  let ou = "magasin";
+  sheet("Signaler une trouvaille", `
+    <p class="small muted" style="margin:0">Aucune information personnelle n'est demandée. Indiquez les valeurs de l'étiquette.</p>
+    <div class="f"><span>Code-barres (facultatif)</span><div class="row" style="flex-wrap:nowrap"><input type="text" id="nEan" inputmode="numeric" maxlength="14" placeholder="Ex. : 3551100163661" class="grow">
+      ${scan ? `<button class="btn" type="button" id="nScan">Scanner</button>` : ""}<button class="btn" type="button" id="nOff">Rechercher</button></div></div>
+    <video id="nVid" playsinline muted hidden style="width:100%;border-radius:12px;background:#000"></video>
+    <div id="nOffMsg" class="small muted"></div>
+    <label class="f">Ou choisir dans le catalogue<select id="nCata"><option value="">—</option>${HYPO_FOODS.filter(f => !isSub(f)).map(f => `<option value="${f.ref}">${esc(f.n)}</option>`).join("")}</select></label>
+    <label class="f">Produit<input type="text" id="nProd" maxlength="80" placeholder="Ex. : pâtes alphabets"></label>
+    <div class="row" style="flex-wrap:nowrap"><label class="f grow">Marque<input type="text" id="nBrand" maxlength="60"></label><label class="f grow">Type<select id="nType">${FIND_TYPES.map(t => `<option>${t}</option>`).join("")}</select></label></div>
+    <div class="row" style="flex-wrap:nowrap"><label class="f grow">Protéines /100 g<input type="text" id="nProt" inputmode="decimal" placeholder="Ex. : 0,4"></label><label class="f grow">kcal /100 g<input type="text" id="nKcal" inputmode="decimal"></label><label class="f grow">Paquet (g)<input type="text" id="nWeight" inputmode="decimal"></label></div>
+    <div class="f"><span>Où l'avez-vous trouvé ?</span><div class="seg" role="group"><button type="button" data-ou="magasin" aria-pressed="true">En magasin</button><button type="button" data-ou="web" aria-pressed="false">Sur le web</button></div></div>
+    <div id="nMag" style="display:grid;gap:10px"><label class="f">Magasin<input type="text" id="nStore" maxlength="60" placeholder="Ex. : Biocoop, pharmacie du Centre"></label>
+      <div class="row" style="flex-wrap:nowrap"><label class="f grow">Ville<input type="text" id="nCity" maxlength="60"></label><label class="f" style="width:120px">Code postal<input type="text" id="nCp" inputmode="numeric" maxlength="5"></label></div></div>
+    <label class="f" id="nWeb" hidden>Lien du site<input type="url" id="nUrl" placeholder="https://…"></label>
+    <div class="row" style="flex-wrap:nowrap"><label class="f" style="width:120px">Prix (€)<input type="text" id="nPrice" inputmode="decimal"></label><label class="f grow">Remarque<input type="text" id="nNote" maxlength="200" placeholder="Ex. : rayon sans gluten"></label></div>
+    <div id="nTs" hidden></div>
+    <div id="nErr" class="err" role="alert"></div>
+    <button class="btn primary block" id="nSend">Partager la trouvaille</button>`, b => {
+      const $ = id => b.querySelector("#" + id), set = (id, v) => { if (v != null && v !== "") $(id).value = typeof v === "number" ? dec(v) : v; };
+      b.querySelectorAll("[data-ou]").forEach(x => x.addEventListener("click", () => { ou = x.dataset.ou; b.querySelectorAll("[data-ou]").forEach(y => y.setAttribute("aria-pressed", y.dataset.ou === ou)); $("nMag").hidden = ou !== "magasin"; $("nWeb").hidden = ou !== "web"; }));
+      $("nCata").addEventListener("change", () => { const f = FOOD.get($("nCata").value); if (!f) return; set("nProd", f.n); set("nBrand", f.marque); set("nProt", f.prot); set("nKcal", f.kcal); $("nType").value = CAT_TO_TYPE[f.cat] || "Autre"; });
+      const off = async () => {
+        const ean = $("nEan").value.replace(/\D/g, ""), msg = $("nOffMsg");
+        if (ean.length < 8){ msg.textContent = "Saisissez le code-barres (8 à 14 chiffres)."; return; }
+        msg.textContent = "Recherche sur Open Food Facts…";
+        try {
+          const r = await fetch(`https://world.openfoodfacts.org/api/v2/product/${ean}.json?fields=product_name,product_name_fr,brands,quantity,nutriments`);
+          const d = await r.json(); if (d.status !== 1 || !d.product) throw 0;
+          const pr = d.product, nu = pr.nutriments || {};
+          set("nProd", pr.product_name_fr || pr.product_name); set("nBrand", (pr.brands || "").split(",")[0].trim());
+          set("nProt", nu.proteins_100g); set("nKcal", nu["energy-kcal_100g"]);
+          const qm = String(pr.quantity || "").match(/([\d.,]+)\s*(g|kg)\b/i); if (qm) set("nWeight", parseNum(qm[1]) * (qm[2].toLowerCase() === "kg" ? 1000 : 1));
+          msg.textContent = "Trouvé sur Open Food Facts : vérifiez les valeurs avec l'étiquette.";
+        } catch(e){ msg.textContent = "Produit inconnu d'Open Food Facts : remplissez les champs depuis l'étiquette."; }
+      };
+      $("nOff").addEventListener("click", off);
+      const sc = $("nScan");
+      if (sc) sc.addEventListener("click", async () => {
+        const vid = $("nVid"), msg = $("nOffMsg");
+        try {
+          const st = await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}}); vid.srcObject = st; vid.hidden = false; await vid.play();
+          const det = new window.BarcodeDetector({formats:["ean_13","ean_8","upc_a","upc_e"]}); msg.textContent = "Visez le code-barres…";
+          const stop = () => { st.getTracks().forEach(t => t.stop()); vid.hidden = true; };
+          const t0 = Date.now();
+          const loop = async () => {
+            if (!vid.isConnected){ stop(); return; }
+            const c = await det.detect(vid).catch(() => []);
+            if (c.length){ stop(); $("nEan").value = c[0].rawValue; off(); return; }
+            if (Date.now() - t0 > 30000){ stop(); msg.textContent = "Code-barres non lu : saisissez-le à la main."; return; }
+            requestAnimationFrame(loop);
+          };
+          loop();
+        } catch(e){ msg.textContent = "Caméra indisponible : saisissez le code-barres à la main."; }
+      });
+      $("nSend").addEventListener("click", async () => {
+        const btn = $("nSend"), err = $("nErr");
+        const item = {ean:$("nEan").value.replace(/\D/g, ""), product:$("nProd").value, brand:$("nBrand").value, type:$("nType").value, prot:parseNum($("nProt").value), kcal:parseNum($("nKcal").value), weight_g:parseNum($("nWeight").value),
+          ou, store:$("nStore").value, city:$("nCity").value, cp:$("nCp").value.trim(), url:$("nUrl").value.trim(), price:parseNum($("nPrice").value), note:$("nNote").value};
+        ["prot","kcal","weight_g","price"].forEach(k => { if (isNaN(item[k])) item[k] = null; });
+        const miss = [];
+        if (item.product.trim().length < 2) miss.push("le produit"); if (item.prot == null) miss.push("les protéines pour 100 g");
+        if (ou === "magasin" && (item.store.trim().length < 2 || item.city.trim().length < 2)) miss.push("le magasin et la ville");
+        if (ou === "web" && !/^https?:\/\//i.test(item.url)) miss.push("le lien du site (https://…)");
+        if (miss.length){ err.textContent = "À compléter : " + miss.join(", ") + "."; return; }
+        err.textContent = ""; btn.disabled = true; btn.textContent = "Envoi…";
+        try {
+          const token = await turnstileToken($("nTs"));
+          await api("/trouvailles", {method:"POST", body:JSON.stringify({token, item})});
+          closeSheet(); toast("Merci ! Trouvaille partagée"); loadFinds(true);
+        } catch(e){ err.textContent = e.message; btn.disabled = false; btn.textContent = "Partager la trouvaille"; }
+      });
+    });
+}
+function openFindAdd(id){
+  const x = (FINDS || []).find(f => f.id === id); if (!x) return;
+  sheet("Ajouter à mes aliments", `
+    <div><b>${esc(x.product)}</b><div class="small muted num">${fmt(x.prot)} g de protéines${x.kcal != null ? ` · ${fmt(x.kcal, 0)} kcal` : ""} pour 100 g</div></div>
+    <p class="small" style="margin:0">Comment compter ce produit dans vos repas ?</p>
+    <div class="list">
+      <button class="item" data-mode="H"><span class="cat H">Hyp</span><span class="grow"><span class="t">Produit hypoprotéiné</span><br><span class="s">Aucune part comptée (consigne AGEPS), grammes et calories enregistrés</span></span></button>
+      <button class="item" data-mode="1"><span class="cat C">Emb</span><span class="grow"><span class="t">Produit du commerce avec lait ou céréales</span><br><span class="s">Parts calculées à partir des protéines (50 mg de Phé par g)</span></span></button>
+      <button class="item" data-mode="0"><span class="cat C">Emb</span><span class="grow"><span class="t">Produit du commerce sans lait ni céréales</span><br><span class="s">Parts calculées à partir des protéines (32 ou 38 mg de Phé par g)</span></span></button>
+    </div>`, b => b.querySelectorAll("[data-mode]").forEach(el => el.addEventListener("click", () => {
+      const p = P(), m = el.dataset.mode, ref = "c" + uid(), name = x.product + (x.brand ? " (" + x.brand + ")" : "");
+      let c;
+      if (m === "H") c = {ref, n:name, c:"H", w:null};
+      else { const lait = m === "1", pr = x.prot; if (!lait && pr > 5 || lait && pr > 12){ toast("Protéines trop élevées pour ce calcul : vérifiez le type"); return; }
+        const w = pr > 0 ? Math.round(100 * (lait ? 200 / (5 * pr) : pr < 0.8 ? 200 / (3.2 * pr) : 200 / (3.8 * pr))) / 100 : null; c = {ref, n:name, w, c:"C", lait, prot:pr}; }
+      if (x.kcal != null) c.kcal = x.kcal;
+      p.custom.push(c); save(); closeSheet(); toast("Ajouté à Mes aliments");
+    })));
+}
+async function findVote(btn){
+  const id = btn.dataset.id, k = btn.dataset.k;
+  btn.closest(".row").querySelectorAll("[data-act=findVote]").forEach(b => b.disabled = true);
+  try {
+    await api(`/trouvailles/${id}/avis`, {method:"POST", body:JSON.stringify({kind:k})});
+    const v = voted(); v[id] = k; try { localStorage.setItem(votedKey(), JSON.stringify(v)); } catch(e){}
+    const x = (FINDS || []).find(f => f.id === id); if (x){ if (k === "vu"){ x.seen++; x.last_seen = new Date().toISOString(); } else x.gone++; }
+    render(); toast(k === "vu" ? "Merci, confirmation enregistrée" : "Merci, signalement enregistré");
+  } catch(e){ toast(e.message); btn.closest(".row").querySelectorAll("[data-act=findVote]").forEach(b => b.disabled = false); }
+}
+async function sendRecipeAnon(btn){
+  const payload = draftPayload(); if (!payload) return;
+  const err = document.getElementById("anonErr");
+  btn.disabled = true; btn.textContent = "Envoi…";
+  try {
+    const token = await turnstileToken(document.getElementById("anonTs"));
+    const d = await api("/recettes", {method:"POST", body:JSON.stringify({token, recette:payload})});
+    document.getElementById("propSend").innerHTML = `<div class="note small"><b>Merci, la recette est envoyée</b> (n° ${d.numero}). Elle apparaîtra dans l'application après vérification par une diététicienne.</div>`;
+  } catch(e){ err.textContent = e.message; btn.disabled = false; btn.textContent = "Envoyer anonymement"; }
 }
 
 /* ---------- Convertir ---------- */
 function viewConvertir(){
   const rows = [2, 4, 6, 8, 10, 15, 20].map(v => `<tr><td>${fmt(v)} mg/dL</td><td>${fmt(Math.round(v * UMOL))} µmol/L</td></tr>`).join("");
-  return `<section class="card">
+  return `<section class="card"><div class="label">Convertir mg/dL ⇄ µmol/L</div>
     <div class="conv"><label class="f">mg/dL<input type="text" id="cMg" inputmode="decimal" value="4"></label><span class="eq">=</span><label class="f">µmol/L<input type="text" id="cUm" inputmode="decimal" value="${fmt(4 * UMOL)}"></label></div>
     <div class="small muted">1 mg/dL (ou mg/100 mL) = ${fmt(UMOL)} µmol/L, d'après la masse molaire de la phénylalanine (165,19 g/mol).</div>
   </section>
-  <section class="card"><div class="label">Repères</div><div style="overflow-x:auto"><table class="ref"><thead><tr><th>mg/dL</th><th>µmol/L</th></tr></thead><tbody>${rows}</tbody></table></div></section>
-  <section class="card"><div class="label">Les parts</div><p style="margin:0">1 part de Phé = ${PART_MG} mg de phénylalanine. Le nombre de parts autorisé par jour est fixé par l'équipe médicale.</p></section>`;
+    <details><summary class="small">Repères</summary><div style="overflow-x:auto"><table class="ref"><thead><tr><th>mg/dL</th><th>µmol/L</th></tr></thead><tbody>${rows}</tbody></table></div></details>
+  </section>`;
 }
 function bindConv(){
   const a = document.getElementById("cMg"), b = document.getElementById("cUm");
@@ -1394,6 +1588,12 @@ document.addEventListener("click", e => {
     case "meal": ui.meal = t.dataset.m; render(); break;
     case "addFood": ui.search = ""; openAddFood(); break;
     case "useRecipe": openUseRecipe(); break;
+    case "findNew": openFindNew(); break;
+    case "findAdd": openFindAdd(t.dataset.id); break;
+    case "findVote": findVote(t); break;
+    case "findOu": findF.ou = t.dataset.k; render(); break;
+    case "findReload": loadFinds(true); break;
+    case "sendAnon": sendRecipeAnon(t); break;
     case "addCat": ui.addCat = t.dataset.c; ui.search = ""; openAddFood.draw(); break;
     case "pickFood": openWeight(t.dataset.ref); break;
     case "editItem": openWeight(dayData(p, ui.day).repas[ui.meal][+t.dataset.i].ref, +t.dataset.i); break;
@@ -1471,9 +1671,11 @@ document.addEventListener("input", e => {
     const d = dayData(P(), ui.day, true); d.note = e.target.value; clearTimeout(noteTimer);
     noteTimer = setTimeout(() => { save(); const s = document.getElementById("noteSaved"); if (s){ s.textContent = "Enregistré"; setTimeout(() => { if (s.isConnected) s.textContent = ""; }, 1500); } }, 400);
   }
+  if (e.target.id === "findQ"){ findF.q = e.target.value; const pos = e.target.selectionStart; render(); const n = document.getElementById("findQ"); n.focus(); n.setSelectionRange(pos, pos); }
   if (e.target.id === "recQ"){ ui.recQ = e.target.value; const pos = e.target.selectionStart; render(); const n = document.getElementById("recQ"); n.focus(); n.setSelectionRange(pos, pos); }
 });
 document.addEventListener("change", e => {
+  if (e.target.id === "findType"){ findF.type = e.target.value; render(); }
   if (e.target.id === "dayPick" && e.target.value){ ui.day = e.target.value > todayISO() ? todayISO() : e.target.value; ui.follow = isToday(ui.day); render(); }
   if (e.target.id === "restoreFile" && e.target.files[0]){ const r = new FileReader(); r.onload = () => restore(r.result); r.readAsText(e.target.files[0]); }
 });

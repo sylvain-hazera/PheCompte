@@ -1,0 +1,52 @@
+name: Déployer le service Cloudflare
+# Déploie worker/ (recettes anonymes et trouvailles) sur Cloudflare Workers + D1.
+# Secrets GitHub nécessaires : CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, TURNSTILE_SECRET, ISSUES_TOKEN, ADMIN_TOKEN
+on:
+  push:
+    branches: [main]
+    paths: ["worker/**", ".github/workflows/worker.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: worker
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: worker
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      WRANGLER_SEND_METRICS: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Vérifier les secrets
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error::Secret CLOUDFLARE_API_TOKEN manquant"; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "::error::Secret CLOUDFLARE_ACCOUNT_ID manquant"; exit 1; }
+      - name: Base D1 (création si besoin)
+        run: |
+          W="npx --yes wrangler@3.112.0"
+          ID=$($W d1 list --json | jq -r '.[] | select(.name=="phecompte") | .uuid')
+          if [ -z "$ID" ]; then $W d1 create phecompte; ID=$($W d1 list --json | jq -r '.[] | select(.name=="phecompte") | .uuid'); fi
+          test -n "$ID" || { echo "::error::Base D1 introuvable"; exit 1; }
+          sed -i "s/__D1_ID__/$ID/" wrangler.toml
+          $W d1 execute phecompte --remote --file=schema.sql
+      - name: Déployer
+        run: npx --yes wrangler@3.112.0 deploy
+      - name: Secrets du service
+        env:
+          TURNSTILE_SECRET: ${{ secrets.TURNSTILE_SECRET }}
+          ISSUES_TOKEN: ${{ secrets.ISSUES_TOKEN }}
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+        run: |
+          for S in TURNSTILE_SECRET ISSUES_TOKEN ADMIN_TOKEN; do
+            V="${!S}"
+            if [ -n "$V" ]; then printf '%s' "$V" | npx --yes wrangler@3.112.0 secret put "$S"; else echo "::warning::Secret $S absent : fonction correspondante désactivée"; fi
+          done

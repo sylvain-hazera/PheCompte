@@ -1,0 +1,12 @@
+name = "phecompte-api"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+
+[vars]
+ALLOWED_ORIGINS = "https://sylvain-hazera.github.io"
+GITHUB_REPO = "sylvain-hazera/PheCompte"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "phecompte"
+database_id = "__D1_ID__"   # remplacé automatiquement par le déploiement GitHub Actions
