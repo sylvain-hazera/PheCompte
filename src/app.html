@@ -238,7 +238,8 @@ function newProfile(prenom){
 function migrate(p){
   if (!p.days || typeof p.days !== "object") p.days = {};
   if (p.repas){
-    if (MEALS.some(([m]) => (p.repas[m] || []).length) && !p.days[todayISO()]) p.days[todayISO()] = {repas:p.repas, note:"", tags:[]};
+    // l'ancienne version ne datait pas la journée en cours : on la range au jour de la mise à jour et on prévient l'utilisateur
+    if (MEALS.some(([m]) => (p.repas[m] || []).length) && !p.days[todayISO()]){ p.days[todayISO()] = {repas:p.repas, note:"", tags:[]}; p.migratedDay = todayISO(); }
     delete p.repas;
   }
   if (!p.routine) p.routine = emptyRepas();
@@ -471,6 +472,8 @@ function banners(p){
   let h = "";
   if (p.isExample) h += `<div class="banner"><span class="grow">Profil d'exemple : ces aliments et résultats sont fictifs.</span><button class="btn" data-act="startReal">Créer mon profil</button></div>`;
   if (!db.seenAgeps && ui.tab === "repas") h += `<div class="card info" role="note"><div class="row" style="flex-wrap:nowrap;align-items:flex-start"><span class="grow small"><b>À savoir</b><br>Les produits hypoprotéinés AGEPS (pâtes, pain, biscuits… de l'onglet « Hypo ») ne comptent aucune part de Phé, conformément à la consigne. Leurs grammes et leurs calories sont enregistrés pour la diététicienne.</span><button class="btn" data-act="seenAgeps" style="min-height:38px;padding:6px 12px">J'ai compris</button></div></div>`;
+  if (p.migratedDay && ui.tab === "repas") h += `<div class="warn" role="note" style="display:grid;gap:8px"><span class="small"><b>Mise à jour de l'application.</b> Les repas saisis avant la mise à jour ont été rangés au <b>${esc(longDate(p.migratedDay))}</b>. S'ils correspondent à un autre jour (par exemple la veille), déplacez-les.</span>
+    <div class="row"><button class="btn primary grow" data-act="fixMigrated" style="min-height:38px">Déplacer ces repas</button><button class="btn grow" data-act="okMigrated" style="min-height:38px">C'est le bon jour</button></div></div>`;
   if (!storageOK) h += `<div class="banner"><span class="grow">Ce navigateur n'enregistre pas les données. Exportez une sauvegarde depuis l'onglet Profil.</span></div>`;
   return h;
 }
@@ -534,6 +537,7 @@ function viewRepas(p){
   <section class="card"><div class="row" style="flex-wrap:nowrap">
     <span class="grow"><b>Journée type</b><br><span class="small muted">${rCount ? `${rCount} aliment${rCount > 1 ? "s" : ""} remis automatiquement chaque jour (${fmt(rParts)} part${rParts > 1 ? "s" : ""})` : "Les aliments habituels, comme le biberon du matin, peuvent être remis automatiquement chaque jour."}</span></span>
     <button class="btn" data-act="routine">${rCount ? "Gérer" : "Configurer"}</button></div></section>
+  ${any || d.note || d.tags.length ? `<button class="btn" data-act="moveDay">Déplacer ou copier cette journée…</button>` : ""}
   ${any ? `<button class="btn ghost" data-act="clearDay" style="color:var(--high)">Vider les repas de cette journée</button>` : ""}`;
 }
 /* utiliser une recette dans un repas : règle de 3 sur le poids total du plat */
@@ -592,6 +596,38 @@ function openUseRecipe(){
     });
   };
   sheet("Utiliser une recette", "", drawList);
+}
+/* déplacer ou copier une journée vers une autre date (erreur de date, repas saisi le lendemain…) */
+function openMoveDay(){
+  const p = P(), from = ui.day, src = dayData(p, from), srcParts = sumDay(p, src);
+  let mode = "move";
+  sheet("Déplacer ou copier la journée", `
+    <p class="small" style="margin:0">Journée du <b>${esc(longDate(from))}</b> : ${fmt(srcParts)} part${srcParts > 1 ? "s" : ""}${src.note || src.tags.length ? ", avec une note" : ""}.</p>
+    <label class="f">Vers le<input type="date" id="mvTo" max="${todayISO()}" value="${isoShift(from, -1)}"></label>
+    <div class="seg" role="group" aria-label="Action"><button type="button" data-mv="move" aria-pressed="true">Déplacer</button><button type="button" data-mv="copy" aria-pressed="false">Copier</button></div>
+    <div class="small muted" id="mvInfo"></div>
+    <div class="err" id="mvErr" role="alert"></div>
+    <button class="btn primary block" id="mvGo">Déplacer</button>`, b => {
+      const to = b.querySelector("#mvTo"), info = b.querySelector("#mvInfo"), go = b.querySelector("#mvGo");
+      const upd = () => { const iso = to.value, tg = iso && p.days[iso]; const n = tg && hasMeals(tg) ? sumDay(p, tg) : 0;
+        info.textContent = !iso ? "" : iso === from ? "Choisissez une autre date." : n ? `Le ${longDate(iso)} contient déjà ${fmt(n)} part${n > 1 ? "s" : ""} : les aliments y seront ajoutés.` : `Le ${longDate(iso)} est vide.`;
+        go.textContent = mode === "move" ? "Déplacer" : "Copier"; };
+      to.addEventListener("change", upd);
+      b.querySelectorAll("[data-mv]").forEach(x => x.addEventListener("click", () => { mode = x.dataset.mv; b.querySelectorAll("[data-mv]").forEach(y => y.setAttribute("aria-pressed", y.dataset.mv === mode)); upd(); }));
+      go.addEventListener("click", () => {
+        const iso = to.value;
+        if (!iso || iso > todayISO() || iso === from){ b.querySelector("#mvErr").textContent = "Choisissez une date passée différente de celle-ci."; return; }
+        const s = dayData(p, from, true), tg = dayData(p, iso, true);
+        MEALS.forEach(([m]) => { tg.repas[m] = [...tg.repas[m], ...s.repas[m].map(x => ({...x}))]; });
+        if (s.note) tg.note = tg.note ? tg.note + "\n" + s.note : s.note;
+        tg.tags = [...new Set([...tg.tags, ...s.tags])]; delete tg.auto;
+        if (mode === "move"){ MEALS.forEach(([m]) => s.repas[m] = []); s.note = ""; s.tags = []; delete s.auto; }
+        if (p.migratedDay === from) delete p.migratedDay;
+        save(); closeSheet(); ui.day = iso; ui.follow = isToday(iso); render(); window.scrollTo(0, 0);
+        toast(mode === "move" ? `Journée déplacée au ${frDate(iso)}` : `Journée copiée au ${frDate(iso)}`);
+      });
+      upd();
+    });
 }
 function openRoutine(){
   const p = P();
@@ -1767,6 +1803,9 @@ document.addEventListener("click", e => {
       const c = p.custom.find(x => x.ref === t.dataset.ref); if (!c) return;
       c.hidden = true; MEALS.forEach(([m]) => { p.routine[m] = p.routine[m].filter(x => x.ref !== c.ref); });
       save(); openAddFood.draw(); render(); toast("Retiré de Mes aliments (l'historique est conservé)"); }); break;
+    case "moveDay": openMoveDay(); break;
+    case "fixMigrated": ui.day = p.migratedDay; ui.follow = isToday(ui.day); render(); openMoveDay(); break;
+    case "okMigrated": delete p.migratedDay; save(); render(); break;
     case "clearDay": armed(t, "Confirmer : vider les 4 repas de ce jour", () => { const d = dayData(p, ui.day, true); MEALS.forEach(([m]) => d.repas[m] = []); save(); render(); toast("Repas du jour vidés"); }); break;
     case "dayShift": { const n = isoShift(ui.day, +t.dataset.n); ui.day = n > todayISO() ? todayISO() : n; ui.follow = isToday(ui.day); render(); break; }
     case "dayToday": ui.day = todayISO(); ui.follow = true; render(); break;
