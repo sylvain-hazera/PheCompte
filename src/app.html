@@ -1074,12 +1074,15 @@ const rid = s => /^\d+$/.test(s) ? +s : s;
 const recType = r => ({"Plat principal":"Plats","Entrée":"Entrées","Dessert":"Desserts","Pain":"Pains"}[r.t] || r.t);
 const badge = r => !r.src ? "" : r.src === "perso" ? `<span class="status st-lo">Ma recette · enregistrée sur ce téléphone, non vérifiée</span>` : r.statut === "validee"
   ? `<span class="status st-in">Validée par une diététicienne</span>` : `<span class="status st-lo">Communauté · non vérifiée</span>`;
+/* recettes de la communauté : celles validées sur le service Cloudflare + les anciennes validées sur GitHub */
 function loadCommunity(){
-  fetch("recettes-communaute.json", {cache:"no-cache"}).then(r => r.ok ? r.json() : Promise.reject()).then(d => {
-    if (!Array.isArray(d)) return;
-    COMM = d; try { localStorage.setItem("phecompte.comm", JSON.stringify(d)); } catch(e){}
+  const get = u => fetch(u, {cache:"no-cache"}).then(r => r.ok ? r.json() : Promise.reject()).catch(() => null);
+  Promise.all([get("recettes-communaute.json"), API ? get(API + "/recettes") : Promise.resolve(null)]).then(([gh, cf]) => {
+    if (!Array.isArray(gh) && !(cf && Array.isArray(cf.recettes))) return;
+    const list = [...(cf && Array.isArray(cf.recettes) ? cf.recettes : []), ...(Array.isArray(gh) ? gh : [])];
+    COMM = list; try { localStorage.setItem("phecompte.comm", JSON.stringify(list)); } catch(e){}
     if (ui.tab === "recettes" && !document.getElementById("sheetRoot").innerHTML) render();
-  }).catch(() => {});
+  });
 }
 function viewRecettes(p){
   if (ui.recipe != null){ const r = allRecipes().find(x => x.id === ui.recipe); if (r) return viewRecipe(p, r); ui.recipe = null; }
@@ -1162,7 +1165,7 @@ function draftFrom(r){
 function openPropose(){
   const d = draft;
   sheet(d.editId ? "Modifier la recette" : "Nouvelle recette", `
-    <div class="note small"><b>Enregistrer dans mes recettes</b> la garde sur ce téléphone, sans compte, et l'inclut dans la sauvegarde. Vous pourrez aussi, si vous le souhaitez, la <b>proposer à la communauté</b> : elle sera envoyée sur GitHub (compte gratuit, texte public) et publiée après vérification par une diététicienne.</div>
+    <div class="note small"><b>Enregistrer dans mes recettes</b> la garde sur ce téléphone, sans compte, et l'inclut dans la sauvegarde. Vous pourrez aussi, si vous le souhaitez, la <b>proposer à la communauté</b> : envoi anonyme, sans compte, publiée après vérification par une diététicienne.</div>
     <label class="f">Nom de la recette<input type="text" data-f="n" maxlength="80" value="${esc(d.n)}" placeholder="Ex. : Gratin de courgettes"></label>
     <div class="row" style="flex-wrap:nowrap"><label class="f grow">Type<select data-f="t">${["Entrée","Plat principal","Dessert","Pain"].map(t => `<option ${d.t === t ? "selected" : ""}>${t}</option>`).join("")}</select></label>
       <label class="f grow">Niveau<select data-f="lv">${["Facile","Moyen","Difficile"].map(t => `<option ${d.lv === t ? "selected" : ""}>${t}</option>`).join("")}</select></label></div>
@@ -1176,7 +1179,7 @@ function openPropose(){
     <label class="f">Votre prénom ou pseudo (facultatif)<input type="text" data-f="auteur" maxlength="40" value="${esc(d.auteur)}"></label>
     <div id="propErr" class="err" role="alert"></div>
     <button class="btn primary block" data-act="saveRecipe">${d.editId ? "Enregistrer les modifications" : "Enregistrer dans mes recettes"}</button>
-    <button class="btn block" data-act="propReady">Proposer à la communauté (GitHub)</button>
+    <button class="btn block" data-act="propReady">Proposer à la communauté</button>
     <button class="btn ghost" data-act="propClear">Effacer le brouillon</button>
     <div id="propSend"></div>`, b => {
       b.addEventListener("input", onPropInput); b.addEventListener("change", onPropInput); propCompute();
@@ -1266,6 +1269,10 @@ ${JSON.stringify(payload, null, 1)}
   const title = "[Recette] " + payload.n;
   const full = `https://github.com/${REPO}/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
   const tooLong = full.length > 7500;
+  if (API){ out.innerHTML = `<div class="card" style="gap:10px"><b>Envoi anonyme, sans compte</b>
+    <span class="small">La recette est transmise sans nom ni adresse. Les parts sont recalculées par le service, puis la recette apparaît dans l'application après vérification par une diététicienne.</span>
+    <div id="anonTs" hidden></div><div id="anonErr" class="err" role="alert"></div>
+    <button class="btn primary block" data-act="sendAnon">Envoyer anonymement</button></div>`; return; }
   out.innerHTML = (API ? `<div class="card" style="gap:10px"><b>Envoi anonyme, sans compte</b>
     <span class="small">La recette est transmise sans nom ni adresse. Elle apparaîtra dans l'application après vérification par une diététicienne.</span>
     <div id="anonTs" hidden></div><div id="anonErr" class="err" role="alert"></div>
@@ -1460,7 +1467,7 @@ async function sendRecipeAnon(btn){
   try {
     const token = await turnstileToken(document.getElementById("anonTs"));
     const d = await api("/recettes", {method:"POST", body:JSON.stringify({token, recette:payload})});
-    document.getElementById("propSend").innerHTML = `<div class="note small"><b>Merci, la recette est envoyée</b> (n° ${d.numero}). Elle apparaîtra dans l'application après vérification par une diététicienne.</div>`;
+    document.getElementById("propSend").innerHTML = `<div class="note small"><b>Merci, la recette est envoyée</b> (${esc(d.parts)} parts selon le calcul du service). Elle apparaîtra dans l'onglet Recettes après vérification par une diététicienne.</div>`;
   } catch(e){ err.textContent = e.message; btn.disabled = false; btn.textContent = "Envoyer anonymement"; }
 }
 

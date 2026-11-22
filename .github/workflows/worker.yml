@@ -1,10 +1,10 @@
 name: Déployer le service Cloudflare
 # Déploie worker/ (recettes anonymes et trouvailles) sur Cloudflare Workers + D1.
-# Secrets GitHub nécessaires : CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, TURNSTILE_SECRET, ISSUES_TOKEN, ADMIN_TOKEN
+# Secrets GitHub nécessaires : CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, TURNSTILE_SECRET, ADMIN_TOKEN
 on:
   push:
     branches: [main]
-    paths: ["worker/**", ".github/workflows/worker.yml"]
+    paths: ["worker/**", ".github/workflows/worker.yml", "src/data.js", "scripts/gen_worker_aliments.py"]
   workflow_dispatch:
 permissions:
   contents: read
@@ -38,15 +38,17 @@ jobs:
           test -n "$ID" || { echo "::error::Base D1 introuvable"; exit 1; }
           sed -i "s/__D1_ID__/$ID/" wrangler.toml
           $W d1 execute phecompte --remote --file=schema.sql
+      - name: Base d'aliments pour le calcul des recettes
+        working-directory: .
+        run: python3 scripts/gen_worker_aliments.py
       - name: Déployer
         run: npx --yes wrangler@3.112.0 deploy
       - name: Secrets du service
         env:
           TURNSTILE_SECRET: ${{ secrets.TURNSTILE_SECRET }}
-          ISSUES_TOKEN: ${{ secrets.ISSUES_TOKEN }}
           ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
         run: |
-          for S in TURNSTILE_SECRET ISSUES_TOKEN ADMIN_TOKEN; do
+          for S in TURNSTILE_SECRET ADMIN_TOKEN; do
             V="${!S}"
             if [ -n "$V" ]; then printf '%s' "$V" | npx --yes wrangler@3.112.0 secret put "$S"; else echo "::warning::Secret $S absent : fonction correspondante désactivée"; fi
           done
@@ -58,6 +60,7 @@ jobs:
           curl -fsS "$U/sante"; echo
           curl -fsS -H "Origin: https://sylvain-hazera.github.io" -D - -o /tmp/t.json "$U/trouvailles" | grep -i "access-control-allow-origin"
           python3 -c "import json;d=json.load(open('/tmp/t.json'));print('trouvailles :',len(d['trouvailles']))"
+          curl -fsS -H "Origin: https://sylvain-hazera.github.io" "$U/recettes" | python3 -c "import json,sys;print('recettes validées :',len(json.load(sys.stdin)['recettes']))"
           code=$(curl -s -o /dev/null -w '%{http_code}' -X POST -H "Origin: https://sylvain-hazera.github.io" -H "Content-Type: application/json" -d '{"token":"faux","item":{"product":"Test","prot":1,"ou":"magasin","store":"Test","city":"Test"}}' "$U/trouvailles")
           echo "Envoi sans vérification anti-robot -> HTTP $code (403 attendu)"; test "$code" = "403"
           code=$(curl -s -o /dev/null -w '%{http_code}' -X POST -H "Content-Type: application/json" -d '{}' "$U/admin/trouvailles/abcdefabcdef")

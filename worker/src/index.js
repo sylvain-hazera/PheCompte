@@ -1,5 +1,6 @@
 /* Service PhéCompte : recettes anonymes (→ issues GitHub) et trouvailles de produits hypoprotéinés (→ base D1).
    Aucune donnée personnelle : pas de compte, pas d'adresse IP stockée (seulement une empreinte qui change chaque jour, pour les quotas). */
+import {ALIMENTS} from "./aliments.js";
 const TYPES = ["Pâtes, riz, semoule", "Pain, biscottes", "Biscuits, gâteaux", "Farines, préparations", "Desserts", "Boissons, substituts de lait", "Plats", "Autre"];
 const LIMITS = {recette: 5, trouvaille: 20};
 const today = () => new Date().toISOString().slice(0, 10);
@@ -50,27 +51,39 @@ function checkFind(x){
 }
 const PUBLIC_COLS = "id, created, product, brand, type, ean, weight_g, prot, kcal, ou, store, city, cp, url, price, note, seen, gone, last_seen";
 
-/* recette → issue GitHub (même format que l'application ; la Phé est recalculée par scripts/recettes.py) */
-function recipeIssue(p){
-  const n = clean(p.n, 80);
-  const body = `<!-- phecompte-recette v1 -->
-### ${n}
-
-Recette proposée anonymement depuis l'application.
-
-#### Ingrédients
-${(p.ing || []).slice(0, 40).map(x => `- ${num(x.g, 0, 5000) ?? "?"} g ${clean(x.nom, 80)}`).join("\n")}
-
-#### Préparation
-${(p.et || []).slice(0, 30).map((s, i) => `${i + 1}. ${clean(s, 800)}`).join("\n")}
-
-<details><summary>Données pour l'application (ne pas modifier)</summary>
-
-\`\`\`json
-${JSON.stringify(p, null, 1).replace(/`/g, "'")}
-\`\`\`
-</details>`;
-  return {title: "[Recette] " + n, body};
+/* recette : validation et recalcul de la Phé (même méthode que l'application et scripts/recettes.py) */
+const R_TYPES = ["Entrée", "Plat principal", "Dessert", "Pain"], R_LEVELS = ["Facile", "Moyen", "Difficile"];
+const R_MODES = {base:"", prot:"produit emballé", phe:"Phé indiquée sur l'étiquette", zero:"sans Phé"};
+const PART = 20;
+const fr = (x, d) => (Math.round(x * 10 ** d) / 10 ** d).toLocaleString("fr-FR", {maximumFractionDigits:d}).replace(/\u202f|\u00a0/g, " ");
+function checkRecipe(p){
+  const e = [], n = clean(p.n, 80);
+  if (n.length < 3) e.push("nom de la recette");
+  if (!R_TYPES.includes(p.t)) e.push("type de recette");
+  if (!R_LEVELS.includes(p.lv)) e.push("niveau");
+  const min = num(p.min, 0, 1440); if (min === null) e.push("temps de préparation");
+  const ings = Array.isArray(p.ing) ? p.ing.slice(0, 41) : [];
+  if (!ings.length || ings.length > 40) e.push("ingrédients (1 à 40)");
+  const steps = Array.isArray(p.et) ? p.et.map(s => clean(s, 800)).filter(Boolean) : [];
+  if (!steps.length || steps.length > 30) e.push("étapes (1 à 30)");
+  const det = [], ingOut = []; let total = 0;
+  for (const x of ings){
+    if (!x || typeof x !== "object"){ e.push("ingrédient invalide"); break; }
+    let nom = clean(x.nom, 80); const g = num(x.g, 0.1, 5000), mode = x.mode; let phe = null; const o = {nom, g, mode};
+    if (!nom || g === null){ e.push("ingrédient incomplet (nom et grammes)"); break; }
+    if (mode === "zero") phe = 0;
+    else if (mode === "base"){ const f = ALIMENTS[x.ref]; if (!f){ e.push(`aliment « ${nom} » absent de la base`); break; } nom = f[0]; o.ref = x.ref; o.nom = nom; phe = g / f[1] * PART; }
+    else if (mode === "prot"){ const lait = x.lait === true, pr = num(x.prot, 0, lait ? 12 : 5); if (pr === null){ e.push(`protéines de « ${nom} »`); break; } o.prot = pr; o.lait = lait; phe = g * pr * (lait ? 50 : pr < 0.8 ? 32 : 38) / 100; }
+    else if (mode === "phe"){ const v = num(x.phe100, 0, 5000); if (v === null){ e.push(`Phé de « ${nom} »`); break; } o.phe100 = v; phe = g * v / 100; }
+    else { e.push("type d'ingrédient"); break; }
+    total += phe; ingOut.push(o);
+    det.push({txt:`${fr(g, 2)} g ${nom}` + (mode === "base" ? "" : ` (${R_MODES[mode]})`), parts:Math.round(phe / PART * 100) / 100, mode});
+  }
+  const kcal = p.kcal == null || p.kcal === "" ? null : num(p.kcal, 0, 50000);
+  const payload = {v:1, n, t:p.t, lv:p.lv, min, p:clean(String(p.p ?? ""), 3), kcal, auteur:clean(p.auteur, 40), ing:ingOut, et:steps};
+  const recette = {src:"communaute", statut:"validee", n, t:p.t, lv:p.lv, min, p:payload.p, kcal, phe:Math.round(total), parts:fr(total / PART, 1),
+    ing:det.map(d => d.txt), ingDetail:det, k:[], et:steps, auteur:payload.auteur};
+  return {e, payload, recette};
 }
 
 export default {
@@ -105,21 +118,21 @@ export default {
           .bind(...(kind === "vu" ? [new Date().toISOString(), m[1]] : [m[1]])).run();
         return json({ok: true}, 200, h);
       }
+      if (path === "/recettes" && req.method === "GET"){
+        const r = await env.DB.prepare("SELECT id, created, moderated, recette FROM recettes WHERE statut = 'validee' ORDER BY moderated DESC LIMIT 500").all();
+        const list = r.results.map(x => ({...JSON.parse(x.recette), id:"cf-" + x.id, date:(x.moderated || x.created).slice(0, 10)}));
+        return json({ok: true, recettes: list}, 200, {...h, "Cache-Control": "public, max-age=60"});
+      }
       if (path === "/recettes" && req.method === "POST"){
         const d = await req.json().catch(() => null), p = d && d.recette;
         if (!p || typeof p !== "object" || JSON.stringify(p).length > 30000) return fail("Recette invalide.", 400, h);
-        if (clean(p.n, 80).length < 3 || !Array.isArray(p.ing) || !p.ing.length || !Array.isArray(p.et) || !p.et.length) return fail("Recette incomplète.", 422, h);
+        const {e, payload, recette} = checkRecipe(p); if (e.length) return fail("À corriger : " + e.join(", ") + ".", 422, h);
         if (!(await turnstile(d.token, req, env))) return fail("Vérification anti-robot échouée : réessayez.", 403, h);
-        if (!env.ISSUES_TOKEN) return fail("Envoi des recettes non configuré.", 503, h);
         const ih = await ipHash(req, env); if (!(await quota(env, ih, "recette"))) return fail("Limite d'envois atteinte pour aujourd'hui.", 429, h);
-        p.auteur = clean(p.auteur, 40);
-        const {title, body} = recipeIssue(p);
-        const r = await fetch(`https://api.github.com/repos/${env.GITHUB_REPO}/issues`, {method: "POST",
-          headers: {"Authorization": "Bearer " + env.ISSUES_TOKEN, "Accept": "application/vnd.github+json", "User-Agent": "phecompte-api", "Content-Type": "application/json"},
-          body: JSON.stringify({title, body})});
-        if (!r.ok) return fail("GitHub n'a pas accepté la recette (" + r.status + ").", 502, h);
-        const is = await r.json();
-        return json({ok: true, numero: is.number, url: is.html_url}, 201, h);
+        const id = uid();
+        await env.DB.prepare("INSERT INTO recettes (id, created, statut, n, recette, payload, ip_hash) VALUES (?,?,'attente',?,?,?,?)")
+          .bind(id, new Date().toISOString(), payload.n, JSON.stringify(recette), JSON.stringify(payload), ih).run();
+        return json({ok: true, id, parts: recette.parts}, 201, h);
       }
 
       /* modération : page /admin + API protégée par ADMIN_TOKEN */
@@ -129,6 +142,18 @@ export default {
         if (path === "/admin/trouvailles" && req.method === "GET"){
           const r = await env.DB.prepare(`SELECT ${PUBLIC_COLS}, hidden FROM trouvailles ORDER BY created DESC LIMIT 2000`).all();
           return json({ok: true, trouvailles: r.results});
+        }
+        if (path === "/admin/recettes" && req.method === "GET"){
+          const r = await env.DB.prepare("SELECT id, created, statut, moderated, recette FROM recettes ORDER BY CASE statut WHEN 'attente' THEN 0 WHEN 'validee' THEN 1 ELSE 2 END, created DESC LIMIT 1000").all();
+          return json({ok: true, recettes: r.results.map(x => ({id:x.id, created:x.created, statut:x.statut, moderated:x.moderated, ...JSON.parse(x.recette), statutRecette:x.statut}))});
+        }
+        const mr = path.match(/^\/admin\/recettes\/([a-f0-9]{12})$/);
+        if (mr && req.method === "POST"){
+          const d = await req.json().catch(() => ({})), now = new Date().toISOString();
+          if (d.action === "supprimer") await env.DB.prepare("DELETE FROM recettes WHERE id = ?").bind(mr[1]).run();
+          else { const st = {valider:"validee", refuser:"refusee", attente:"attente"}[d.action]; if (!st) return fail("Action inconnue.");
+            await env.DB.prepare("UPDATE recettes SET statut = ?, moderated = ? WHERE id = ?").bind(st, now, mr[1]).run(); }
+          return json({ok: true});
         }
         m = path.match(/^\/admin\/trouvailles\/([a-f0-9]{12})$/);
         if (m && req.method === "POST"){
@@ -146,15 +171,26 @@ export default {
 };
 
 const ADMIN_HTML = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
-<title>Modération PhéCompte</title><style>body{font:15px system-ui,sans-serif;margin:0;padding:16px;max-width:1000px;margin:auto;color:#12232e}input,button{font:inherit;padding:8px 10px;border:1px solid #ccd;border-radius:8px}button{cursor:pointer;background:#fff}
-table{width:100%;border-collapse:collapse;margin-top:12px}td,th{border-top:1px solid #dde;padding:8px;text-align:left;vertical-align:top;font-size:14px}tr.h{opacity:.45}.m{color:#667}</style></head><body>
-<h1>Modération des trouvailles</h1><p class="m">Saisissez le mot de passe de modération (secret ADMIN_TOKEN). Il reste dans cet onglet uniquement.</p>
-<form id="f"><input type="password" id="t" placeholder="Mot de passe" autocomplete="off"> <button>Afficher</button></form><div id="o"></div>
+<title>Modération PhéCompte</title><style>body{font:15px system-ui,sans-serif;margin:0 auto;padding:16px;max-width:1000px;color:#12232e}input,button{font:inherit;padding:8px 10px;border:1px solid #ccd;border-radius:8px}button{cursor:pointer;background:#fff}
+.tabs{display:flex;gap:8px;margin:14px 0}.tabs button[aria-pressed=true]{background:#12232e;color:#fff}table{width:100%;border-collapse:collapse}td,th{border-top:1px solid #dde;padding:8px;text-align:left;vertical-align:top;font-size:14px}tr.h{opacity:.45}.m{color:#667}
+.r{border:1px solid #dde;border-radius:12px;padding:12px;margin:10px 0}.r.validee{border-color:#2b9a57}.r.refusee{opacity:.55}.b{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:99px;background:#eef}.attente .b{background:#fde9c8}.validee .b{background:#d2f0dc}
+ul,ol{margin:6px 0;padding-left:20px}.act{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}</style></head><body>
+<h1>Modération PhéCompte</h1><p class="m">Saisissez le mot de passe de modération (secret ADMIN_TOKEN). Il reste dans cet onglet uniquement.</p>
+<form id="f"><input type="password" id="t" placeholder="Mot de passe" autocomplete="off"> <button>Afficher</button></form>
+<div class="tabs" id="tabs" hidden><button data-v="recettes" aria-pressed="true">Recettes</button><button data-v="trouvailles" aria-pressed="false">Trouvailles</button></div><div id="o"></div>
 <script>
-let T="";const o=document.getElementById("o");const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-async function load(){const r=await fetch("/admin/trouvailles",{headers:{Authorization:"Bearer "+T}});if(!r.ok){o.textContent="Mot de passe incorrect.";return;}const d=await r.json();
-if(!d.trouvailles.length){o.innerHTML="<p>Aucune trouvaille pour l'instant.</p>";return;}o.innerHTML="<table><tr><th>Produit</th><th>Où</th><th>Valeurs</th><th>Avis</th><th></th></tr>"+d.trouvailles.map(x=>"<tr class='"+(x.hidden?"h":"")+"'><td><b>"+esc(x.product)+"</b><br><span class=m>"+esc(x.brand)+" · "+esc(x.type)+"<br>"+esc(x.created.slice(0,10))+"</span></td><td>"+esc(x.ou==="web"?x.url:x.store+", "+x.city)+"</td><td>"+esc(x.prot)+" g prot. · "+esc(x.kcal??"?")+" kcal /100 g</td><td>vu "+x.seen+" · absent "+x.gone+"</td><td><button data-a='"+(x.hidden?"afficher":"masquer")+"' data-i='"+x.id+"'>"+(x.hidden?"Réafficher":"Masquer")+"</button> <button data-a='supprimer' data-i='"+x.id+"'>Supprimer</button></td></tr>").join("")+"</table>";}
+let T="",V="recettes";const o=document.getElementById("o");const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const H=()=>({Authorization:"Bearer "+T,"Content-Type":"application/json"});
+async function load(){const r=await fetch("/admin/"+V,{headers:H()});if(!r.ok){o.textContent="Mot de passe incorrect.";return;}document.getElementById("tabs").hidden=false;const d=await r.json();
+if(V==="trouvailles"){if(!d.trouvailles.length){o.innerHTML="<p>Aucune trouvaille pour l'instant.</p>";return;}
+o.innerHTML="<table><tr><th>Produit</th><th>Où</th><th>Valeurs</th><th>Avis</th><th></th></tr>"+d.trouvailles.map(x=>"<tr class='"+(x.hidden?"h":"")+"'><td><b>"+esc(x.product)+"</b><br><span class=m>"+esc(x.brand)+" · "+esc(x.type)+"<br>"+esc(x.created.slice(0,10))+"</span></td><td>"+esc(x.ou==="web"?x.url:x.store+", "+x.city)+"</td><td>"+esc(x.prot)+" g prot. · "+esc(x.kcal??"?")+" kcal /100 g</td><td>vu "+x.seen+" · absent "+x.gone+"</td><td><button data-k='trouvailles' data-a='"+(x.hidden?"afficher":"masquer")+"' data-i='"+x.id+"'>"+(x.hidden?"Réafficher":"Masquer")+"</button> <button data-k='trouvailles' data-a='supprimer' data-i='"+x.id+"'>Supprimer</button></td></tr>").join("")+"</table>";return;}
+if(!d.recettes.length){o.innerHTML="<p>Aucune recette proposée pour l'instant.</p>";return;}
+const L={attente:"En attente",validee:"Validée",refusee:"Refusée"};
+o.innerHTML=d.recettes.map(x=>"<div class='r "+x.statutRecette+"'><span class=b>"+L[x.statutRecette]+"</span> <b>"+esc(x.n)+"</b> <span class=m>"+esc(x.t)+" · "+esc(x.lv)+" · "+esc(x.min)+" min"+(x.p?" · "+esc(x.p)+" pers.":"")+" · envoyée le "+esc(x.created.slice(0,10))+(x.auteur?" par "+esc(x.auteur):"")+"</span>"+
+"<div><b>"+esc(x.parts)+" parts</b> ("+esc(x.phe)+" mg de Phé, recalculé par le service)"+(x.kcal?" · "+esc(x.kcal)+" kcal":"")+"</div><ul>"+x.ingDetail.map(i=>"<li>"+esc(i.txt)+" <span class=m>("+esc(i.parts)+" part)</span></li>").join("")+"</ul><ol>"+x.et.map(s=>"<li>"+esc(s)+"</li>").join("")+"</ol>"+
+"<div class=act>"+(x.statutRecette!=="validee"?"<button data-k='recettes' data-a='valider' data-i='"+x.id+"'>Valider</button>":"<button data-k='recettes' data-a='attente' data-i='"+x.id+"'>Remettre en attente</button>")+(x.statutRecette!=="refusee"?"<button data-k='recettes' data-a='refuser' data-i='"+x.id+"'>Refuser</button>":"")+"<button data-k='recettes' data-a='supprimer' data-i='"+x.id+"'>Supprimer</button></div></div>").join("");}
 document.getElementById("f").onsubmit=e=>{e.preventDefault();T=document.getElementById("t").value;load();};
+document.getElementById("tabs").onclick=e=>{const b=e.target.closest("button");if(!b)return;V=b.dataset.v;document.querySelectorAll("#tabs button").forEach(x=>x.setAttribute("aria-pressed",x===b));load();};
 o.onclick=async e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.a==="supprimer"&&!b.dataset.ok){b.dataset.ok=1;b.textContent="Confirmer";return;}
-await fetch("/admin/trouvailles/"+b.dataset.i,{method:"POST",headers:{Authorization:"Bearer "+T,"Content-Type":"application/json"},body:JSON.stringify({action:b.dataset.a})});load();};
+await fetch("/admin/"+b.dataset.k+"/"+b.dataset.i,{method:"POST",headers:H(),body:JSON.stringify({action:b.dataset.a})});load();};
 </script></body></html>`;

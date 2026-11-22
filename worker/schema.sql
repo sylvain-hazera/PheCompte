@@ -27,3 +27,15 @@ CREATE INDEX IF NOT EXISTS trouvailles_recent ON trouvailles (hidden, last_seen)
 CREATE TABLE IF NOT EXISTS avis (find_id TEXT NOT NULL, ip_hash TEXT NOT NULL, day TEXT NOT NULL, kind TEXT NOT NULL, PRIMARY KEY (find_id, ip_hash, day));
 -- quotas anti-abus par appareil et par jour (empreinte non réversible, change chaque jour)
 CREATE TABLE IF NOT EXISTS quotas (ip_hash TEXT NOT NULL, day TEXT NOT NULL, kind TEXT NOT NULL, n INTEGER NOT NULL, PRIMARY KEY (ip_hash, day, kind));
+-- recettes proposées par les familles (statut : attente | validee | refusee)
+CREATE TABLE IF NOT EXISTS recettes (
+  id TEXT PRIMARY KEY,
+  created TEXT NOT NULL,
+  statut TEXT NOT NULL DEFAULT 'attente',
+  moderated TEXT,
+  n TEXT NOT NULL,
+  recette TEXT NOT NULL,   -- recette prête pour l'application (JSON, Phé recalculée par le service)
+  payload TEXT NOT NULL,   -- données envoyées (JSON)
+  ip_hash TEXT
+);
+CREATE INDEX IF NOT EXISTS recettes_statut ON recettes (statut, created);
