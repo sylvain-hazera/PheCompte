@@ -228,7 +228,6 @@ function save(){
   if (SNAP) stamp();
   try { localStorage.setItem(KEY, JSON.stringify(db)); storageOK = true; }
   catch(e){ storageOK = false; }
-  if (SNAP) scheduleSync();
 }
 function emptyRepas(){ return {pdj:[], dej:[], gouter:[], diner:[]}; }
 function newProfile(prenom){
@@ -278,12 +277,10 @@ function exampleProfile(){
 let db = load();
 if (!db || !Array.isArray(db.profiles) || !db.profiles.length){ const p = exampleProfile(); db = {profiles:[p], current:p.id}; }
 db.profiles.forEach(migrate);
-/* ---------- Synchronisation chiffrée dans le Google Drive de la personne ----------
-   Les données sont chiffrées sur le téléphone (AES-GCM 256, clé dérivée de la phrase de passe, PBKDF2 600 000 itérations)
-   puis enregistrées dans le dossier caché réservé à l'application (appDataFolder) du Google Drive de l'utilisateur.
-   Aucun serveur PhéCompte n'intervient. Fusion élément par élément : la modification la plus récente l'emporte. */
-const GOOGLE_CLIENT_ID = "";   // identifiant OAuth (application Web) du projet Google Cloud PhéCompte
-const SYNC_FILE = "phecompte-sync.json", SYNC_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
+/* ---------- Sauvegarde partagée entre téléphones (fichier enregistré dans Google Drive via le menu Partager) ----------
+   Chaque élément porte sa date de modification : à l'import, les deux téléphones sont fusionnés élément par élément
+   (journée repas par repas, note, résultats, aliments, recettes), la modification la plus récente l'emporte.
+   Chiffrement facultatif sur le téléphone (AES-GCM 256, clé dérivée de la phrase de passe, PBKDF2 600 000 itérations). */
 /* horodatage automatique des éléments modifiés (comparaison avec l'état précédent) */
 let SNAP = null;
 const DAY_FIELDS = ["pdj", "dej", "gouter", "diner", "note"];
@@ -366,110 +363,10 @@ async function decryptDb(text, key){
   const pt = await crypto.subtle.decrypt({name:"AES-GCM", iv:fromB64(f.iv)}, key, fromB64(f.ct));
   return JSON.parse(new TextDecoder().decode(pt));
 }
-/* clé gardée sur l'appareil (non exportable) dans IndexedDB */
-function idb(mode, fn){ return new Promise((res, rej) => { const r = indexedDB.open("phecompte", 1); r.onupgradeneeded = () => r.result.createObjectStore("kv");
-  r.onsuccess = () => { const t = r.result.transaction("kv", mode), s = t.objectStore("kv"), q = fn(s); t.oncomplete = () => res(q && q.result); t.onerror = () => rej(t.error); }; r.onerror = () => rej(r.error); }); }
-const keyStore = {get: () => idb("readonly", s => s.get("syncKey")).catch(() => null), set: v => idb("readwrite", s => s.put(v, "syncKey")), del: () => idb("readwrite", s => s.delete("syncKey")).catch(() => {})};
-/* Google : jeton d'accès (Google Identity Services) et Drive (dossier caché de l'application) */
-let gTok = null, gExp = 0;
-function loadGis(){ return window.google && google.accounts ? Promise.resolve() : loadScript("https://accounts.google.com/gsi/client"); }
-async function googleToken(interactive){
-  if (window.__syncMock) return "mock";
-  if (gTok && Date.now() < gExp - 60000) return gTok;
-  await loadGis();
-  return new Promise((res, rej) => {
-    const c = google.accounts.oauth2.initTokenClient({client_id:GOOGLE_CLIENT_ID, scope:SYNC_SCOPE,
-      callback: r => { if (r.error){ rej(new Error(r.error === "access_denied" ? "Accès au Google Drive refusé." : "Connexion à Google impossible.")); return; } gTok = r.access_token; gExp = Date.now() + (+r.expires_in || 3600) * 1000; res(gTok); },
-      error_callback: () => rej(new Error(interactive ? "Connexion Google annulée ou bloquée (fenêtre fermée ?)." : "reconnexion"))});
-    c.requestAccessToken({prompt: interactive ? "" : "none"});
-  });
-}
-const DRIVE = {
-  async find(t){ if (window.__syncMock) return window.__syncMock.find();
-    const r = await fetch("https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&fields=files(id,modifiedTime)&q=" + encodeURIComponent(`name='${SYNC_FILE}'`), {headers:{Authorization:"Bearer " + t}});
-    if (!r.ok) throw new Error("Google Drive ne répond pas (" + r.status + ")."); return (await r.json()).files[0] || null; },
-  async read(t, id){ if (window.__syncMock) return window.__syncMock.read(id);
-    const r = await fetch(`https://www.googleapis.com/drive/v3/files/${id}?alt=media`, {headers:{Authorization:"Bearer " + t}});
-    if (!r.ok) throw new Error("Lecture de la sauvegarde impossible (" + r.status + ")."); return r.text(); },
-  async write(t, id, text){ if (window.__syncMock) return window.__syncMock.write(id, text);
-    let r;
-    if (id) r = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${id}?uploadType=media`, {method:"PATCH", headers:{Authorization:"Bearer " + t, "Content-Type":"application/json"}, body:text});
-    else { const b = "phecompte" + uid();
-      r = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id", {method:"POST", headers:{Authorization:"Bearer " + t, "Content-Type":"multipart/related; boundary=" + b},
-        body:`--${b}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify({name:SYNC_FILE, parents:["appDataFolder"]})}\r\n--${b}\r\nContent-Type: application/json\r\n\r\n${text}\r\n--${b}--`}); }
-    if (!r.ok) throw new Error("Enregistrement dans Google Drive impossible (" + r.status + ")."); return id || (await r.json()).id; }
-};
-/* état et déroulement */
-let syncInfo; try { syncInfo = JSON.parse(localStorage.getItem("phecompte.sync") || "null") || {}; } catch(e){ syncInfo = {}; }
-const saveSyncInfo = () => { try { localStorage.setItem("phecompte.sync", JSON.stringify(syncInfo)); } catch(e){} };
-let syncBusy = false, syncTimer, syncMsg = "";
 const hasRealData = d => d.profiles.some(p => !p.isExample) || (d.mesRecettes || []).length;
 function applyMerged(next){ db = next; try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e){} snapshot(); }
-async function syncNow(interactive){
-  if ((!GOOGLE_CLIENT_ID && !window.__syncMock) || !syncInfo.on || syncBusy) return;
-  syncBusy = true; syncMsg = "Synchronisation…"; refreshSync();
-  try {
-    const k = await keyStore.get(); if (!k) throw new Error("Phrase de passe à ressaisir sur ce téléphone.");
-    const t = await googleToken(interactive);
-    const f = await DRIVE.find(t);
-    if (f){ const remote = await decryptDb(await DRIVE.read(t, f.id), k.key).catch(() => { throw new Error("La sauvegarde du Drive ne s'ouvre pas avec la phrase enregistrée sur ce téléphone."); });
-      applyMerged(mergeDb(db, remote)); }
-    const id = await DRIVE.write(t, f ? f.id : null, await encryptDb(db, k.key, k.salt));
-    syncInfo.fileId = id; syncInfo.last = new Date().toISOString(); syncInfo.err = ""; saveSyncInfo(); syncMsg = "";
-    if (!document.getElementById("sheetRoot").innerHTML) render();
-  } catch(e){
-    syncInfo.err = e.message === "reconnexion" ? "Reconnexion à Google nécessaire." : e.message; saveSyncInfo(); syncMsg = "";
-  } finally { syncBusy = false; refreshSync(); }
-}
-function scheduleSync(){ if (!syncInfo.on) return; clearTimeout(syncTimer); syncTimer = setTimeout(() => syncNow(false), 15000); }
-function refreshSync(){ const el = document.getElementById("syncCard"); if (el) el.outerHTML = syncCard(); }
-const ago = iso => { const m = Math.round((Date.now() - new Date(iso)) / 60000); return m < 1 ? "à l'instant" : m < 60 ? `il y a ${m} min` : m < 1440 ? `il y a ${Math.round(m / 60)} h` : `le ${frDate(iso.slice(0, 10))}`; };
-function syncCard(){
-  if (!GOOGLE_CLIENT_ID && !window.__syncMock) return `<section class="card" id="syncCard"><div class="label">Synchronisation Google Drive</div><span class="small muted">Bientôt disponible : sauvegarde chiffrée dans votre Google Drive et utilisation sur plusieurs téléphones.</span></section>`;
-  if (!syncInfo.on) return `<section class="card" id="syncCard"><div class="label">Synchronisation Google Drive</div>
-    <p class="small" style="margin:0">Sauvegarde automatique, <b>chiffrée sur ce téléphone</b>, dans <b>votre</b> Google Drive (dossier caché réservé à l'application). Activez-la sur chaque téléphone avec la même phrase de passe pour partager les données entre les deux parents. Aucun serveur PhéCompte n'intervient.</p>
-    <button class="btn block" data-act="syncSetup">Activer la synchronisation</button></section>`;
-  return `<section class="card" id="syncCard"><div class="label">Synchronisation Google Drive</div>
-    <div class="small">${syncMsg ? esc(syncMsg) : syncInfo.last ? `Dernière synchronisation ${ago(syncInfo.last)}.` : "Pas encore synchronisé."}</div>
-    ${syncInfo.err && !syncMsg ? `<div class="warn small">${esc(syncInfo.err)}</div>` : ""}
-    <div class="row"><button class="btn grow" data-act="syncNow" ${syncBusy ? "disabled" : ""}>Synchroniser maintenant</button><button class="btn ghost" data-act="syncOff">Désactiver sur ce téléphone</button></div></section>`;
-}
-function openSyncSetup(){
-  sheet("Synchronisation Google Drive", `
-    <p class="small" style="margin:0">Les données sont <b>chiffrées sur ce téléphone</b> avec votre phrase de passe, puis enregistrées dans un dossier caché de <b>votre</b> Google Drive. Google ne peut pas les lire.</p>
-    <div class="warn small"><b>Notez votre phrase de passe en lieu sûr.</b> Sans elle, la sauvegarde est illisible : personne ne peut la retrouver. Utilisez la même phrase sur le second téléphone.</div>
-    <label class="f">Phrase de passe (10 caractères minimum)<input type="password" id="spP1" autocomplete="new-password"></label>
-    <label class="f">Confirmez la phrase de passe<input type="password" id="spP2" autocomplete="new-password"></label>
-    <label class="row" style="flex-wrap:nowrap;gap:10px;cursor:pointer" for="spOk"><input type="checkbox" id="spOk" style="width:22px;height:22px;flex:none;accent-color:var(--accent)"><span class="small">J'ai noté ma phrase de passe.</span></label>
-    <div class="err" id="spErr" role="alert"></div>
-    <button class="btn primary block" id="spGo">Se connecter à Google et activer</button>
-    <p class="small muted" style="margin:0">Second téléphone : saisissez la même phrase. Si ce téléphone ne contient que le profil d'exemple, il reprend les données du Drive ; sinon les deux sont fusionnées.</p>`, b => {
-      b.querySelector("#spGo").addEventListener("click", async () => {
-        const p1 = b.querySelector("#spP1").value, p2 = b.querySelector("#spP2").value, err = b.querySelector("#spErr"), go = b.querySelector("#spGo");
-        if (p1.length < 10){ err.textContent = "La phrase de passe doit contenir au moins 10 caractères."; return; }
-        if (p1 !== p2){ err.textContent = "Les deux saisies ne sont pas identiques."; return; }
-        if (!b.querySelector("#spOk").checked){ err.textContent = "Cochez la case une fois la phrase de passe notée."; return; }
-        err.textContent = ""; go.disabled = true; go.textContent = "Connexion…";
-        try {
-          const t = await googleToken(true);
-          go.textContent = "Chiffrement…";
-          const f = await DRIVE.find(t);
-          let salt, key, msg;
-          if (f){
-            const head = JSON.parse(await DRIVE.read(t, f.id)); salt = fromB64(head.kdf.salt); key = await deriveKey(p1, salt);
-            const remote = await decryptDb(JSON.stringify(head), key).catch(() => { throw new Error("Cette phrase ne correspond pas à la sauvegarde déjà présente dans ce Google Drive."); });
-            const real = hasRealData(db);
-            applyMerged(real ? mergeDb(db, remote) : {...migrateAll(remote), current: remote.current});
-            msg = real ? "Données fusionnées avec celles du Drive" : "Données récupérées depuis le Drive";
-          } else { salt = crypto.getRandomValues(new Uint8Array(16)); key = await deriveKey(p1, salt); msg = "Synchronisation activée"; }
-          await keyStore.set({key, salt});
-          const id = await DRIVE.write(t, f ? f.id : null, await encryptDb(db, key, salt));
-          syncInfo = {on:true, fileId:id, last:new Date().toISOString(), err:""}; saveSyncInfo();
-          closeSheet(); render(); toast(msg);
-        } catch(e){ err.textContent = e.message; go.disabled = false; go.textContent = "Se connecter à Google et activer"; }
-      });
-    });
-}
+let lastBackup; try { lastBackup = localStorage.getItem("phecompte.lastBackup") || ""; } catch(e){ lastBackup = ""; }
+const ago = iso => { const m = Math.round((Date.now() - new Date(iso)) / 60000); return m < 1 ? "à l'instant" : m < 60 ? `il y a ${m} min` : m < 1440 ? `il y a ${Math.round(m / 60)} h` : m < 2880 ? "hier" : `il y a ${Math.round(m / 1440)} jours`; };
 function migrateAll(d){ d.profiles.forEach(migrate); return d; }
 snapshot();
 const P = () => db.profiles.find(p => p.id === db.current) || db.profiles[0];
@@ -1699,10 +1596,11 @@ function viewProfil(p){
   <section class="card"><div class="label">Profils sur cet appareil</div><div class="list">
     ${others.map(o => `<button class="item" data-act="switch" data-id="${o.id}">${avatarHTML(o)}<span class="grow t">${esc(o.prenom)} ${esc(o.nom)}${o.isExample ? " (exemple)" : ""}</span><span class="s">Utiliser</span></button>`).join("") || `<div class="small muted">Un seul profil. Ajoutez-en un pour chaque personne suivie.</div>`}
   </div><button class="btn block" data-act="newProfile">${icon("plus")}Ajouter un profil</button></section>
-  ${syncCard()}
-  <section class="card"><div class="label">Sauvegarde</div>
-    <p class="small muted" style="margin:0">Les données restent sur ce téléphone uniquement. Exportez régulièrement une sauvegarde pour pouvoir les restaurer sur un autre appareil.</p>
-    <div class="row"><button class="btn grow" data-act="backup">Exporter</button><label class="btn grow" for="restoreFile">Restaurer</label><input type="file" id="restoreFile" accept=".json,application/json" hidden></div>
+  <section class="card"><div class="label">Sauvegarde et deuxième téléphone</div>
+    <p class="small" style="margin:0">Les données restent sur ce téléphone. Enregistrez une sauvegarde dans <b>Google Drive</b> (ou Fichiers) avec le menu Partager. Sur l'autre téléphone, récupérez-la depuis Drive : les données des deux téléphones sont <b>fusionnées</b>, rien n'est écrasé.</p>
+    <div class="small ${lastBackup && Date.now() - new Date(lastBackup) < 7 * 864e5 ? "muted" : ""}" style="${lastBackup && Date.now() - new Date(lastBackup) < 7 * 864e5 ? "" : "color:var(--mid)"}">${lastBackup ? "Dernière sauvegarde " + ago(lastBackup) + "." : "Aucune sauvegarde enregistrée depuis ce téléphone."}</div>
+    <button class="btn primary block" data-act="backup">Enregistrer dans Google Drive</button>
+    <label class="btn block" for="restoreFile">Récupérer depuis Google Drive</label><input type="file" id="restoreFile" accept=".json,application/json,text/plain,application/octet-stream" hidden>
   </section>
   <section class="card"><div class="label">À propos</div>
     <p class="small" style="margin:0"><b>Produits hypoprotéinés AGEPS.</b> Les produits hypoprotéinés AGEPS (pâtes, pain, biscuits… de l'onglet « Hypo ») ne comptent aucune part de Phé, conformément à la consigne. Leurs grammes et leurs calories sont enregistrés pour la diététicienne.</p>
@@ -1759,27 +1657,71 @@ function openProfile(isNew){
     });
 }
 function openBackup(){
-  const data = JSON.stringify({app:"PhéCompte", version:1, exportedAt:new Date().toISOString(), ...db});
-  sheet("Exporter une sauvegarde", `
-    <p class="small muted" style="margin:0">Ce fichier contient tous les profils, repas, résultats et vos recettes. Gardez-le en lieu sûr : il contient des données de santé.</p>
-    ${framed ? "" : `<button class="btn primary block" id="bShare">Partager ou enregistrer le fichier</button>`}
-    <button class="btn block" id="bCopy">Copier le contenu</button>
-    <textarea id="bText" readonly aria-label="Sauvegarde">${esc(data)}</textarea>`, b => {
-      b.querySelector("#bCopy").addEventListener("click", () => copyText(b.querySelector("#bText")));
-      const s = b.querySelector("#bShare"); if (s) s.addEventListener("click", () => shareFile(data, `phecompte-sauvegarde-${todayISO()}.json`, "application/json"));
+  sheet("Enregistrer dans Google Drive", `
+    <ol class="small" style="margin:0;padding-left:1.2em;display:grid;gap:4px">
+      <li>Touchez « Enregistrer le fichier », puis choisissez <b>Drive</b> (sur iPhone : <b>Enregistrer dans Fichiers</b> → Google Drive).</li>
+      <li>Sur l'autre téléphone : Profil → <b>Récupérer depuis Google Drive</b>, puis choisissez ce fichier.</li>
+    </ol>
+    <label class="row" style="flex-wrap:nowrap;gap:10px;cursor:pointer" for="bEnc"><input type="checkbox" id="bEnc" style="width:22px;height:22px;flex:none;accent-color:var(--accent)"><span><b>Chiffrer avec une phrase de passe</b><br><span class="small muted">Recommandé : le fichier est illisible sans la phrase. Si vous l'oubliez, personne ne pourra l'ouvrir.</span></span></label>
+    <div id="bPass" hidden style="display:grid;gap:10px"><label class="f">Phrase de passe (8 caractères minimum)<input type="password" id="bP1" autocomplete="new-password"></label><label class="f">Confirmez<input type="password" id="bP2" autocomplete="new-password"></label></div>
+    <div class="err" id="bErr" role="alert"></div>
+    ${framed ? "" : `<button class="btn primary block" id="bShare">Enregistrer le fichier</button>`}
+    <details class="small"><summary>Autre méthode : copier le contenu</summary><button class="btn block" id="bCopy" style="margin-top:8px">Copier le contenu</button><textarea id="bText" readonly aria-label="Sauvegarde"></textarea></details>`, b => {
+      const enc = b.querySelector("#bEnc"), err = b.querySelector("#bErr");
+      enc.addEventListener("change", () => { b.querySelector("#bPass").hidden = !enc.checked; });
+      const build = async () => {
+        const plain = JSON.stringify({app:"PhéCompte", version:2, exportedAt:new Date().toISOString(), ...db});
+        if (!enc.checked) return plain;
+        const p1 = b.querySelector("#bP1").value, p2 = b.querySelector("#bP2").value;
+        if (p1.length < 8) throw new Error("La phrase de passe doit contenir au moins 8 caractères.");
+        if (p1 !== p2) throw new Error("Les deux saisies ne sont pas identiques.");
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+        return encryptDb(JSON.parse(plain), await deriveKey(p1, salt), salt);
+      };
+      const done = () => { lastBackup = new Date().toISOString(); try { localStorage.setItem("phecompte.lastBackup", lastBackup); } catch(e){} };
+      const s = b.querySelector("#bShare");
+      if (s) s.addEventListener("click", async () => {
+        err.textContent = ""; s.disabled = true; s.textContent = enc.checked ? "Chiffrement…" : "Préparation…";
+        try { const txt = await build(); await shareFile(txt, `phecompte-${(P().prenom || "sauvegarde").normalize("NFD").replace(/[^\w-]/g, "")}-${todayISO()}${enc.checked ? "-chiffre" : ""}.json`, "application/json"); done(); closeSheet(); render(); toast("Sauvegarde prête : choisissez Drive pour l'enregistrer"); }
+        catch(e){ err.textContent = e.message; s.disabled = false; s.textContent = "Enregistrer le fichier"; }
+      });
+      b.querySelector("#bCopy").addEventListener("click", async () => { try { err.textContent = ""; b.querySelector("#bText").value = await build(); copyText(b.querySelector("#bText")); done(); } catch(e){ err.textContent = e.message; } });
     });
 }
-function restore(text){
-  try {
-    const d = JSON.parse(text);
-    if (!Array.isArray(d.profiles) || !d.profiles.length || !d.profiles.every(p => p.id && (p.repas || p.days) && Array.isArray(p.analyses))) throw 0;
-    const keep = mesRecettes(), imp = Array.isArray(d.mesRecettes) ? d.mesRecettes.filter(r => r && r.id && r.payload) : [];
-    db = {profiles:d.profiles, current:d.profiles.some(p => p.id === d.current) ? d.current : d.profiles[0].id, seenAgeps: !!(d.seenAgeps || db.seenAgeps),
-      mesRecettes:[...imp, ...keep.filter(r => !imp.some(x => x.id === r.id))]};
-    db.profiles.forEach(migrate);
-    save(); render(); toast(`${db.profiles.length} profil${db.profiles.length > 1 ? "s" : ""} restauré${db.profiles.length > 1 ? "s" : ""}`);
-  } catch(e){ toast("Ce fichier n'est pas une sauvegarde PhéCompte valide"); }
+/* récupération : fichier en clair ou chiffré, puis fusion (recommandé) ou remplacement */
+function importBackup(text){
+  let f; try { f = JSON.parse(text); } catch(e){ toast("Ce fichier n'est pas une sauvegarde PhéCompte valide"); return; }
+  if (f && f.ct && f.iv && f.kdf){
+    sheet("Sauvegarde chiffrée", `<p class="small" style="margin:0">Saisissez la phrase de passe utilisée pour ce fichier.</p>
+      <label class="f">Phrase de passe<input type="password" id="iP" autocomplete="current-password"></label><div class="err" id="iErr" role="alert"></div>
+      <button class="btn primary block" id="iGo">Ouvrir la sauvegarde</button>`, b => {
+        b.querySelector("#iGo").addEventListener("click", async () => {
+          const go = b.querySelector("#iGo"); go.disabled = true; go.textContent = "Déchiffrement…";
+          try { const k = await deriveKey(b.querySelector("#iP").value, fromB64(f.kdf.salt)); const d = await decryptDb(text, k); closeSheet(); chooseImport(d); }
+          catch(e){ b.querySelector("#iErr").textContent = "Phrase de passe incorrecte."; go.disabled = false; go.textContent = "Ouvrir la sauvegarde"; }
+        });
+      });
+    return;
+  }
+  chooseImport(f);
 }
+function chooseImport(d){
+  if (!d || !Array.isArray(d.profiles) || !d.profiles.length || !d.profiles.every(p => p.id && (p.repas || p.days) && Array.isArray(p.analyses))){ toast("Ce fichier n'est pas une sauvegarde PhéCompte valide"); return; }
+  migrateAll(d);
+  const nDays = d.profiles.reduce((s, p) => s + Object.keys(p.days || {}).length, 0);
+  const apply = mode => {
+    if (mode === "remplacer" || !hasRealData(db)) applyMerged({...d, current: d.profiles.some(p => p.id === d.current) ? d.current : d.profiles[0].id});
+    else applyMerged(mergeDb(db, d));
+    closeSheet(); render(); toast(mode === "remplacer" || !hasRealData(db) ? "Sauvegarde récupérée" : "Données fusionnées avec la sauvegarde");
+  };
+  if (!hasRealData(db)){ apply("remplacer"); return; }
+  sheet("Récupérer la sauvegarde", `<p class="small" style="margin:0">Fichier du ${d.exportedAt ? longDate(d.exportedAt.slice(0, 10)) : "?"} : ${d.profiles.length} profil${d.profiles.length > 1 ? "s" : ""} (${esc(d.profiles.map(p => p.prenom).join(", "))}), ${nDays} journée${nDays > 1 ? "s" : ""}.</p>
+    <button class="btn primary block" data-imp="fusion">Fusionner avec ce téléphone (recommandé)</button>
+    <p class="small muted" style="margin:0">Les saisies des deux téléphones sont conservées ; pour un même repas modifié des deux côtés, la version la plus récente l'emporte.</p>
+    <button class="btn danger block" data-imp="remplacer">Remplacer les données de ce téléphone</button>`, b => b.querySelectorAll("[data-imp]").forEach(x => x.addEventListener("click", () => {
+      if (x.dataset.imp === "remplacer" && !x.dataset.ok){ x.dataset.ok = 1; x.textContent = "Confirmer : remplacer tout"; return; } apply(x.dataset.imp); })));
+}
+function restore(text){ importBackup(text); }
 
 /* ---------- events ---------- */
 document.addEventListener("click", e => {
@@ -1862,9 +1804,6 @@ document.addEventListener("click", e => {
     case "editProfile": openProfile(false); break;
     case "newProfile": openProfile(true); break;
     case "startReal": openProfile(false); break;
-    case "syncSetup": openSyncSetup(); break;
-    case "syncNow": syncNow(true); break;
-    case "syncOff": armed(t, "Confirmer : désactiver ici", async () => { syncInfo = {}; saveSyncInfo(); await keyStore.del(); render(); toast("Synchronisation désactivée sur ce téléphone (les données restent sur le Drive)"); }); break;
     case "seenAgeps": db.seenAgeps = true; save(); render(); break;
     case "switch": db.current = t.dataset.id; save(); render(); toast("Profil de " + P().prenom); break;
     case "delProfile": armed(t, "Confirmer : tout supprimer pour " + p.prenom, () => { db.profiles = db.profiles.filter(x => x.id !== p.id); db.current = db.profiles[0].id; save(); render(); toast("Profil supprimé"); }); break;
@@ -1884,9 +1823,8 @@ document.addEventListener("input", e => {
 document.addEventListener("change", e => {
   if (e.target.id === "findType"){ findF.type = e.target.value; render(); }
   if (e.target.id === "dayPick" && e.target.value){ ui.day = e.target.value > todayISO() ? todayISO() : e.target.value; ui.follow = isToday(ui.day); render(); }
-  if (e.target.id === "restoreFile" && e.target.files[0]){ const r = new FileReader(); r.onload = () => restore(r.result); r.readAsText(e.target.files[0]); }
+  if (e.target.id === "restoreFile" && e.target.files[0]){ const r = new FileReader(); r.onload = () => { e.target.value = ""; restore(r.result); }; r.readAsText(e.target.files[0]); }
 });
 route();
 loadCommunity();
-if (syncInfo.on){ syncNow(false); document.addEventListener("visibilitychange", () => { if (!document.hidden && (!syncInfo.last || Date.now() - new Date(syncInfo.last) > 120000)) syncNow(false); }); }
 </script>
