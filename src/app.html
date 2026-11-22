@@ -84,6 +84,7 @@ textarea{min-height:120px;font:13px/1.4 ui-monospace,Menlo,monospace}
 .cat{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex:none;font:700 .8rem var(--f-display)}
 .cat.F{background:color-mix(in srgb,var(--mid) 20%,var(--surface));color:var(--mid)}
 .cat.L{background:color-mix(in srgb,var(--low) 20%,var(--surface));color:var(--low)}
+.cat.R{background:color-mix(in srgb,var(--high) 14%,var(--surface));color:var(--high)}
 .cat.H{background:color-mix(in srgb,var(--sun) 28%,var(--surface));color:color-mix(in srgb,var(--sun) 55%,var(--ink))}
 .cat.C{background:color-mix(in srgb,var(--accent) 18%,var(--surface));color:var(--accent)}
 .parts{font:700 1rem var(--f-display);text-align:right;white-space:nowrap}
@@ -289,7 +290,7 @@ const qtyTxt = (f, g) => f.pp != null ? `${fmt(g)} ${unitOf(f, g)}` : `${fmt(g, 
 const ruleTxt = f => f.c === "H" ? (f.phe100 === 0 ? "sans Phé" : "parts non comptées (consigne AGEPS)") : f.pp != null ? `1 ${f.unit || "portion"} = ${fmt(f.pp)} part${f.pp > 1 ? "s" : ""}` : f.w ? `1 part = ${fmt(f.w)} g` : f.c === "H" ? (f.cata && f.phe100 === 0 ? "sans Phé" : f.cata && f.phe100 == null ? "Phé non publiée" : "Phé non comptée") : "sans Phé";
 const isSub = f => !!f && f.cat === "Substituts et compléments";
 const isHypo = f => !!f && f.c === "H" && !isSub(f);
-const catTag = f => isSub(f) ? "Sub" : f.c === "H" ? "Hyp" : f.c === "C" ? (f.pp != null ? "Prt" : "Emb") : f.c === "F" ? "Fr" : "Lég";
+const catTag = f => isSub(f) ? "Sub" : f.c === "R" ? "Rec" : f.c === "H" ? "Hyp" : f.c === "C" ? (f.pp != null ? "Prt" : "Emb") : f.c === "F" ? "Fr" : "Lég";
 /* calories : kcal pour 100 g (ou par portion pour un aliment compté en portions) ; null si non renseignées */
 const kcalOf = (f, g) => !f || f.kcal == null ? null : f.pp != null ? g * f.kcal : g * f.kcal / 100;
 const kcalRule = f => f.kcal == null ? "" : f.pp != null ? `${fmt(f.kcal, 0)} kcal/${f.unit || "portion"}` : `${fmt(f.kcal, 0)} kcal/100 g`;
@@ -426,6 +427,7 @@ function viewRepas(p){
   <section class="card"><div class="list">${list}</div>
     ${statsTxt(mealStats(p, d, ui.meal)) ? `<div class="small muted num" style="border-top:1px solid var(--line);padding-top:8px">${MEALS.find(x => x[0] === ui.meal)[1]} : ${statsTxt(mealStats(p, d, ui.meal))}</div>` : ""}
     <button class="btn primary block" data-act="addFood">${icon("plus")}Ajouter un aliment</button>
+    <button class="btn block" data-act="useRecipe">${icon("recettes")}Utiliser une recette</button>
     ${!any && rCount && !today ? `<button class="btn block" data-act="routineApply">${icon("repeat")}Ajouter la journée type à ce jour</button>` : ""}
   </section>
   <section class="card">
@@ -437,6 +439,63 @@ function viewRepas(p){
     <span class="grow"><b>Journée type</b><br><span class="small muted">${rCount ? `${rCount} aliment${rCount > 1 ? "s" : ""} remis automatiquement chaque jour (${fmt(rParts)} part${rParts > 1 ? "s" : ""})` : "Les aliments habituels, comme le biberon du matin, peuvent être remis automatiquement chaque jour."}</span></span>
     <button class="btn" data-act="routine">${rCount ? "Gérer" : "Configurer"}</button></div></section>
   ${any ? `<button class="btn ghost" data-act="clearDay" style="color:var(--high)">Vider les repas de cette journée</button>` : ""}`;
+}
+/* utiliser une recette dans un repas : règle de 3 sur le poids total du plat */
+const recipeWeight = r => r.src === "perso" ? (r.poids || Math.round(r.payload.ing.reduce((s, x) => s + (x.g || 0), 0))) : (r.poids || null);
+function openUseRecipe(){
+  const p = P(), mealName = MEALS.find(m => m[0] === ui.meal)[1].toLowerCase();
+  let q = "";
+  const listView = () => {
+    const s = q.trim().toLowerCase(), match = r => !s || r.n.toLowerCase().includes(s);
+    const mine = mesRecettes().filter(match), others = [...RECETTES, ...COMM].filter(match);
+    const row = r => `<button class="item" data-pick="${esc(r.id)}"><span class="cat R">Rec</span><span class="grow"><span class="t">${esc(r.n)}</span><br><span class="s">${recType(r)} · ${esc(r.parts)} parts pour la recette entière</span></span>›</button>`;
+    return `<input type="search" id="urQ" placeholder="Rechercher une recette" value="${esc(q)}" autocomplete="off">
+      <div class="list">${mine.length ? `<div class="letter">Mes recettes</div>${mine.map(row).join("")}` : `<div class="small muted" style="padding:8px 2px">Aucune recette personnelle${s ? " ne correspond" : " pour l'instant : créez-en une dans l'onglet Recettes"}.</div>`}
+      ${others.length ? `<div class="letter">Recettes de l'application</div>${others.map(row).join("")}` : ""}</div>`;
+  };
+  const drawList = () => {
+    const b = document.getElementById("sheetBody"); b.innerHTML = listView();
+    const i = b.querySelector("#urQ"); i.addEventListener("input", () => { q = i.value; const pos = i.selectionStart; drawList(); const n = document.getElementById("urQ"); n.focus(); n.setSelectionRange(pos, pos); });
+    b.querySelectorAll("[data-pick]").forEach(x => x.addEventListener("click", () => drawPick(allRecipes().find(r => String(r.id) === x.dataset.pick))));
+  };
+  const drawPick = r => {
+    const b = document.getElementById("sheetBody"), perso = r.src === "perso", w0 = recipeWeight(r), totParts = r.phe / PART_MG;
+    const sumIng = perso ? Math.round(r.payload.ing.reduce((s, x) => s + (x.g || 0), 0)) : null;
+    b.innerHTML = `<button class="btn ghost" data-back="1" style="justify-self:start">${icon("back")}Autre recette</button>
+      <div><div class="label">${recType(r)}</div><h3 style="font-size:1.25rem">${esc(r.n)}</h3>
+      <div class="small muted num">Recette entière : ${fmt(totParts)} parts (${fmt(r.phe, 0)} mg de Phé)${r.kcal ? ` · ${fmt(r.kcal, 0)} kcal` : ""}</div></div>
+      <label class="f">Poids total du plat préparé (g)<input type="text" id="urTot" inputmode="decimal" value="${w0 ? dec(w0) : ""}" placeholder="Pesez le plat entier"></label>
+      <div class="small muted" style="margin-top:-6px">${perso ? `Par défaut : somme des ingrédients (${fmt(sumIng, 0)} g). Si possible, pesez le plat une fois cuit : la cuisson fait perdre de l'eau.` : "Pesez le plat entier une fois préparé."}</div>
+      <label class="f">Quantité mangée (g)<input type="text" id="urEat" inputmode="decimal" placeholder="Ex. : 150"></label>
+      <div class="chips">${[["¼", .25], ["⅓", 1/3], ["½", .5], ["Tout", 1]].map(([l, k]) => `<button class="chip" type="button" data-frac="${k}">${l} du plat</button>`).join("")}</div>
+      <div class="note num" id="urOut">Indiquez le poids total et la quantité mangée.</div>
+      ${perso ? `<label class="row" style="flex-wrap:nowrap;gap:10px;cursor:pointer" for="urMem"><input type="checkbox" id="urMem" checked style="width:22px;height:22px;flex:none;accent-color:var(--accent)"><span class="small">Mémoriser ce poids total pour la prochaine fois</span></label>` : ""}
+      <div class="err" id="urErr" role="alert"></div>
+      <button class="btn primary block" id="urSave">Ajouter au ${mealName}</button>`;
+    const tot = b.querySelector("#urTot"), eat = b.querySelector("#urEat"), out = b.querySelector("#urOut");
+    const calc = () => {
+      const T = parseNum(tot.value), E = parseNum(eat.value);
+      if (isNaN(T) || T <= 0 || isNaN(E) || E <= 0){ out.textContent = "Indiquez le poids total et la quantité mangée."; return null; }
+      const parts = Math.round(100 * totParts * E / T) / 100, k = r.kcal ? r.kcal * E / T : null;
+      out.innerHTML = `<b>${fmt(parts)} part${parts > 1 ? "s" : ""}</b> · ${fmt(parts * PART_MG, 0)} mg de Phé${k != null ? ` · ${fmt(k, 0)} kcal` : ""}<br><span class="small muted">${fmt(totParts)} parts × ${fmt(E)} g ÷ ${fmt(T)} g</span>`;
+      return {T, E};
+    };
+    tot.addEventListener("input", calc); eat.addEventListener("input", calc);
+    b.querySelectorAll("[data-frac]").forEach(x => x.addEventListener("click", () => { const T = parseNum(tot.value); if (isNaN(T) || T <= 0){ b.querySelector("#urErr").textContent = "Indiquez d'abord le poids total du plat."; return; } b.querySelector("#urErr").textContent = ""; eat.value = dec(Math.round(T * +x.dataset.frac)); calc(); }));
+    b.querySelector("[data-back]").addEventListener("click", drawList);
+    b.querySelector("#urSave").addEventListener("click", () => {
+      const v = calc(); if (!v){ b.querySelector("#urErr").textContent = "Indiquez le poids total du plat et la quantité mangée, en grammes."; return; }
+      if (v.E > v.T * 1.05){ b.querySelector("#urErr").textContent = "La quantité mangée dépasse le poids total du plat."; return; }
+      // aliment « recette » figé (poids d'une part et kcal/100 g) pour que l'historique ne change pas si la recette est modifiée
+      const w = r.phe > 0 ? Math.round(100 * v.T * PART_MG / r.phe) / 100 : null, kc = r.kcal ? Math.round(10 * r.kcal / v.T * 100) / 10 : null;
+      let f = p.custom.find(c => c.c === "R" && c.recipeId === String(r.id) && c.w === w && (c.kcal ?? null) === kc && c.n === "Recette : " + r.n);
+      if (!f){ f = {ref:"c" + uid(), n:"Recette : " + r.n, c:"R", w, recipeId:String(r.id), rw:v.T, hidden:true}; if (kc != null) f.kcal = kc; p.custom.push(f); }
+      if (perso && b.querySelector("#urMem") && b.querySelector("#urMem").checked){ r.poids = v.T; }
+      dayData(p, ui.day, true).repas[ui.meal].push({ref:f.ref, g:v.E});
+      save(); closeSheet(); render(); toast(`${r.n} : ${fmt(partsOf(f, v.E))} parts ajoutées`);
+    });
+  };
+  sheet("Utiliser une recette", "", drawList);
 }
 function openRoutine(){
   const p = P();
@@ -1333,6 +1392,7 @@ document.addEventListener("click", e => {
     case "closeSheet": closeSheet(); break;
     case "meal": ui.meal = t.dataset.m; render(); break;
     case "addFood": ui.search = ""; openAddFood(); break;
+    case "useRecipe": openUseRecipe(); break;
     case "addCat": ui.addCat = t.dataset.c; ui.search = ""; openAddFood.draw(); break;
     case "pickFood": openWeight(t.dataset.ref); break;
     case "editItem": openWeight(dayData(p, ui.day).repas[ui.meal][+t.dataset.i].ref, +t.dataset.i); break;
