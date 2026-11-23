@@ -229,6 +229,7 @@ function save(){
   if (SNAP) stamp();
   try { localStorage.setItem(KEY, JSON.stringify(db)); storageOK = true; }
   catch(e){ storageOK = false; }
+  if (typeof driveSoon === "function") driveSoon();
 }
 function emptyRepas(){ return {pdj:[], dej:[], gouter:[], diner:[]}; }
 function newProfile(prenom){
@@ -475,6 +476,7 @@ function banners(p){
   if (!db.seenAgeps && ui.tab === "repas") h += `<div class="card info" role="note"><div class="row" style="flex-wrap:nowrap;align-items:flex-start"><span class="grow small"><b>À savoir</b><br>Les produits hypoprotéinés AGEPS (pâtes, pain, biscuits… de l'onglet « Hypo ») ne comptent aucune part de Phé, conformément à la consigne. Leurs grammes et leurs calories sont enregistrés pour la diététicienne.</span><button class="btn" data-act="seenAgeps" style="min-height:38px;padding:6px 12px">J'ai compris</button></div></div>`;
   if (p.migratedDay && ui.tab === "repas") h += `<div class="warn" role="note" style="display:grid;gap:8px"><span class="small"><b>Mise à jour de l'application.</b> Les repas saisis avant la mise à jour ont été rangés au <b>${esc(longDate(p.migratedDay))}</b>. S'ils correspondent à un autre jour (par exemple la veille), déplacez-les.</span>
     <div class="row"><button class="btn primary grow" data-act="fixMigrated" style="min-height:38px">Déplacer ces repas</button><button class="btn grow" data-act="okMigrated" style="min-height:38px">C'est le bon jour</button></div></div>`;
+  if (typeof driveAvailable === "function" && driveAvailable() && DS.on && DS.needLogin) h += `<div class="banner"><span class="grow">Synchronisation Google Drive en pause : reconnectez-vous pour retrouver les saisies de vos autres appareils.</span><button class="btn" data-act="driveLogin">Se reconnecter</button></div>`;
   if (!storageOK) h += `<div class="banner"><span class="grow">Ce navigateur n'enregistre pas les données. Exportez une sauvegarde depuis l'onglet Profil.</span></div>`;
   return h;
 }
@@ -652,7 +654,7 @@ function sheet(title, body, onMount){
     <div class="sheet-b" id="sheetBody">${body}</div></div></div>`;
   onMount && onMount(document.getElementById("sheetBody"));
 }
-function closeSheet(){ document.getElementById("sheetRoot").innerHTML = ""; }
+function closeSheet(){ document.getElementById("sheetRoot").innerHTML = ""; if (typeof drivePending !== "undefined" && drivePending) setTimeout(driveSync, 300); }
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
 
 function openAddFood(){
@@ -1637,10 +1639,11 @@ function viewProfil(p){
   <section class="card"><div class="label">Profils sur cet appareil</div><div class="list">
     ${others.map(o => `<button class="item" data-act="switch" data-id="${o.id}">${avatarHTML(o)}<span class="grow t">${esc(o.prenom)} ${esc(o.nom)}${o.isExample ? " (exemple)" : ""}</span><span class="s">Utiliser</span></button>`).join("") || `<div class="small muted">Un seul profil. Ajoutez-en un pour chaque personne suivie.</div>`}
   </div><button class="btn block" data-act="newProfile">${icon("plus")}Ajouter un profil</button></section>
-  <section class="card"><div class="label">Sauvegarde et deuxième téléphone</div>
-    <p class="small" style="margin:0">Les données restent sur ce téléphone. Enregistrez une sauvegarde dans <b>Google Drive</b> (ou Fichiers) avec le menu Partager. Sur l'autre téléphone, récupérez-la depuis Drive : les données des deux téléphones sont <b>fusionnées</b>, rien n'est écrasé.</p>
+  ${driveCard()}
+  <section class="card"><div class="label">${driveAvailable() ? "Sauvegarde dans un fichier" : "Sauvegarde et deuxième téléphone"}</div>
+    <p class="small" style="margin:0">${driveAvailable() ? "Pour garder une copie à part ou la transmettre : enregistrez un fichier avec le menu Partager, puis récupérez-le sur un autre appareil. Les données sont <b>fusionnées</b>, rien n'est écrasé." : "Les données restent sur ce téléphone. Enregistrez une sauvegarde dans <b>Google Drive</b> (ou Fichiers) avec le menu Partager. Sur l'autre téléphone, récupérez-la depuis Drive : les données des deux téléphones sont <b>fusionnées</b>, rien n'est écrasé."}</p>
     <div class="small ${lastBackup && Date.now() - new Date(lastBackup) < 7 * 864e5 ? "muted" : ""}" style="${lastBackup && Date.now() - new Date(lastBackup) < 7 * 864e5 ? "" : "color:var(--mid)"}">${lastBackup ? "Dernière sauvegarde " + ago(lastBackup) + "." : "Aucune sauvegarde enregistrée depuis ce téléphone."}</div>
-    <button class="btn primary block" data-act="backup">Enregistrer dans Google Drive</button>
+    <button class="btn ${driveAvailable() ? "" : "primary "}block" data-act="backup">Enregistrer dans Google Drive</button>
     <label class="btn block" for="restoreFile">Récupérer depuis Google Drive</label><input type="file" id="restoreFile" accept=".json,application/json,text/plain,application/octet-stream" hidden>
   </section>
   <section class="card"><div class="label">À propos</div>
@@ -1765,6 +1768,120 @@ function chooseImport(d){
 }
 function restore(text){ importBackup(text); }
 
+/* ---------- synchronisation Google Drive (fichier dans le Drive de l'utilisateur) ----------
+   Connexion OAuth « jeton » par redirection, sans serveur : portée drive.file (l'application ne voit que le fichier qu'elle a créé).
+   Google limite le jeton à 1 h : il est renouvelé sans action (redirection prompt=none) à l'ouverture de l'application.
+   Chaque synchronisation fusionne (mergeDb) le fichier et ce téléphone, puis renvoie le résultat : rien n'est écrasé. */
+const GOOGLE_CLIENT_ID = "";
+const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file";
+const DRIVE_KEY = "phecompte.drive", DRIVE_NAME = "PhéCompte - synchronisation.json";
+const DRIVE_REDIRECT = (() => { try { const u = new URL("index.html", location.href); return u.origin + u.pathname; } catch(e){ return ""; } })();
+const driveAvailable = () => !!GOOGLE_CLIENT_ID && !framed && /^https?:$/.test(location.protocol);
+let DS; try { DS = JSON.parse(localStorage.getItem(DRIVE_KEY) || "null") || {}; } catch(e){ DS = {}; }
+const driveSave = () => { try { localStorage.setItem(DRIVE_KEY, JSON.stringify(DS)); } catch(e){} };
+const driveTokenOk = () => !!(DS.on && DS.token && DS.exp && Date.now() < DS.exp - 120000);
+let driveBusy = false, driveAgain = false, driveTimer = null, drivePending = false;
+
+function driveAuth(mode){
+  const state = Math.random().toString(36).slice(2) + Date.now().toString(36);
+  try { sessionStorage.setItem("phecompte.oauth", JSON.stringify({state, mode, back:location.hash})); } catch(e){}
+  if (mode === "silent"){ DS.lastSilent = Date.now(); driveSave(); }
+  const q = new URLSearchParams({client_id:GOOGLE_CLIENT_ID, redirect_uri:DRIVE_REDIRECT, response_type:"token", scope:DRIVE_SCOPE,
+    include_granted_scopes:"true", state, prompt: mode === "silent" ? "none" : "select_account"});
+  if (DS.email) q.set("login_hint", DS.email);
+  location.assign("https://accounts.google.com/o/oauth2/v2/auth?" + q);
+}
+/* retour de Google : #access_token=…&expires_in=…&state=…  ou  #error=…&state=… */
+function driveCatchRedirect(){
+  const h = location.hash.slice(1);
+  if (!/(^|&)(access_token|error)=/.test(h)) return;
+  const r = new URLSearchParams(h); let saved = null;
+  try { saved = JSON.parse(sessionStorage.getItem("phecompte.oauth") || "null"); sessionStorage.removeItem("phecompte.oauth"); } catch(e){}
+  history.replaceState(null, "", location.pathname + location.search + (saved && saved.back || ""));
+  if (!saved || r.get("state") !== saved.state) return;
+  if (r.get("access_token")){
+    DS.on = true; DS.token = r.get("access_token"); DS.exp = Date.now() + (+r.get("expires_in") || 3600) * 1000; DS.needLogin = false; DS.err = "";
+    driveSave(); if (saved.mode !== "silent") ui.driveJustOn = true;
+  } else if (saved.mode === "silent"){ DS.needLogin = true; DS.token = ""; driveSave(); }
+  else if (r.get("error") !== "access_denied" || !DS.on){ /* refus à l'activation : rien à faire */ }
+}
+/* renouvellement automatique : seulement si rien n'est en cours de saisie, et au plus une fois toutes les 10 minutes */
+function driveRenewIfNeeded(){
+  if (!driveAvailable() || !DS.on || DS.needLogin || driveTokenOk() || !navigator.onLine) return false;
+  if (document.getElementById("sheetRoot").children.length || /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || "")) return false;
+  if (DS.lastSilent && Date.now() - DS.lastSilent < 10 * 60000) return false;
+  driveAuth("silent"); return true;
+}
+async function gapi(url, opt = {}){
+  const r = await fetch(url, {...opt, headers:{...(opt.headers || {}), Authorization:"Bearer " + DS.token}});
+  if (r.status === 401){ DS.token = ""; DS.exp = 0; driveSave(); throw Object.assign(new Error("Connexion Google expirée"), {auth:true}); }
+  if (r.status === 404 && opt.allow404) return null;
+  if (!r.ok) throw new Error("Google Drive a répondu " + r.status);
+  return r;
+}
+const canon = v => Array.isArray(v) ? "[" + v.map(canon).join(",") + "]" : v && typeof v === "object" ? "{" + Object.keys(v).sort().map(k => JSON.stringify(k) + ":" + canon(v[k])).join(",") + "}" : JSON.stringify(v ?? null);
+async function driveFindFile(){
+  const q = encodeURIComponent("appProperties has { key='phecompte' and value='sync' } and trashed=false");
+  const r = await (await gapi(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=drive&orderBy=modifiedTime desc&fields=files(id)`)).json();
+  return r.files && r.files[0] ? r.files[0].id : null;
+}
+async function driveSync(){
+  if (!driveAvailable() || !driveTokenOk()) return;
+  if (driveBusy){ driveAgain = true; return; }
+  if (document.getElementById("sheetRoot").children.length || /^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName || "")){ drivePending = true; return; }
+  driveBusy = true; drivePending = false;
+  try {
+    if (!DS.email){ try { const a = await (await gapi("https://www.googleapis.com/drive/v3/about?fields=user(emailAddress)")).json(); DS.email = a.user && a.user.emailAddress || ""; } catch(e){ if (e.auth) throw e; } }
+    let id = DS.fileId, remote = null;
+    if (id){ const r = await gapi(`https://www.googleapis.com/drive/v3/files/${id}?alt=media`, {allow404:true}); if (r) remote = await r.json().catch(() => null); else id = null; }
+    if (!id){ id = await driveFindFile(); if (id) remote = await (await gapi(`https://www.googleapis.com/drive/v3/files/${id}?alt=media`)).json().catch(() => null); }
+    let next = db, remoteCanon = null;
+    if (remote && Array.isArray(remote.profiles) && remote.profiles.length){
+      const {app, version, exportedAt, syncedAt, ...rd} = remote; migrateAll(rd); remoteCanon = canon(rd);
+      next = hasRealData(db) ? mergeDb(db, rd) : {...rd, current: rd.profiles.some(p => p.id === rd.current) ? rd.current : rd.profiles[0].id};
+    }
+    if (canon(next) !== canon(db)){
+      if (document.getElementById("sheetRoot").children.length){ drivePending = true; return; }   // une saisie a commencé entre-temps
+      applyMerged(next); render();
+    }
+    if (hasRealData(db) && canon(db) !== remoteCanon){
+      const body = JSON.stringify({app:"PhéCompte", version:2, syncedAt:new Date().toISOString(), ...db});
+      if (id) await gapi(`https://www.googleapis.com/upload/drive/v3/files/${id}?uploadType=media`, {method:"PATCH", headers:{"Content-Type":"application/json"}, body});
+      else {
+        const meta = {name:DRIVE_NAME, mimeType:"application/json", appProperties:{phecompte:"sync"}}, bd = "pc" + Date.now();
+        const mp = `--${bd}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(meta)}\r\n--${bd}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${bd}--`;
+        id = (await (await gapi("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id", {method:"POST", headers:{"Content-Type":"multipart/related; boundary=" + bd}, body:mp})).json()).id;
+      }
+    }
+    DS.fileId = id; DS.lastSync = new Date().toISOString(); DS.err = ""; driveSave();
+  } catch(e){
+    DS.err = e.auth ? "" : (navigator.onLine ? e.message : "Hors connexion"); driveSave();
+  } finally {
+    driveBusy = false;
+    if (ui.tab === "profil" && !document.getElementById("sheetRoot").children.length && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || "")) render();
+    if (driveAgain){ driveAgain = false; driveSync(); }
+  }
+}
+function driveSoon(){ if (!DS.on) return; clearTimeout(driveTimer); driveTimer = setTimeout(driveSync, 1500); }
+function driveOff(){
+  if (DS.token) fetch("https://oauth2.googleapis.com/revoke?token=" + encodeURIComponent(DS.token), {method:"POST"}).catch(() => {});
+  DS = {}; driveSave();
+}
+function driveCard(){
+  if (!driveAvailable()) return "";
+  if (!DS.on) return `<section class="card"><div class="label">Synchronisation entre appareils</div>
+    <p class="small" style="margin:0">Saisissez le midi sur un téléphone et le soir sur un autre : avec la synchronisation, chaque appareil retrouve automatiquement les saisies des autres. Les données sont rangées dans <b>votre</b> Google Drive, dans un seul fichier ; l'application n'a accès à rien d'autre.</p>
+    <button class="btn primary block" data-act="driveOn">Activer avec mon compte Google</button>
+    <p class="small muted" style="margin:0">À faire une fois sur chaque appareil, avec le même compte Google.</p></section>`;
+  const st = DS.needLogin ? `<span style="color:var(--mid)">Reconnexion à Google nécessaire.</span>`
+    : DS.err ? `<span style="color:var(--mid)">Dernier essai : ${esc(DS.err)}.</span>`
+    : DS.lastSync ? `Dernière synchronisation ${ago(DS.lastSync)}.` : "Première synchronisation en attente.";
+  return `<section class="card"><div class="label">Synchronisation entre appareils</div>
+    <p class="small" style="margin:0">Activée${DS.email ? ` avec <b>${esc(DS.email)}</b>` : ""}. ${st}</p>
+    ${DS.needLogin || !driveTokenOk() ? `<button class="btn primary block" data-act="driveLogin">Se reconnecter à Google</button>` : `<button class="btn block" data-act="driveNow">Synchroniser maintenant</button>`}
+    <button class="btn ghost block" data-act="driveOff">Désactiver sur cet appareil</button></section>`;
+}
+
 /* ---------- events ---------- */
 document.addEventListener("click", e => {
   const t = e.target.closest("[data-act],[data-tab]"); if (!t) return;
@@ -1856,6 +1973,9 @@ document.addEventListener("click", e => {
     case "switch": db.current = t.dataset.id; save(); render(); toast("Profil de " + P().prenom); break;
     case "delProfile": armed(t, "Confirmer : tout supprimer pour " + p.prenom, () => { db.profiles = db.profiles.filter(x => x.id !== p.id); db.current = db.profiles[0].id; save(); render(); toast("Profil supprimé"); }); break;
     case "backup": openBackup(); break;
+    case "driveOn": case "driveLogin": if (!navigator.onLine){ toast("Connexion Internet nécessaire"); break; } driveAuth("interactive"); break;
+    case "driveNow": toast("Synchronisation…"); driveSync().then(() => toast(DS.err ? "Échec : " + DS.err : "Synchronisé")); break;
+    case "driveOff": armed(t, "Confirmer : désactiver", () => { driveOff(); render(); toast("Synchronisation désactivée sur cet appareil (le fichier reste dans votre Drive)"); }); break;
   }
 });
 document.getElementById("hdrAvatar").addEventListener("click", () => { location.hash = "profil"; });
@@ -1873,6 +1993,14 @@ document.addEventListener("change", e => {
   if (e.target.id === "dayPick" && e.target.value){ ui.day = e.target.value > todayISO() ? todayISO() : e.target.value; ui.follow = isToday(ui.day); render(); }
   if (e.target.id === "restoreFile" && e.target.files[0]){ const r = new FileReader(); r.onload = () => { e.target.value = ""; restore(r.result); }; r.readAsText(e.target.files[0]); }
 });
+if (driveAvailable()) driveCatchRedirect();
 route();
 loadCommunity();
+if (driveAvailable()){
+  if (ui.driveJustOn){ ui.driveJustOn = false; toast("Synchronisation activée"); }
+  if (!driveRenewIfNeeded()) driveSync();
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && DS.on){ if (!driveRenewIfNeeded()) driveSync(); } else if (document.visibilityState === "hidden" && driveTimer){ clearTimeout(driveTimer); driveSync(); } });
+  window.addEventListener("online", () => { if (DS.on && !driveRenewIfNeeded()) driveSync(); });
+  setInterval(() => { if (document.visibilityState === "visible" && driveTokenOk()) driveSync(); }, 60000);
+}
 </script>

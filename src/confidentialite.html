@@ -5,16 +5,20 @@
 <body><main>
 <p><a href="index.html">← Retour à PhéCompte</a></p>
 <h1>Politique de confidentialité de PhéCompte</h1>
-<p>Mise à jour : 22 novembre 2026.</p>
+<p>Mise à jour : 24 novembre 2026.</p>
 <p>PhéCompte est une application gratuite d'aide au suivi du régime de la phénylcétonurie. Elle fonctionne dans le navigateur du téléphone, sans compte PhéCompte.</p>
 <h2>Données de santé (repas, notes, résultats, profils)</h2>
-<p>Elles sont enregistrées <b>uniquement sur le téléphone</b>. PhéCompte n'a aucun serveur qui les reçoit ou les conserve. Le rapport PDF et les sauvegardes ne sont partagés que si l'utilisateur les envoie lui-même.</p>
-<h2>Sauvegarde et deuxième téléphone (facultatif)</h2>
-<p>L'utilisateur peut créer un fichier de sauvegarde et l'enregistrer où il le souhaite (par exemple dans <b>son</b> Google Drive) avec le menu Partager du téléphone. PhéCompte ne se connecte à aucun compte Google et ne voit pas ce fichier. Le fichier peut être <b>chiffré sur le téléphone</b> (AES-256, clé dérivée d'une phrase de passe) : il est alors illisible sans cette phrase. Sur un autre téléphone, l'utilisateur récupère le fichier et les données sont fusionnées.</p>
+<p>Elles sont enregistrées <b>uniquement sur le téléphone</b>. PhéCompte n'a aucun serveur qui les reçoit ou les conserve. Elles ne quittent le téléphone que si l'utilisateur le décide : rapport PDF envoyé, fichier de sauvegarde, ou synchronisation avec <b>son</b> Google Drive (voir ci-dessous).</p>
+<h2>Synchronisation entre appareils avec Google Drive (facultatif)</h2>
+<p>Si l'utilisateur l'active, PhéCompte enregistre les données dans <b>un seul fichier</b> (« PhéCompte - synchronisation.json ») dans <b>son propre</b> Google Drive, pour que ses autres appareils les retrouvent automatiquement. La connexion se fait directement entre le téléphone et Google : aucun serveur PhéCompte n'intervient et l'auteur de l'application n'a pas accès à ce fichier.</p>
+<p>L'autorisation demandée à Google est limitée (« drive.file ») : l'application ne peut voir et modifier que les fichiers qu'elle a créés, jamais le reste du Drive. Elle lit aussi l'adresse e-mail du compte, pour l'afficher et éviter de redemander le choix du compte. Le jeton d'accès, valable une heure, est conservé sur le téléphone puis renouvelé automatiquement auprès de Google.</p>
+<p>Le fichier est stocké chez Google selon les conditions du compte Google de l'utilisateur. Pour arrêter : Profil → « Désactiver sur cet appareil » (l'autorisation est retirée), puis supprimer le fichier dans Google Drive si on le souhaite. L'accès peut aussi être retiré à tout moment depuis les paramètres du compte Google (Sécurité → Applications tierces).</p>
+<h2>Fichier de sauvegarde (facultatif)</h2>
+<p>L'utilisateur peut créer un fichier de sauvegarde et l'enregistrer où il le souhaite (par exemple dans <b>son</b> Google Drive) avec le menu Partager du téléphone. PhéCompte ne voit pas ce fichier. Le fichier peut être <b>chiffré sur le téléphone</b> (AES-256, clé dérivée d'une phrase de passe) : il est alors illisible sans cette phrase. Sur un autre téléphone, l'utilisateur récupère le fichier et les données sont fusionnées.</p>
 <h2>Trouvailles et recettes partagées (facultatif)</h2>
 <p>Les trouvailles (produit, magasin ou site, valeurs de l'étiquette) et les recettes proposées sont envoyées <b>anonymement</b> : ni nom, ni compte, ni adresse IP conservée (seule une empreinte qui change chaque jour sert à limiter les abus). Elles sont publiques après modération.</p>
 <h2>Services tiers</h2>
-<p>Hébergement du site : GitHub Pages. Service des trouvailles et recettes : Cloudflare. Recherche facultative d'un code-barres : Open Food Facts. Vérification anti-robot : Cloudflare Turnstile.</p>
+<p>Hébergement du site : GitHub Pages. Service des trouvailles et recettes : Cloudflare. Recherche facultative d'un code-barres : Open Food Facts. Vérification anti-robot : Cloudflare Turnstile. Synchronisation facultative : Google Drive (compte Google de l'utilisateur).</p>
 <h2>Contact</h2>
 <p>Pour toute question : via le dépôt <a href="https://github.com/sylvain-hazera/PheCompte">github.com/sylvain-hazera/PheCompte</a>.</p>
 </main></body></html>
