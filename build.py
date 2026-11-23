@@ -26,7 +26,8 @@ sw='\n<script>if("serviceWorker" in navigator && location.protocol.startsWith("h
 (out/'index.html').write_text(head+app.replace('<div class="shell">','</head><body>\n<div class="shell">',1)+sw+'</body></html>\n',encoding='utf-8')
 for f in ['manifest.webmanifest','sw.js']: shutil.copy(root/'src'/f,out/f)
 for f in (root/'icons').glob('*.png'): shutil.copy(f,out/'icons'/f.name)
-(out/'aliments.html').write_text((root/'src/aliments.html').read_text(encoding='utf-8').replace('/*DATA*/',data),encoding='utf-8')
+_s=json.loads((root/'data/parts-sfeim.json').read_text(encoding='utf-8'))
+(out/'aliments.html').write_text((root/'src/aliments.html').read_text(encoding='utf-8').replace('/*DATA*/',data+'const SFEIM='+json.dumps(_s,ensure_ascii=False,separators=(',',':'))+';\n'),encoding='utf-8')
 shutil.copy(out/'aliments.html',root/'aliments.html')
 c=root/'data/recettes-communaute.json'
 (out/'recettes-communaute.json').write_text(c.read_text(encoding='utf-8') if c.exists() else '[]\n',encoding='utf-8')

@@ -207,7 +207,8 @@ const longDate = iso => new Date(iso + "T12:00").toLocaleDateString("fr-FR", {da
 const uid = () => Math.random().toString(36).slice(2, 9);
 const framed = (() => { try { return window.self !== window.top; } catch(e) { return true; } })();
 
-const FOOD = new Map(ALIMENTS.map(([id, n, w, t, c]) => ["a"+id, {ref:"a"+id, n, w, t, c}]));
+/* x = 1 : aliment retiré du consensus SFEIM 2009, gardé pour relire les anciens repas mais plus proposé */
+const FOOD = new Map(ALIMENTS.map(([id, n, w, t, c, x]) => ["a"+id, {ref:"a"+id, n, w, t, c, x:!!x}]));
 /* calories des fruits et légumes : Ciqual 2020 (data/kcal-fruits-legumes.json) */
 if (typeof KCAL_FL !== "undefined") for (const [ref, k] of Object.entries(KCAL_FL)){ const f = FOOD.get(ref); if (f){ f.kcal = k.kcal; f.ciq = k; } }
 /* catalogue des produits hypoprotéinés (data/hypo-catalogue.json) */
@@ -661,7 +662,7 @@ function openAddFood(){
     let body = `<div class="seg" role="group" aria-label="Type d'aliment">${cats.map(([k,l]) => `<button data-act="addCat" data-c="${k}" aria-pressed="${ui.addCat===k}">${l}</button>`).join("")}</div>`;
     if (ui.addCat === "F" || ui.addCat === "L"){
       const q = ui.search.trim().toLowerCase();
-      const rows = [...FOOD.values()].filter(f => f.c === ui.addCat && (!q || f.n.toLowerCase().includes(q))).sort((a, b) => a.n.localeCompare(b.n, "fr"));
+      const rows = [...FOOD.values()].filter(f => f.c === ui.addCat && !f.x && (!q || f.n.toLowerCase().includes(q))).sort((a, b) => a.n.localeCompare(b.n, "fr"));
       let last = "", list = "";
       for (const f of rows){
         const L = f.n[0].toUpperCase().normalize("NFD")[0];
@@ -1303,7 +1304,7 @@ function openPropose(){
       <label class="f grow">Niveau<select data-f="lv">${["Facile","Moyen","Difficile"].map(t => `<option ${d.lv === t ? "selected" : ""}>${t}</option>`).join("")}</select></label></div>
     <div class="row" style="flex-wrap:nowrap"><label class="f grow">Préparation (min)<input type="text" inputmode="numeric" data-f="min" value="${esc(d.min)}"></label><label class="f grow">Personnes<input type="text" inputmode="numeric" data-f="p" value="${esc(d.p)}"></label><label class="f grow">kcal (total)<input type="text" inputmode="numeric" data-f="kcal" value="${esc(d.kcal)}" placeholder="facultatif"></label></div>
     <div class="label">Ingrédients</div>
-    <datalist id="foodNames">${[...FOOD.values()].sort((a, b) => a.n.localeCompare(b.n, "fr")).map(f => `<option value="${esc(f.n)}">`).join("")}</datalist>
+    <datalist id="foodNames">${[...FOOD.values()].filter(f => !f.x).sort((a, b) => a.n.localeCompare(b.n, "fr")).map(f => `<option value="${esc(f.n)}">`).join("")}</datalist>
     <div id="ingRows" style="display:grid;gap:10px">${d.ing.map(ingRow).join("")}</div>
     <button class="btn" data-act="ingAdd">${icon("plus")}Ajouter un ingrédient</button>
     <div class="total card" style="padding:14px"><div class="label">Total calculé</div><div class="num" style="font:800 1.8rem var(--f-display)" id="propTotal"></div></div>
@@ -1645,7 +1646,7 @@ function viewProfil(p){
   <section class="card"><div class="label">À propos</div>
     <p class="small" style="margin:0"><b>Produits hypoprotéinés AGEPS.</b> Les produits hypoprotéinés AGEPS (pâtes, pain, biscuits… de l'onglet « Hypo ») ne comptent aucune part de Phé, conformément à la consigne. Leurs grammes et leurs calories sont enregistrés pour la diététicienne.</p>
     <p class="small" style="margin:0"><b>Outil indicatif.</b> Les calculs et graphiques ne remplacent ni l'avis de l'équipe médicale ni le régime prescrit. En cas de doute sur un aliment ou un résultat, demandez à votre diététicien(ne) ou à votre médecin.</p>
-    <p class="small muted" style="margin:0">La table des aliments, la méthode de calcul des produits emballés et les recettes proviennent de l'application aPhetit (2015-2017), conçue avec la SFEIM et l'association Les Feux Follets. Ces données n'ont pas été mises à jour depuis. Usage personnel uniquement.</p>
+    <p class="small muted" style="margin:0">La méthode de calcul des produits emballés et les recettes proviennent de l'application aPhetit (2015-2017), conçue avec la SFEIM et l'association Les Feux Follets. Les fruits et légumes suivent le consensus national SFEIM 2009 (listes de la filière G2M). Usage personnel uniquement.</p>
     <a class="btn block" href="aliments.html" target="_blank" rel="noopener">Consulter la base d'aliments et recettes</a>
     <p class="small muted" style="margin:0"><a href="confidentialite.html" target="_blank" rel="noopener">Politique de confidentialité</a> · Liens utiles : <a href="https://www.sfeim.org" target="_blank" rel="noopener">sfeim.org</a> · <a href="https://www.phenylcetonurie.org" target="_blank" rel="noopener">phenylcetonurie.org</a></p>
   </section>

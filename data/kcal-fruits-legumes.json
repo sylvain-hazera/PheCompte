@@ -1107,6 +1107,41 @@
    "nom": "Champignon, pleurote, crue",
    "calc": false,
    "approx": false
+  },
+  "a166": {
+   "kcal": 43.0,
+   "code": 11014,
+   "nom": "Persil, frais",
+   "calc": false,
+   "approx": false
+  },
+  "a167": {
+   "kcal": 18.0,
+   "code": 20132,
+   "nom": "Potimarron, pulpe, cru",
+   "calc": true,
+   "approx": false
+  },
+  "a168": {
+   "kcal": 38.2,
+   "code": 20331,
+   "nom": "Potimarron, pulpe, bouilli/cuit à l'eau",
+   "calc": false,
+   "approx": false
+  },
+  "a169": {
+   "kcal": 17.8,
+   "code": 20200,
+   "nom": "Laitue iceberg, crue",
+   "calc": true,
+   "approx": false
+  },
+  "a170": {
+   "kcal": 16.7,
+   "code": 20171,
+   "nom": "Laitue romaine, crue",
+   "calc": true,
+   "approx": false
   }
  }
 }

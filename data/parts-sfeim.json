@@ -1,0 +1,5888 @@
+{
+ "source": "Consensus national des parts pondérales des fruits et légumes, diététiciens SFEIM, juin 2009. Listes publiées par la filière G2M (filiere-g2m.fr, Listes des parts de protéines et acides aminés).",
+ "avertissement": "Utilisation encadrée par un diététicien expérimenté dans les maladies héréditaires du métabolisme et supervisée par un médecin métabolicien.",
+ "cats": {
+  "S": "Fruits au sirop",
+  "F": "Fruits frais",
+  "L": "Légumes",
+  "C": "Champignons"
+ },
+ "systemes": [
+  {
+   "id": "phe",
+   "nom": "Phénylalanine",
+   "part": "1 part = 20 mg de phénylalanine",
+   "pathologies": "Phénylcétonurie, hyperphénylalaninémie",
+   "aliments": [
+    [
+     "S",
+     "Abricot au sirop",
+     75
+    ],
+    [
+     "S",
+     "Airelles au sirop",
+     115
+    ],
+    [
+     "S",
+     "Ananas au sirop",
+     220
+    ],
+    [
+     "S",
+     "Cerises au sirop",
+     95
+    ],
+    [
+     "S",
+     "Figues au sirop",
+     220
+    ],
+    [
+     "S",
+     "Fraises au sirop",
+     125
+    ],
+    [
+     "S",
+     "Framboises au sirop",
+     90
+    ],
+    [
+     "S",
+     "Litchis au sirop",
+     40
+    ],
+    [
+     "S",
+     "Mandarines au sirop",
+     135
+    ],
+    [
+     "S",
+     "Myrtilles au sirop",
+     85
+    ],
+    [
+     "S",
+     "Pamplemousse au sirop",
+     60
+    ],
+    [
+     "S",
+     "Poires au sirop",
+     1000
+    ],
+    [
+     "S",
+     "Prunes au sirop",
+     665
+    ],
+    [
+     "S",
+     "Pêches au sirop",
+     145
+    ],
+    [
+     "S",
+     "Raisins au sirop",
+     195
+    ],
+    [
+     "F",
+     "Abricot",
+     40
+    ],
+    [
+     "F",
+     "Ananas",
+     95
+    ],
+    [
+     "F",
+     "Baie de sureau",
+     50
+    ],
+    [
+     "F",
+     "Banane",
+     40
+    ],
+    [
+     "F",
+     "Carambole ou fruit étoile",
+     45
+    ],
+    [
+     "F",
+     "Cassis",
+     45
+    ],
+    [
+     "F",
+     "Cerise",
+     85
+    ],
+    [
+     "F",
+     "Citron",
+     80
+    ],
+    [
+     "F",
+     "Citron lime",
+     95
+    ],
+    [
+     "F",
+     "Clémentine / Mandarine / Tangerine",
+     80
+    ],
+    [
+     "F",
+     "Coing",
+     165
+    ],
+    [
+     "F",
+     "Corossol",
+     60
+    ],
+    [
+     "F",
+     "Figue",
+     110
+    ],
+    [
+     "F",
+     "Figue de Barbarie ou Nopale",
+     40
+    ],
+    [
+     "F",
+     "Fraise",
+     105
+    ],
+    [
+     "F",
+     "Framboise",
+     55
+    ],
+    [
+     "F",
+     "Fruit de la passion ou grenadille",
+     30
+    ],
+    [
+     "F",
+     "Goyave",
+     65
+    ],
+    [
+     "F",
+     "Grenade",
+     70
+    ],
+    [
+     "F",
+     "Groseille ou gadelle rouge et blanche",
+     45
+    ],
+    [
+     "F",
+     "Kaki",
+     75
+    ],
+    [
+     "F",
+     "Kiwi",
+     45
+    ],
+    [
+     "F",
+     "Kumquat",
+     35
+    ],
+    [
+     "F",
+     "Litchi",
+     60
+    ],
+    [
+     "F",
+     "Mangue",
+     200
+    ],
+    [
+     "F",
+     "Melon",
+     85
+    ],
+    [
+     "F",
+     "Mirabelle",
+     90
+    ],
+    [
+     "F",
+     "Myrtille",
+     85
+    ],
+    [
+     "F",
+     "Mûre",
+     50
+    ],
+    [
+     "F",
+     "Nashi ou poire asiatique",
+     155
+    ],
+    [
+     "F",
+     "Nectarine / Brugnon",
+     180
+    ],
+    [
+     "F",
+     "Nèfle du Japon",
+     145
+    ],
+    [
+     "F",
+     "Orange",
+     65
+    ],
+    [
+     "F",
+     "Pamplemousse blanc",
+     55
+    ],
+    [
+     "F",
+     "Pamplemousse rose",
+     55
+    ],
+    [
+     "F",
+     "Papaye",
+     400
+    ],
+    [
+     "F",
+     "Pastèque",
+     135
+    ],
+    [
+     "F",
+     "Poire",
+     180
+    ],
+    [
+     "F",
+     "Pomme",
+     285
+    ],
+    [
+     "F",
+     "Pomme cannelle",
+     30
+    ],
+    [
+     "F",
+     "Prune",
+     145
+    ],
+    [
+     "F",
+     "Pêche",
+     105
+    ],
+    [
+     "F",
+     "Raisin blanc et noir",
+     105
+    ],
+    [
+     "F",
+     "Rhubarbe",
+     120
+    ],
+    [
+     "F",
+     "Sapote",
+     35
+    ],
+    [
+     "F",
+     "Sapotille",
+     145
+    ],
+    [
+     "L",
+     "Ail (à négliger si utilisé en petite quantité)",
+     10
+    ],
+    [
+     "L",
+     "Artichaut",
+     15
+    ],
+    [
+     "L",
+     "Asperge",
+     30
+    ],
+    [
+     "L",
+     "Aubergine",
+     55
+    ],
+    [
+     "L",
+     "Avocat",
+     10
+    ],
+    [
+     "L",
+     "Banane plantain",
+     75
+    ],
+    [
+     "L",
+     "Bette ou carde",
+     20
+    ],
+    [
+     "L",
+     "Betterave",
+     40
+    ],
+    [
+     "L",
+     "Brocoli",
+     15
+    ],
+    [
+     "L",
+     "Carotte crue (100 g cuite)",
+     55
+    ],
+    [
+     "L",
+     "Carotte cuite (55 g crue)",
+     100
+    ],
+    [
+     "L",
+     "Champignon de Paris",
+     20
+    ],
+    [
+     "L",
+     "Chou blanc",
+     65
+    ],
+    [
+     "L",
+     "Chou de Bruxelles",
+     20
+    ],
+    [
+     "L",
+     "Chou de Chine ou pet-sai",
+     45
+    ],
+    [
+     "L",
+     "Chou romanesco",
+     20
+    ],
+    [
+     "L",
+     "Chou rouge cru (40 g cuit)",
+     80
+    ],
+    [
+     "L",
+     "Chou rouge cuit (80 g cru)",
+     40
+    ],
+    [
+     "L",
+     "Chou vert frisé",
+     10
+    ],
+    [
+     "L",
+     "Chou-fleur",
+     30
+    ],
+    [
+     "L",
+     "Chou-rave",
+     50
+    ],
+    [
+     "L",
+     "Christophine ou chayote (légume antillais)",
+     55
+    ],
+    [
+     "L",
+     "Châtaigne ou marron",
+     25
+    ],
+    [
+     "L",
+     "Citrouille / potiron cru (85 g cuit)",
+     60
+    ],
+    [
+     "L",
+     "Citrouille / potiron cuit (60 g cru)",
+     85
+    ],
+    [
+     "L",
+     "Civette (à négliger si utilisé en petite quantité)",
+     10
+    ],
+    [
+     "L",
+     "Coeurs de palmiers",
+     20
+    ],
+    [
+     "L",
+     "Concombre",
+     105
+    ],
+    [
+     "L",
+     "Cornichon (à négliger si utilisé en petite quantité)",
+     175
+    ],
+    [
+     "L",
+     "Courge (spaghetti)",
+     45
+    ],
+    [
+     "L",
+     "Courgette (longue)",
+     45
+    ],
+    [
+     "L",
+     "Courgette (ronde)",
+     45
+    ],
+    [
+     "L",
+     "Crosne",
+     10
+    ],
+    [
+     "L",
+     "Céleri branche cru, coeur de céleri cru (85 g cuit)",
+     100
+    ],
+    [
+     "L",
+     "Céleri branche cuit, coeur de céleri cuit (100 g cru)",
+     85
+    ],
+    [
+     "L",
+     "Céleri-rave",
+     40
+    ],
+    [
+     "L",
+     "Endive (chicorée de Bruxelles ou witloof)",
+     90
+    ],
+    [
+     "L",
+     "Fenouil",
+     40
+    ],
+    [
+     "L",
+     "Feuille de vigne",
+     25
+    ],
+    [
+     "L",
+     "Fruit à pain (légume antillais)",
+     75
+    ],
+    [
+     "L",
+     "Germes de soja (haricots mango)",
+     25
+    ],
+    [
+     "L",
+     "Gombo ou Okra",
+     30
+    ],
+    [
+     "L",
+     "Haricots beurre crus (35 g cuits)",
+     25
+    ],
+    [
+     "L",
+     "Haricots beurre cuits (25 g crus)",
+     35
+    ],
+    [
+     "L",
+     "Haricots beurre plats crus (35 g cuits)",
+     25
+    ],
+    [
+     "L",
+     "Haricots beurre plats cuits (25 g crus)",
+     35
+    ],
+    [
+     "L",
+     "Haricots verts crus (35 g cuits)",
+     25
+    ],
+    [
+     "L",
+     "Haricots verts cuits (25 g crus)",
+     35
+    ],
+    [
+     "L",
+     "Haricots verts plats crus (35 g cuits)",
+     25
+    ],
+    [
+     "L",
+     "Haricots verts plats cuits (25 g crus)",
+     35
+    ],
+    [
+     "L",
+     "Igname",
+     30
+    ],
+    [
+     "L",
+     "Manioc",
+     45
+    ],
+    [
+     "L",
+     "Maïs",
+     15
+    ],
+    [
+     "L",
+     "Navet cru (140 g cuit)",
+     115
+    ],
+    [
+     "L",
+     "Navet cuit (115 g cru)",
+     140
+    ],
+    [
+     "L",
+     "Oignon (à négliger si utilisé en petite quantité)",
+     65
+    ],
+    [
+     "L",
+     "Oseille",
+     15
+    ],
+    [
+     "L",
+     "Panais",
+     35
+    ],
+    [
+     "L",
+     "Patate douce",
+     20
+    ],
+    [
+     "L",
+     "Persil (à négliger si utilisé en petite quantité)",
+     15
+    ],
+    [
+     "L",
+     "Petits pois",
+     10
+    ],
+    [
+     "L",
+     "Piment cru (60 g cuit) (à négliger si utilisé en petite quantité)",
+     30
+    ],
+    [
+     "L",
+     "Piment cuit (30 g cru) (à négliger si utilisé en petite quantité)",
+     60
+    ],
+    [
+     "L",
+     "Pissenlit",
+     15
+    ],
+    [
+     "L",
+     "Poireau cru (65 g cuit)",
+     35
+    ],
+    [
+     "L",
+     "Poireau cuit (35 g cru)",
+     65
+    ],
+    [
+     "L",
+     "Pois plats ou pois gourmands",
+     20
+    ],
+    [
+     "L",
+     "Poivron",
+     70
+    ],
+    [
+     "L",
+     "Pomme de terre",
+     20
+    ],
+    [
+     "L",
+     "Potimarron cru (85 g cuit)",
+     60
+    ],
+    [
+     "L",
+     "Potimarron cuit (60 g cru)",
+     85
+    ],
+    [
+     "L",
+     "Pousse de bambou crue (35 g cuite)",
+     20
+    ],
+    [
+     "L",
+     "Pousse de bambou cuite (20 g crue)",
+     35
+    ],
+    [
+     "L",
+     "Pâtisson",
+     45
+    ],
+    [
+     "L",
+     "Radis noir",
+     100
+    ],
+    [
+     "L",
+     "Radis rose",
+     85
+    ],
+    [
+     "L",
+     "Raifort",
+     45
+    ],
+    [
+     "L",
+     "Rutabaga",
+     60
+    ],
+    [
+     "L",
+     "Sal. Chicorée",
+     30
+    ],
+    [
+     "L",
+     "Sal. Cresson",
+     15
+    ],
+    [
+     "L",
+     "Sal. Laitue",
+     30
+    ],
+    [
+     "L",
+     "Sal. Laitue iceberg",
+     30
+    ],
+    [
+     "L",
+     "Sal. Laitue romaine",
+     30
+    ],
+    [
+     "L",
+     "Sal. Mâche",
+     20
+    ],
+    [
+     "L",
+     "Sal. Pourpier",
+     30
+    ],
+    [
+     "L",
+     "Sal. Scarole ou endive belge",
+     30
+    ],
+    [
+     "L",
+     "Sal. Trévise",
+     30
+    ],
+    [
+     "L",
+     "Salsifis ou scorsonère",
+     40
+    ],
+    [
+     "L",
+     "Taro cru (70 g cuit)",
+     25
+    ],
+    [
+     "L",
+     "Taro cuit (25 g cru)",
+     70
+    ],
+    [
+     "L",
+     "Tomate crue (70 g cuite)",
+     90
+    ],
+    [
+     "L",
+     "Tomate cuite (90 g crue)",
+     70
+    ],
+    [
+     "L",
+     "Tomate en concentré",
+     25
+    ],
+    [
+     "L",
+     "Tomate en coulis",
+     55
+    ],
+    [
+     "L",
+     "Topinambour",
+     30
+    ],
+    [
+     "L",
+     "Échalote (à négliger si utilisé en petite quantité)",
+     30
+    ],
+    [
+     "L",
+     "Épinards",
+     15
+    ],
+    [
+     "C",
+     "Bolet orange",
+     30
+    ],
+    [
+     "C",
+     "Bolet rude",
+     30
+    ],
+    [
+     "C",
+     "Chanterelle / girole",
+     30
+    ],
+    [
+     "C",
+     "Cèpe",
+     20
+    ],
+    [
+     "C",
+     "Oronge",
+     165
+    ],
+    [
+     "C",
+     "Pleurote",
+     20
+    ]
+   ]
+  },
+  {
+   "id": "leu",
+   "nom": "Leucine",
+   "part": "1 part = 50 mg de leucine",
+   "pathologies": "Leucinose (MSUD)",
+   "aliments": [
+    [
+     "S",
+     "Abricot au sirop",
+     135
+    ],
+    [
+     "S",
+     "Airelles au sirop",
+     225
+    ],
+    [
+     "S",
+     "Ananas au sirop",
+     385
+    ],
+    [
+     "S",
+     "Cerises au sirop",
+     180
+    ],
+    [
+     "S",
+     "Figues au sirop",
+     295
+    ],
+    [
+     "S",
+     "Fraises au sirop",
+     170
+    ],
+    [
+     "S",
+     "Framboises au sirop",
+     175
+    ],
+    [
+     "S",
+     "Litchis au sirop",
+     80
+    ],
+    [
+     "S",
+     "Mandarines au sirop",
+     450
+    ],
+    [
+     "S",
+     "Myrtilles au sirop",
+     130
+    ],
+    [
+     "S",
+     "Pamplemousse au sirop",
+     455
+    ],
+    [
+     "S",
+     "Poires au sirop",
+     715
+    ],
+    [
+     "S",
+     "Prunes au sirop",
+     625
+    ],
+    [
+     "S",
+     "Pêches au sirop",
+     190
+    ],
+    [
+     "S",
+     "Raisins au sirop",
+     490
+    ],
+    [
+     "F",
+     "Abricot",
+     65
+    ],
+    [
+     "F",
+     "Ananas",
+     210
+    ],
+    [
+     "F",
+     "Baie de sureau",
+     85
+    ],
+    [
+     "F",
+     "Banane",
+     75
+    ],
+    [
+     "F",
+     "Carambole ou fruit étoile",
+     65
+    ],
+    [
+     "F",
+     "Cassis",
+     80
+    ],
+    [
+     "F",
+     "Cerise",
+     165
+    ],
+    [
+     "F",
+     "Citron",
+     280
+    ],
+    [
+     "F",
+     "Citron lime",
+     165
+    ],
+    [
+     "F",
+     "Clémentine / Mandarine / Tangerine",
+     280
+    ],
+    [
+     "F",
+     "Coing",
+     285
+    ],
+    [
+     "F",
+     "Corossol",
+     105
+    ],
+    [
+     "F",
+     "Figue",
+     150
+    ],
+    [
+     "F",
+     "Figue de Barbarie ou Nopale",
+     65
+    ],
+    [
+     "F",
+     "Fraise",
+     145
+    ],
+    [
+     "F",
+     "Framboise",
+     95
+    ],
+    [
+     "F",
+     "Fruit de la passion ou grenadille",
+     50
+    ],
+    [
+     "F",
+     "Goyave",
+     30
+    ],
+    [
+     "F",
+     "Grenade",
+     120
+    ],
+    [
+     "F",
+     "Groseille ou gadelle rouge et blanche",
+     80
+    ],
+    [
+     "F",
+     "Kaki",
+     120
+    ],
+    [
+     "F",
+     "Kiwi",
+     75
+    ],
+    [
+     "F",
+     "Kumquat",
+     60
+    ],
+    [
+     "F",
+     "Litchi",
+     105
+    ],
+    [
+     "F",
+     "Mangue",
+     160
+    ],
+    [
+     "F",
+     "Melon",
+     170
+    ],
+    [
+     "F",
+     "Mirabelle",
+     155
+    ],
+    [
+     "F",
+     "Myrtille",
+     125
+    ],
+    [
+     "F",
+     "Mûre",
+     80
+    ],
+    [
+     "F",
+     "Nashi ou poire asiatique",
+     200
+    ],
+    [
+     "F",
+     "Nectarine / Brugnon",
+     355
+    ],
+    [
+     "F",
+     "Nèfle du Japon",
+     190
+    ],
+    [
+     "F",
+     "Orange",
+     230
+    ],
+    [
+     "F",
+     "Pamplemousse blanc",
+     415
+    ],
+    [
+     "F",
+     "Pamplemousse rose",
+     415
+    ],
+    [
+     "F",
+     "Papaye",
+     315
+    ],
+    [
+     "F",
+     "Pastèque",
+     280
+    ],
+    [
+     "F",
+     "Poire",
+     265
+    ],
+    [
+     "F",
+     "Pomme",
+     355
+    ],
+    [
+     "F",
+     "Pomme cannelle",
+     55
+    ],
+    [
+     "F",
+     "Prune",
+     335
+    ],
+    [
+     "F",
+     "Pêche",
+     185
+    ],
+    [
+     "F",
+     "Raisin blanc et noir",
+     225
+    ],
+    [
+     "F",
+     "Rhubarbe",
+     210
+    ],
+    [
+     "F",
+     "Sapote",
+     60
+    ],
+    [
+     "F",
+     "Sapotille",
+     210
+    ],
+    [
+     "L",
+     "Ail (à négliger si utilisé en petite quantité)",
+     15
+    ],
+    [
+     "L",
+     "Artichaut",
+     25
+    ],
+    [
+     "L",
+     "Asperge",
+     45
+    ],
+    [
+     "L",
+     "Aubergine",
+     95
+    ],
+    [
+     "L",
+     "Avocat",
+     35
+    ],
+    [
+     "L",
+     "Banane plantain",
+     140
+    ],
+    [
+     "L",
+     "Bette ou carde",
+     35
+    ],
+    [
+     "L",
+     "Betterave",
+     70
+    ],
+    [
+     "L",
+     "Brocoli",
+     35
+    ],
+    [
+     "L",
+     "Carotte crue (185 g cuite)",
+     105
+    ],
+    [
+     "L",
+     "Carotte cuite (105 g crue)",
+     185
+    ],
+    [
+     "L",
+     "Champignon de Paris",
+     30
+    ],
+    [
+     "L",
+     "Chou blanc",
+     90
+    ],
+    [
+     "L",
+     "Chou de Bruxelles",
+     30
+    ],
+    [
+     "L",
+     "Chou de Chine ou pet-sai cru (55 g cuit)",
+     70
+    ],
+    [
+     "L",
+     "Chou de Chine ou pet-sai cuit (70 g cru)",
+     55
+    ],
+    [
+     "L",
+     "Chou romanesco",
+     30
+    ],
+    [
+     "L",
+     "Chou rouge cru (65 g cuit)",
+     110
+    ],
+    [
+     "L",
+     "Chou rouge cuit (110 g cru)",
+     65
+    ],
+    [
+     "L",
+     "Chou vert frisé cru (40 g cuit)",
+     20
+    ],
+    [
+     "L",
+     "Chou vert frisé cuit (20 g cru)",
+     40
+    ],
+    [
+     "L",
+     "Chou-fleur",
+     45
+    ],
+    [
+     "L",
+     "Chou-rave",
+     70
+    ],
+    [
+     "L",
+     "Christophine ou chayote (légume antillais)",
+     85
+    ],
+    [
+     "L",
+     "Châtaigne ou marron",
+     40
+    ],
+    [
+     "L",
+     "Citrouille / potiron cru (145 g cuit)",
+     110
+    ],
+    [
+     "L",
+     "Citrouille / potiron cuit (110 g cru)",
+     145
+    ],
+    [
+     "L",
+     "Civette (à négliger si utilisé en petite quantité)",
+     20
+    ],
+    [
+     "L",
+     "Coeurs de palmiers",
+     30
+    ],
+    [
+     "L",
+     "Concombre",
+     170
+    ],
+    [
+     "L",
+     "Cornichon (à négliger si utilisé en petite quantité)",
+     290
+    ],
+    [
+     "L",
+     "Courge (spaghetti)",
+     70
+    ],
+    [
+     "L",
+     "Courgette (longue)",
+     70
+    ],
+    [
+     "L",
+     "Courgette (ronde)",
+     70
+    ],
+    [
+     "L",
+     "Crosne",
+     40
+    ],
+    [
+     "L",
+     "Céleri branche cru, coeur de céleri cru (130 g cuit)",
+     155
+    ],
+    [
+     "L",
+     "Céleri branche cuit, coeur de céleri cuit (155 g cru)",
+     130
+    ],
+    [
+     "L",
+     "Céleri-rave",
+     65
+    ],
+    [
+     "L",
+     "Endive (chicorée de Bruxelles ou witloof)",
+     130
+    ],
+    [
+     "L",
+     "Fenouil",
+     70
+    ],
+    [
+     "L",
+     "Feuille de vigne",
+     50
+    ],
+    [
+     "L",
+     "Fruit à pain (légume antillais)",
+     75
+    ],
+    [
+     "L",
+     "Germes de soja (haricots mango)",
+     40
+    ],
+    [
+     "L",
+     "Gombo ou Okra",
+     45
+    ],
+    [
+     "L",
+     "Haricots beurre crus (55 g cuits)",
+     35
+    ],
+    [
+     "L",
+     "Haricots beurre cuits (35 g crus)",
+     55
+    ],
+    [
+     "L",
+     "Haricots beurre plats crus (55 g cuits)",
+     35
+    ],
+    [
+     "L",
+     "Haricots beurre plats cuits (35 g crus)",
+     55
+    ],
+    [
+     "L",
+     "Haricots verts crus (55 g cuits)",
+     35
+    ],
+    [
+     "L",
+     "Haricots verts cuits (35 g crus)",
+     55
+    ],
+    [
+     "L",
+     "Haricots verts plats crus (55 g cuits)",
+     35
+    ],
+    [
+     "L",
+     "Haricots verts plats cuits (35 g crus)",
+     55
+    ],
+    [
+     "L",
+     "Igname",
+     50
+    ],
+    [
+     "L",
+     "Manioc",
+     130
+    ],
+    [
+     "L",
+     "Maïs",
+     20
+    ],
+    [
+     "L",
+     "Navet cru (190 g cuit)",
+     150
+    ],
+    [
+     "L",
+     "Navet cuit (150 g cru)",
+     190
+    ],
+    [
+     "L",
+     "Oignon (à négliger si utilisé en petite quantité)",
+     120
+    ],
+    [
+     "L",
+     "Oseille",
+     30
+    ],
+    [
+     "L",
+     "Panais",
+     70
+    ],
+    [
+     "L",
+     "Patate douce",
+     40
+    ],
+    [
+     "L",
+     "Persil (à négliger si utilisé en petite quantité)",
+     25
+    ],
+    [
+     "L",
+     "Petits pois",
+     15
+    ],
+    [
+     "L",
+     "Piment cru (85 g cuit) (à négliger si utilisé en petite quantité)",
+     45
+    ],
+    [
+     "L",
+     "Piment cuit (45 g cru) (à négliger si utilisé en petite quantité)",
+     85
+    ],
+    [
+     "L",
+     "Pissenlit",
+     20
+    ],
+    [
+     "L",
+     "Poireau cru (95 g cuit)",
+     50
+    ],
+    [
+     "L",
+     "Poireau cuit (50 g cru)",
+     95
+    ],
+    [
+     "L",
+     "Pois plats ou pois gourmands",
+     15
+    ],
+    [
+     "L",
+     "Poivron",
+     105
+    ],
+    [
+     "L",
+     "Pomme de terre",
+     40
+    ],
+    [
+     "L",
+     "Potimarron cru (145 g cuit)",
+     110
+    ],
+    [
+     "L",
+     "Potimarron cuit (110 g cru)",
+     145
+    ],
+    [
+     "L",
+     "Pousse de bambou",
+     35
+    ],
+    [
+     "L",
+     "Pâtisson",
+     70
+    ],
+    [
+     "L",
+     "Radis noir",
+     160
+    ],
+    [
+     "L",
+     "Radis rose",
+     135
+    ],
+    [
+     "L",
+     "Raifort",
+     70
+    ],
+    [
+     "L",
+     "Rutabaga",
+     120
+    ],
+    [
+     "L",
+     "Sal. Chicorée",
+     50
+    ],
+    [
+     "L",
+     "Sal. Cresson",
+     30
+    ],
+    [
+     "L",
+     "Sal. Laitue",
+     50
+    ],
+    [
+     "L",
+     "Sal. Laitue iceberg",
+     50
+    ],
+    [
+     "L",
+     "Sal. Laitue romaine",
+     50
+    ],
+    [
+     "L",
+     "Sal. Mâche",
+     35
+    ],
+    [
+     "L",
+     "Sal. Pourpier",
+     50
+    ],
+    [
+     "L",
+     "Sal. Scarole ou endive belge",
+     50
+    ],
+    [
+     "L",
+     "Sal. Trévise",
+     50
+    ],
+    [
+     "L",
+     "Salsifis ou scorsonère",
+     70
+    ],
+    [
+     "L",
+     "Taro cru (130 g cuit)",
+     45
+    ],
+    [
+     "L",
+     "Taro cuit (45 g cru)",
+     130
+    ],
+    [
+     "L",
+     "Tomate crue (130 g cuite)",
+     160
+    ],
+    [
+     "L",
+     "Tomate cuite (160 g crue)",
+     130
+    ],
+    [
+     "L",
+     "Tomate en concentré",
+     50
+    ],
+    [
+     "L",
+     "Tomate en coulis",
+     105
+    ],
+    [
+     "L",
+     "Topinambour",
+     50
+    ],
+    [
+     "L",
+     "Échalote (à négliger si utilisé en petite quantité)",
+     35
+    ],
+    [
+     "L",
+     "Épinards",
+     20
+    ],
+    [
+     "C",
+     "Bolet orange",
+     45
+    ],
+    [
+     "C",
+     "Chanterelle / girole",
+     55
+    ],
+    [
+     "C",
+     "Cèpe",
+     40
+    ],
+    [
+     "C",
+     "Oronge",
+     55
+    ],
+    [
+     "C",
+     "Pleurote",
+     30
+    ]
+   ]
+  },
+  {
+   "id": "met",
+   "nom": "Méthionine",
+   "part": "1 part = 10 mg de méthionine",
+   "pathologies": "Homocystinurie",
+   "aliments": [
+    [
+     "S",
+     "Abricot au sirop",
+     335
+    ],
+    [
+     "S",
+     "Airelles au sirop",
+     130
+    ],
+    [
+     "S",
+     "Ananas au sirop",
+     110
+    ],
+    [
+     "S",
+     "Cerises au sirop",
+     105
+    ],
+    [
+     "S",
+     "Figues au sirop",
+     335
+    ],
+    [
+     "S",
+     "Fraises au sirop",
+     1000
+    ],
+    [
+     "S",
+     "Framboises au sirop",
+     100
+    ],
+    [
+     "S",
+     "Litchis au sirop",
+     45
+    ],
+    [
+     "S",
+     "Mandarines au sirop",
+     100
+    ],
+    [
+     "S",
+     "Myrtilles au sirop",
+     100
+    ],
+    [
+     "S",
+     "Pamplemousse au sirop",
+     200
+    ],
+    [
+     "S",
+     "Poires au sirop",
+     500
+    ],
+    [
+     "S",
+     "Prunes au sirop",
+     500
+    ],
+    [
+     "S",
+     "Pêches au sirop",
+     90
+    ],
+    [
+     "S",
+     "Raisins au sirop",
+     60
+    ],
+    [
+     "F",
+     "Abricot",
+     165
+    ],
+    [
+     "F",
+     "Ananas",
+     85
+    ],
+    [
+     "F",
+     "Baie de sureau",
+     75
+    ],
+    [
+     "F",
+     "Banane",
+     125
+    ],
+    [
+     "F",
+     "Carambole ou fruit étoile",
+     50
+    ],
+    [
+     "F",
+     "Cassis",
+     65
+    ],
+    [
+     "F",
+     "Cerise",
+     100
+    ],
+    [
+     "F",
+     "Citron",
+     100
+    ],
+    [
+     "F",
+     "Citron lime",
+     130
+    ],
+    [
+     "F",
+     "Clémentine / Mandarine / Tangerine",
+     90
+    ],
+    [
+     "F",
+     "Coing",
+     225
+    ],
+    [
+     "F",
+     "Corossol",
+     140
+    ],
+    [
+     "F",
+     "Figue",
+     165
+    ],
+    [
+     "F",
+     "Figue de Barbarie ou Nopale",
+     65
+    ],
+    [
+     "F",
+     "Fraise",
+     500
+    ],
+    [
+     "F",
+     "Framboise",
+     75
+    ],
+    [
+     "F",
+     "Fruit de la passion ou grenadille",
+     40
+    ],
+    [
+     "F",
+     "Goyave",
+     65
+    ],
+    [
+     "F",
+     "Grenade",
+     95
+    ],
+    [
+     "F",
+     "Groseille ou gadelle rouge et blanche",
+     65
+    ],
+    [
+     "F",
+     "Kaki",
+     200
+    ],
+    [
+     "F",
+     "Kiwi",
+     40
+    ],
+    [
+     "F",
+     "Kumquat",
+     45
+    ],
+    [
+     "F",
+     "Litchi",
+     100
+    ],
+    [
+     "F",
+     "Mangue",
+     200
+    ],
+    [
+     "F",
+     "Melon",
+     85
+    ],
+    [
+     "F",
+     "Mirabelle",
+     120
+    ],
+    [
+     "F",
+     "Myrtille",
+     90
+    ],
+    [
+     "F",
+     "Mûre",
+     65
+    ],
+    [
+     "F",
+     "Nashi ou poire asiatique",
+     165
+    ],
+    [
+     "F",
+     "Nectarine / Brugnon",
+     165
+    ],
+    [
+     "F",
+     "Nèfle du Japon",
+     250
+    ],
+    [
+     "F",
+     "Orange",
+     90
+    ],
+    [
+     "F",
+     "Pamplemousse blanc",
+     165
+    ],
+    [
+     "F",
+     "Pamplemousse rose",
+     165
+    ],
+    [
+     "F",
+     "Papaye",
+     500
+    ],
+    [
+     "F",
+     "Pastèque",
+     165
+    ],
+    [
+     "F",
+     "Poire",
+     500
+    ],
+    [
+     "F",
+     "Pomme",
+     1000
+    ],
+    [
+     "F",
+     "Pomme cannelle",
+     45
+    ],
+    [
+     "F",
+     "Prune",
+     125
+    ],
+    [
+     "F",
+     "Pêche",
+     100
+    ],
+    [
+     "F",
+     "Raisin blanc et noir",
+     110
+    ],
+    [
+     "F",
+     "Rhubarbe",
+     145
+    ],
+    [
+     "F",
+     "Sapote",
+     65
+    ],
+    [
+     "F",
+     "Sapotille",
+     335
+    ],
+    [
+     "L",
+     "Ail (à négliger si utilisé en petite quantité)",
+     15
+    ],
+    [
+     "L",
+     "Artichaut",
+     20
+    ],
+    [
+     "L",
+     "Asperge",
+     40
+    ],
+    [
+     "L",
+     "Aubergine",
+     110
+    ],
+    [
+     "L",
+     "Avocat",
+     25
+    ],
+    [
+     "L",
+     "Banane plantain",
+     100
+    ],
+    [
+     "L",
+     "Bette ou carde",
+     50
+    ],
+    [
+     "L",
+     "Betterave",
+     50
+    ],
+    [
+     "L",
+     "Brocoli",
+     25
+    ],
+    [
+     "L",
+     "Carotte crue (250 g cuite)",
+     125
+    ],
+    [
+     "L",
+     "Carotte cuite (125 g crue)",
+     250
+    ],
+    [
+     "L",
+     "Champignon de Paris",
+     20
+    ],
+    [
+     "L",
+     "Chou blanc",
+     75
+    ],
+    [
+     "L",
+     "Chou de Bruxelles",
+     30
+    ],
+    [
+     "L",
+     "Chou de Chine ou pet-sai cru (110 g cuit)",
+     140
+    ],
+    [
+     "L",
+     "Chou de Chine ou pet-sai cuit (140 g cru)",
+     110
+    ],
+    [
+     "L",
+     "Chou romanesco",
+     25
+    ],
+    [
+     "L",
+     "Chou rouge",
+     60
+    ],
+    [
+     "L",
+     "Chou vert frisé cru (55 g cuit)",
+     30
+    ],
+    [
+     "L",
+     "Chou vert frisé cuit (30 g cru)",
+     55
+    ],
+    [
+     "L",
+     "Chou-fleur",
+     35
+    ],
+    [
+     "L",
+     "Chou-rave",
+     70
+    ],
+    [
+     "L",
+     "Christophine ou chayote (légume antillais)",
+     800
+    ],
+    [
+     "L",
+     "Châtaigne ou marron",
+     20
+    ],
+    [
+     "L",
+     "Citrouille / potiron cru (125 g cuit)",
+     90
+    ],
+    [
+     "L",
+     "Citrouille / potiron cuit (90 g cru)",
+     125
+    ],
+    [
+     "L",
+     "Civette (à négliger si utilisé en petite quantité)",
+     20
+    ],
+    [
+     "L",
+     "Coeurs de palmiers",
+     25
+    ],
+    [
+     "L",
+     "Concombre",
+     165
+    ],
+    [
+     "L",
+     "Cornichon (à négliger si utilisé en petite quantité)",
+     350
+    ],
+    [
+     "L",
+     "Courge (spaghetti)",
+     55
+    ],
+    [
+     "L",
+     "Courgette (longue)",
+     55
+    ],
+    [
+     "L",
+     "Courgette (ronde)",
+     55
+    ],
+    [
+     "L",
+     "Crosne",
+     20
+    ],
+    [
+     "L",
+     "Céleri branche cru, coeur de céleri cru (140 g cuit)",
+     200
+    ],
+    [
+     "L",
+     "Céleri branche cuit, coeur de céleri cuit (200 g cru)",
+     140
+    ],
+    [
+     "L",
+     "Céleri-rave",
+     55
+    ],
+    [
+     "L",
+     "Endive (chicorée de Bruxelles ou witloof)",
+     200
+    ],
+    [
+     "L",
+     "Fenouil",
+     60
+    ],
+    [
+     "L",
+     "Feuille de vigne",
+     50
+    ],
+    [
+     "L",
+     "Fruit à pain (légume antillais)",
+     100
+    ],
+    [
+     "L",
+     "Germes de soja (haricots mango)",
+     40
+    ],
+    [
+     "L",
+     "Gombo ou Okra",
+     50
+    ],
+    [
+     "L",
+     "Haricots beurre crus (55 g cuits)",
+     30
+    ],
+    [
+     "L",
+     "Haricots beurre cuits (30 g crus)",
+     55
+    ],
+    [
+     "L",
+     "Haricots beurre plats crus (55 g cuits)",
+     30
+    ],
+    [
+     "L",
+     "Haricots beurre plats cuits (30 g crus)",
+     55
+    ],
+    [
+     "L",
+     "Haricots verts crus (55 g cuits)",
+     30
+    ],
+    [
+     "L",
+     "Haricots verts cuits (30 g crus)",
+     55
+    ],
+    [
+     "L",
+     "Haricots verts plats crus (55 g cuits)",
+     30
+    ],
+    [
+     "L",
+     "Haricots verts plats cuits (30 g crus)",
+     55
+    ],
+    [
+     "L",
+     "Igname",
+     45
+    ],
+    [
+     "L",
+     "Manioc",
+     90
+    ],
+    [
+     "L",
+     "Maïs",
+     20
+    ],
+    [
+     "L",
+     "Navet cru (110 g cuit)",
+     90
+    ],
+    [
+     "L",
+     "Navet cuit (90 g cru)",
+     110
+    ],
+    [
+     "L",
+     "Oignon (à négliger si utilisé en petite quantité)",
+     100
+    ],
+    [
+     "L",
+     "Oseille",
+     30
+    ],
+    [
+     "L",
+     "Panais",
+     50
+    ],
+    [
+     "L",
+     "Patate douce",
+     25
+    ],
+    [
+     "L",
+     "Persil (à négliger si utilisé en petite quantité)",
+     25
+    ],
+    [
+     "L",
+     "Petits pois",
+     10
+    ],
+    [
+     "L",
+     "Piment cru (60 g cuit)",
+     40
+    ],
+    [
+     "L",
+     "Piment cuit (40 g cru)",
+     60
+    ],
+    [
+     "L",
+     "Pissenlit",
+     20
+    ],
+    [
+     "L",
+     "Poireau cru (100 g cuit)",
+     55
+    ],
+    [
+     "L",
+     "Poireau cuit (55 g cru)",
+     100
+    ],
+    [
+     "L",
+     "Pois plats crus ou pois gourmands crus (70 g cuits)",
+     90
+    ],
+    [
+     "L",
+     "Pois plats cuits ou pois gourmands cuits (90 g crus)",
+     70
+    ],
+    [
+     "L",
+     "Poivron",
+     90
+    ],
+    [
+     "L",
+     "Pomme de terre",
+     30
+    ],
+    [
+     "L",
+     "Potimarron cru (125 g cuit)",
+     90
+    ],
+    [
+     "L",
+     "Potimarron cuit (90 g cru)",
+     125
+    ],
+    [
+     "L",
+     "Pousse de bambou",
+     35
+    ],
+    [
+     "L",
+     "Pâtisson",
+     60
+    ],
+    [
+     "L",
+     "Radis noir",
+     170
+    ],
+    [
+     "L",
+     "Radis rose",
+     140
+    ],
+    [
+     "L",
+     "Raifort",
+     65
+    ],
+    [
+     "L",
+     "Rutabaga",
+     100
+    ],
+    [
+     "L",
+     "Sal. Chicorée",
+     50
+    ],
+    [
+     "L",
+     "Sal. Cresson",
+     50
+    ],
+    [
+     "L",
+     "Sal. Laitue",
+     50
+    ],
+    [
+     "L",
+     "Sal. Laitue iceberg",
+     50
+    ],
+    [
+     "L",
+     "Sal. Laitue romaine",
+     50
+    ],
+    [
+     "L",
+     "Sal. Mâche",
+     40
+    ],
+    [
+     "L",
+     "Sal. Pourpier",
+     50
+    ],
+    [
+     "L",
+     "Sal. Scarole ou endive belge",
+     50
+    ],
+    [
+     "L",
+     "Sal. Trévise",
+     50
+    ],
+    [
+     "L",
+     "Salsifis ou scorsonère",
+     55
+    ],
+    [
+     "L",
+     "Taro cru (140 g cuit)",
+     50
+    ],
+    [
+     "L",
+     "Taro cuit (50 g cru)",
+     140
+    ],
+    [
+     "L",
+     "Tomate crue (110 g cuite)",
+     140
+    ],
+    [
+     "L",
+     "Tomate cuite (140 g crue)",
+     110
+    ],
+    [
+     "L",
+     "Tomate en concentré",
+     55
+    ],
+    [
+     "L",
+     "Tomate en coulis",
+     110
+    ],
+    [
+     "L",
+     "Topinambour",
+     40
+    ],
+    [
+     "L",
+     "Échalote (à négliger si utilisé en petite quantité)",
+     35
+    ],
+    [
+     "L",
+     "Épinards",
+     20
+    ],
+    [
+     "C",
+     "Bolet orange",
+     165
+    ],
+    [
+     "C",
+     "Bolet rude",
+     330
+    ],
+    [
+     "C",
+     "Chanterelle / girole",
+     110
+    ],
+    [
+     "C",
+     "Cèpe",
+     15
+    ],
+    [
+     "C",
+     "Oronge",
+     70
+    ],
+    [
+     "C",
+     "Pleurote",
+     20
+    ]
+   ]
+  },
+  {
+   "id": "lys",
+   "nom": "Lysine",
+   "part": "1 part = 25 mg de lysine",
+   "pathologies": "Acidurie glutarique de type 1",
+   "aliments": [
+    [
+     "S",
+     "Abricot au sirop",
+     55
+    ],
+    [
+     "S",
+     "Airelles au sirop",
+     130
+    ],
+    [
+     "S",
+     "Ananas au sirop",
+     155
+    ],
+    [
+     "S",
+     "Cerises au sirop",
+     105
+    ],
+    [
+     "S",
+     "Figues au sirop",
+     165
+    ],
+    [
+     "S",
+     "Fraises au sirop",
+     110
+    ],
+    [
+     "S",
+     "Framboises au sirop",
+     100
+    ],
+    [
+     "S",
+     "Litchis au sirop",
+     45
+    ],
+    [
+     "S",
+     "Mandarines au sirop",
+     110
+    ],
+    [
+     "S",
+     "Myrtilles au sirop",
+     205
+    ],
+    [
+     "S",
+     "Pamplemousse au sirop",
+     180
+    ],
+    [
+     "S",
+     "Poires au sirop",
+     1250
+    ],
+    [
+     "S",
+     "Prunes au sirop",
+     835
+    ],
+    [
+     "S",
+     "Pêches au sirop",
+     165
+    ],
+    [
+     "S",
+     "Raisins au sirop",
+     230
+    ],
+    [
+     "F",
+     "Abricot",
+     25
+    ],
+    [
+     "F",
+     "Ananas",
+     95
+    ],
+    [
+     "F",
+     "Baie de sureau",
+     95
+    ],
+    [
+     "F",
+     "Banane",
+     50
+    ],
+    [
+     "F",
+     "Carambole ou fruit étoile",
+     30
+    ],
+    [
+     "F",
+     "Cassis",
+     40
+    ],
+    [
+     "F",
+     "Cerise",
+     80
+    ],
+    [
+     "F",
+     "Citron",
+     70
+    ],
+    [
+     "F",
+     "Citron lime",
+     80
+    ],
+    [
+     "F",
+     "Clémentine / Mandarine / Tangerine",
+     70
+    ],
+    [
+     "F",
+     "Coing",
+     135
+    ],
+    [
+     "F",
+     "Corossol",
+     40
+    ],
+    [
+     "F",
+     "Figue",
+     85
+    ],
+    [
+     "F",
+     "Figue de Barbarie ou Nopale",
+     40
+    ],
+    [
+     "F",
+     "Fraise",
+     95
+    ],
+    [
+     "F",
+     "Framboise",
+     45
+    ],
+    [
+     "F",
+     "Fruit de la passion ou grenadille",
+     25
+    ],
+    [
+     "F",
+     "Goyave",
+     35
+    ],
+    [
+     "F",
+     "Grenade",
+     55
+    ],
+    [
+     "F",
+     "Groseille ou gadelle rouge et blanche",
+     40
+    ],
+    [
+     "F",
+     "Kaki",
+     75
+    ],
+    [
+     "F",
+     "Kiwi",
+     40
+    ],
+    [
+     "F",
+     "Kumquat",
+     30
+    ],
+    [
+     "F",
+     "Litchi",
+     65
+    ],
+    [
+     "F",
+     "Mangue",
+     60
+    ],
+    [
+     "F",
+     "Melon",
+     85
+    ],
+    [
+     "F",
+     "Mirabelle",
+     75
+    ],
+    [
+     "F",
+     "Myrtille",
+     215
+    ],
+    [
+     "F",
+     "Mûre",
+     40
+    ],
+    [
+     "F",
+     "Nashi ou poire asiatique",
+     145
+    ],
+    [
+     "F",
+     "Nectarine / Brugnon",
+     155
+    ],
+    [
+     "F",
+     "Nèfle du Japon",
+     110
+    ],
+    [
+     "F",
+     "Orange",
+     70
+    ],
+    [
+     "F",
+     "Pamplemousse blanc",
+     155
+    ],
+    [
+     "F",
+     "Pamplemousse rose",
+     155
+    ],
+    [
+     "F",
+     "Papaye",
+     100
+    ],
+    [
+     "F",
+     "Pastèque",
+     40
+    ],
+    [
+     "F",
+     "Poire",
+     145
+    ],
+    [
+     "F",
+     "Pomme",
+     190
+    ],
+    [
+     "F",
+     "Pomme cannelle",
+     25
+    ],
+    [
+     "F",
+     "Prune",
+     155
+    ],
+    [
+     "F",
+     "Pêche",
+     85
+    ],
+    [
+     "F",
+     "Raisin blanc et noir",
+     95
+    ],
+    [
+     "F",
+     "Rhubarbe",
+     100
+    ],
+    [
+     "F",
+     "Sapote",
+     25
+    ],
+    [
+     "F",
+     "Sapotille",
+     65
+    ],
+    [
+     "L",
+     "Ail (à négliger si utilisé en petite quantité)",
+     10
+    ],
+    [
+     "L",
+     "Artichaut",
+     15
+    ],
+    [
+     "L",
+     "Asperge",
+     20
+    ],
+    [
+     "L",
+     "Aubergine",
+     65
+    ],
+    [
+     "L",
+     "Avocat",
+     20
+    ],
+    [
+     "L",
+     "Banane plantain",
+     70
+    ],
+    [
+     "L",
+     "Bette ou carde",
+     25
+    ],
+    [
+     "L",
+     "Betterave",
+     40
+    ],
+    [
+     "L",
+     "Brocoli",
+     15
+    ],
+    [
+     "L",
+     "Carotte crue (100 g cuite)",
+     55
+    ],
+    [
+     "L",
+     "Carotte cuite (55 g crue)",
+     100
+    ],
+    [
+     "L",
+     "Champignon de Paris",
+     10
+    ],
+    [
+     "L",
+     "Chou blanc",
+     40
+    ],
+    [
+     "L",
+     "Chou de Bruxelles",
+     15
+    ],
+    [
+     "L",
+     "Chou de Chine ou pet-sai",
+     30
+    ],
+    [
+     "L",
+     "Chou romanesco",
+     15
+    ],
+    [
+     "L",
+     "Chou rouge cru (35 g cuit)",
+     55
+    ],
+    [
+     "L",
+     "Chou rouge cuit (55 g cru)",
+     35
+    ],
+    [
+     "L",
+     "Chou vert frisé",
+     10
+    ],
+    [
+     "L",
+     "Chou-fleur",
+     25
+    ],
+    [
+     "L",
+     "Chou-rave",
+     40
+    ],
+    [
+     "L",
+     "Christophine ou chayote (légume antillais)",
+     85
+    ],
+    [
+     "L",
+     "Châtaigne ou marron",
+     20
+    ],
+    [
+     "L",
+     "Citrouille / potiron cru (65 g cuit)",
+     45
+    ],
+    [
+     "L",
+     "Citrouille / potiron cuit (45 g cru)",
+     65
+    ],
+    [
+     "L",
+     "Civette (à négliger si utilisé en petite quantité)",
+     10
+    ],
+    [
+     "L",
+     "Coeurs de palmiers",
+     30
+    ],
+    [
+     "L",
+     "Concombre",
+     85
+    ],
+    [
+     "L",
+     "Cornichon (à négliger si utilisé en petite quantité)",
+     175
+    ],
+    [
+     "L",
+     "Courge (spaghetti)",
+     35
+    ],
+    [
+     "L",
+     "Courgette (longue)",
+     35
+    ],
+    [
+     "L",
+     "Courgette (ronde)",
+     35
+    ],
+    [
+     "L",
+     "Crosne",
+     10
+    ],
+    [
+     "L",
+     "Céleri branche, coeur de céleri",
+     80
+    ],
+    [
+     "L",
+     "Céleri-rave",
+     35
+    ],
+    [
+     "L",
+     "Endive (chicorée de Bruxelles ou witloof)",
+     70
+    ],
+    [
+     "L",
+     "Fenouil",
+     40
+    ],
+    [
+     "L",
+     "Feuille de vigne",
+     30
+    ],
+    [
+     "L",
+     "Fruit à pain (légume antillais)",
+     65
+    ],
+    [
+     "L",
+     "Germes de soja (haricots mango)",
+     20
+    ],
+    [
+     "L",
+     "Gombo ou Okra",
+     30
+    ],
+    [
+     "L",
+     "Haricots beurre crus (35 g cuits)",
+     20
+    ],
+    [
+     "L",
+     "Haricots beurre cuits (20 g crus)",
+     35
+    ],
+    [
+     "L",
+     "Haricots beurre plats crus (35 g cuits)",
+     20
+    ],
+    [
+     "L",
+     "Haricots beurre plats cuits (20 g crus)",
+     35
+    ],
+    [
+     "L",
+     "Haricots verts crus (35 g cuits)",
+     20
+    ],
+    [
+     "L",
+     "Haricots verts cuits (20 g crus)",
+     35
+    ],
+    [
+     "L",
+     "Haricots verts plats crus (35 g cuits)",
+     20
+    ],
+    [
+     "L",
+     "Haricots verts plats cuits (20 g crus)",
+     35
+    ],
+    [
+     "L",
+     "Igname",
+     40
+    ],
+    [
+     "L",
+     "Manioc",
+     55
+    ],
+    [
+     "L",
+     "Maïs",
+     20
+    ],
+    [
+     "L",
+     "Navet cru (90 g cuit)",
+     70
+    ],
+    [
+     "L",
+     "Navet cuit (70 g cru)",
+     90
+    ],
+    [
+     "L",
+     "Oignon (à négliger si utilisé en petite quantité)",
+     45
+    ],
+    [
+     "L",
+     "Oseille",
+     20
+    ],
+    [
+     "L",
+     "Panais",
+     30
+    ],
+    [
+     "L",
+     "Patate douce",
+     30
+    ],
+    [
+     "L",
+     "Persil (à négliger si utilisé en petite quantité)",
+     15
+    ],
+    [
+     "L",
+     "Petits pois",
+     10
+    ],
+    [
+     "L",
+     "Piment cru (50 g cuit) (à négliger si utilisé en petite quantité)",
+     30
+    ],
+    [
+     "L",
+     "Piment cuit (30 g cru) (à négliger si utilisé en petite quantité)",
+     50
+    ],
+    [
+     "L",
+     "Pissenlit",
+     15
+    ],
+    [
+     "L",
+     "Poireau cru (60 g cuit)",
+     30
+    ],
+    [
+     "L",
+     "Poireau cuit (30 g cru)",
+     60
+    ],
+    [
+     "L",
+     "Pois plats ou pois gourmands",
+     10
+    ],
+    [
+     "L",
+     "Poivron",
+     60
+    ],
+    [
+     "L",
+     "Pomme de terre",
+     20
+    ],
+    [
+     "L",
+     "Potimarron cru (65 g cuit)",
+     45
+    ],
+    [
+     "L",
+     "Potimarron cuit (45 g cru)",
+     65
+    ],
+    [
+     "L",
+     "Pousse de bambou",
+     20
+    ],
+    [
+     "L",
+     "Pâtisson",
+     35
+    ],
+    [
+     "L",
+     "Radis noir",
+     85
+    ],
+    [
+     "L",
+     "Radis rose",
+     70
+    ],
+    [
+     "L",
+     "Raifort",
+     30
+    ],
+    [
+     "L",
+     "Rutabaga",
+     60
+    ],
+    [
+     "L",
+     "Sal. Chicorée",
+     25
+    ],
+    [
+     "L",
+     "Sal. Cresson",
+     20
+    ],
+    [
+     "L",
+     "Sal. Laitue",
+     25
+    ],
+    [
+     "L",
+     "Sal. Laitue iceberg",
+     25
+    ],
+    [
+     "L",
+     "Sal. Laitue romaine",
+     25
+    ],
+    [
+     "L",
+     "Sal. Mâche",
+     25
+    ],
+    [
+     "L",
+     "Sal. Pourpier",
+     25
+    ],
+    [
+     "L",
+     "Sal. Scarole ou endive belge",
+     25
+    ],
+    [
+     "L",
+     "Sal. Trévise",
+     25
+    ],
+    [
+     "L",
+     "Salsifis ou scorsonère",
+     40
+    ],
+    [
+     "L",
+     "Taro cru (110 g cuit)",
+     35
+    ],
+    [
+     "L",
+     "Taro cuit (35 g cru)",
+     110
+    ],
+    [
+     "L",
+     "Tomate crue (65 g cuite)",
+     80
+    ],
+    [
+     "L",
+     "Tomate cuite (80 g crue)",
+     65
+    ],
+    [
+     "L",
+     "Tomate en concentré",
+     25
+    ],
+    [
+     "L",
+     "Tomate en coulis",
+     50
+    ],
+    [
+     "L",
+     "Topinambour",
+     25
+    ],
+    [
+     "L",
+     "Échalote (à négliger si utilisé en petite quantité)",
+     20
+    ],
+    [
+     "L",
+     "Épinards",
+     15
+    ],
+    [
+     "C",
+     "Bolet orange",
+     25
+    ],
+    [
+     "C",
+     "Bolet rude",
+     60
+    ],
+    [
+     "C",
+     "Chanterelle / girole",
+     65
+    ],
+    [
+     "C",
+     "Cèpe",
+     15
+    ],
+    [
+     "C",
+     "Oronge",
+     45
+    ],
+    [
+     "C",
+     "Pleurote",
+     15
+    ]
+   ]
+  },
+  {
+   "id": "arg",
+   "nom": "Arginine",
+   "part": "1 part = 25 mg d'arginine",
+   "pathologies": "Hyperargininémie (déficit en arginase)",
+   "aliments": [
+    [
+     "S",
+     "Abricot au sirop",
+     105
+    ],
+    [
+     "S",
+     "Airelles au sirop",
+     95
+    ],
+    [
+     "S",
+     "Ananas au sirop",
+     210
+    ],
+    [
+     "S",
+     "Cerises au sirop",
+     75
+    ],
+    [
+     "S",
+     "Figues au sirop",
+     280
+    ],
+    [
+     "S",
+     "Fraises au sirop",
+     105
+    ],
+    [
+     "S",
+     "Framboises au sirop",
+     70
+    ],
+    [
+     "S",
+     "Litchis au sirop",
+     35
+    ],
+    [
+     "S",
+     "Mandarines au sirop",
+     80
+    ],
+    [
+     "S",
+     "Myrtilles au sirop",
+     75
+    ],
+    [
+     "S",
+     "Pamplemousse au sirop",
+     40
+    ],
+    [
+     "S",
+     "Poires au sirop",
+     1250
+    ],
+    [
+     "S",
+     "Prunes au sirop",
+     415
+    ],
+    [
+     "S",
+     "Pêches au sirop",
+     210
+    ],
+    [
+     "S",
+     "Raisins au sirop",
+     70
+    ],
+    [
+     "F",
+     "Abricot",
+     55
+    ],
+    [
+     "F",
+     "Ananas",
+     130
+    ],
+    [
+     "F",
+     "Baie de sureau",
+     55
+    ],
+    [
+     "F",
+     "Banane",
+     50
+    ],
+    [
+     "F",
+     "Carambole ou fruit étoile",
+     315
+    ],
+    [
+     "F",
+     "Cassis",
+     40
+    ],
+    [
+     "F",
+     "Cerise",
+     140
+    ],
+    [
+     "F",
+     "Citron",
+     60
+    ],
+    [
+     "F",
+     "Citron lime",
+     80
+    ],
+    [
+     "F",
+     "Clémentine / Mandarine / Tangerine",
+     55
+    ],
+    [
+     "F",
+     "Coing",
+     140
+    ],
+    [
+     "F",
+     "Corossol",
+     55
+    ],
+    [
+     "F",
+     "Figue",
+     145
+    ],
+    [
+     "F",
+     "Figue de Barbarie ou Nopale",
+     50
+    ],
+    [
+     "F",
+     "Fraise",
+     90
+    ],
+    [
+     "F",
+     "Framboise",
+     45
+    ],
+    [
+     "F",
+     "Fruit de la passion ou grenadille",
+     25
+    ],
+    [
+     "F",
+     "Goyave",
+     115
+    ],
+    [
+     "F",
+     "Grenade",
+     60
+    ],
+    [
+     "F",
+     "Groseille ou gadelle rouge et blanche",
+     40
+    ],
+    [
+     "F",
+     "Kaki",
+     100
+    ],
+    [
+     "F",
+     "Kiwi",
+     30
+    ],
+    [
+     "F",
+     "Kumquat",
+     30
+    ],
+    [
+     "F",
+     "Litchi",
+     55
+    ],
+    [
+     "F",
+     "Mangue",
+     210
+    ],
+    [
+     "F",
+     "Melon",
+     85
+    ],
+    [
+     "F",
+     "Mirabelle",
+     80
+    ],
+    [
+     "F",
+     "Myrtille",
+     75
+    ],
+    [
+     "F",
+     "Mûre",
+     40
+    ],
+    [
+     "F",
+     "Nashi ou poire asiatique",
+     280
+    ],
+    [
+     "F",
+     "Nectarine / Brugnon",
+     280
+    ],
+    [
+     "F",
+     "Nèfle du Japon",
+     180
+    ],
+    [
+     "F",
+     "Orange",
+     35
+    ],
+    [
+     "F",
+     "Pamplemousse blanc",
+     35
+    ],
+    [
+     "F",
+     "Pamplemousse rose",
+     35
+    ],
+    [
+     "F",
+     "Papaye",
+     500
+    ],
+    [
+     "F",
+     "Pastèque",
+     40
+    ],
+    [
+     "F",
+     "Poire",
+     250
+    ],
+    [
+     "F",
+     "Pomme",
+     415
+    ],
+    [
+     "F",
+     "Pomme cannelle",
+     30
+    ],
+    [
+     "F",
+     "Prune",
+     280
+    ],
+    [
+     "F",
+     "Pêche",
+     140
+    ],
+    [
+     "F",
+     "Raisin blanc et noir",
+     20
+    ],
+    [
+     "F",
+     "Rhubarbe",
+     125
+    ],
+    [
+     "F",
+     "Sapote",
+     60
+    ],
+    [
+     "F",
+     "Sapotille",
+     155
+    ],
+    [
+     "L",
+     "Ail (à négliger si utilisé en petite quantité)",
+     5
+    ],
+    [
+     "L",
+     "Artichaut",
+     15
+    ],
+    [
+     "L",
+     "Asperge",
+     20
+    ],
+    [
+     "L",
+     "Aubergine",
+     55
+    ],
+    [
+     "L",
+     "Avocat",
+     30
+    ],
+    [
+     "L",
+     "Banane plantain",
+     40
+    ],
+    [
+     "L",
+     "Bette ou carde",
+     20
+    ],
+    [
+     "L",
+     "Betterave",
+     55
+    ],
+    [
+     "L",
+     "Brocoli",
+     15
+    ],
+    [
+     "L",
+     "Carotte crue (95 g cuite)",
+     50
+    ],
+    [
+     "L",
+     "Carotte cuite (50 g crue)",
+     95
+    ],
+    [
+     "L",
+     "Champignon de Paris",
+     20
+    ],
+    [
+     "L",
+     "Chou blanc",
+     25
+    ],
+    [
+     "L",
+     "Chou de Bruxelles",
+     10
+    ],
+    [
+     "L",
+     "Chou de Chine ou pet-sai",
+     30
+    ],
+    [
+     "L",
+     "Chou romanesco",
+     15
+    ],
+    [
+     "L",
+     "Chou rouge",
+     30
+    ],
+    [
+     "L",
+     "Chou vert frisé",
+     15
+    ],
+    [
+     "L",
+     "Chou-fleur",
+     25
+    ],
+    [
+     "L",
+     "Chou-rave",
+     20
+    ],
+    [
+     "L",
+     "Christophine ou chayote (légume antillais)",
+     95
+    ],
+    [
+     "L",
+     "Châtaigne ou marron",
+     20
+    ],
+    [
+     "L",
+     "Citrouille / potiron cru (65 g cuit)",
+     45
+    ],
+    [
+     "L",
+     "Citrouille / potiron cuit (45 g cru)",
+     65
+    ],
+    [
+     "L",
+     "Civette (à négliger si utilisé en petite quantité)",
+     10
+    ],
+    [
+     "L",
+     "Coeurs de palmiers",
+     15
+    ],
+    [
+     "L",
+     "Concombre",
+     55
+    ],
+    [
+     "L",
+     "Cornichon (à négliger si utilisé en petite quantité)",
+     110
+    ],
+    [
+     "L",
+     "Courge (spaghetti)",
+     50
+    ],
+    [
+     "L",
+     "Courgette (longue)",
+     50
+    ],
+    [
+     "L",
+     "Courgette (ronde)",
+     50
+    ],
+    [
+     "L",
+     "Crosne",
+     10
+    ],
+    [
+     "L",
+     "Céleri branche cru, coeur de céleri cru (105 g cuit)",
+     125
+    ],
+    [
+     "L",
+     "Céleri branche cuit, coeur de céleri cuit (125 g cru)",
+     105
+    ],
+    [
+     "L",
+     "Céleri-rave",
+     55
+    ],
+    [
+     "L",
+     "Endive (chicorée de Bruxelles ou witloof)",
+     40
+    ],
+    [
+     "L",
+     "Fenouil",
+     20
+    ],
+    [
+     "L",
+     "Feuille de vigne",
+     35
+    ],
+    [
+     "L",
+     "Fruit à pain (légume antillais)",
+     55
+    ],
+    [
+     "L",
+     "Germes de soja (haricots mango)",
+     15
+    ],
+    [
+     "L",
+     "Gombo ou Okra",
+     30
+    ],
+    [
+     "L",
+     "Haricots beurre crus (40 g cuits)",
+     25
+    ],
+    [
+     "L",
+     "Haricots beurre cuits (25 g crus)",
+     40
+    ],
+    [
+     "L",
+     "Haricots beurre plats crus (40 g cuits)",
+     25
+    ],
+    [
+     "L",
+     "Haricots beurre plats cuits (25 g crus)",
+     40
+    ],
+    [
+     "L",
+     "Haricots verts crus (40 g cuits)",
+     25
+    ],
+    [
+     "L",
+     "Haricots verts cuits (25 g crus)",
+     40
+    ],
+    [
+     "L",
+     "Haricots verts plats crus (40 g cuits)",
+     25
+    ],
+    [
+     "L",
+     "Haricots verts plats cuits (25 g crus)",
+     40
+    ],
+    [
+     "L",
+     "Igname",
+     20
+    ],
+    [
+     "L",
+     "Manioc",
+     20
+    ],
+    [
+     "L",
+     "Maïs",
+     25
+    ],
+    [
+     "L",
+     "Navet cru (130 g cuit)",
+     105
+    ],
+    [
+     "L",
+     "Navet cuit (105 g cru)",
+     130
+    ],
+    [
+     "L",
+     "Oignon (à négliger si utilisé en petite quantité)",
+     15
+    ],
+    [
+     "L",
+     "Oseille",
+     20
+    ],
+    [
+     "L",
+     "Panais",
+     20
+    ],
+    [
+     "L",
+     "Patate douce",
+     30
+    ],
+    [
+     "L",
+     "Persil (à négliger si utilisé en petite quantité)",
+     20
+    ],
+    [
+     "L",
+     "Petits pois",
+     5
+    ],
+    [
+     "L",
+     "Piment cru (50 g cuit) (à négliger si utilisé en petite quantité)",
+     25
+    ],
+    [
+     "L",
+     "Piment cuit (25 g cru) (à négliger si utilisé en petite quantité)",
+     50
+    ],
+    [
+     "L",
+     "Pissenlit",
+     20
+    ],
+    [
+     "L",
+     "Poireau cru (60 g cuit)",
+     30
+    ],
+    [
+     "L",
+     "Poireau cuit (30 g cru)",
+     60
+    ],
+    [
+     "L",
+     "Pois plats ou pois gourmands",
+     15
+    ],
+    [
+     "L",
+     "Poivron",
+     55
+    ],
+    [
+     "L",
+     "Pomme de terre",
+     25
+    ],
+    [
+     "L",
+     "Potimarron cru (65 g cuit)",
+     45
+    ],
+    [
+     "L",
+     "Potimarron cuit (45 g cru)",
+     65
+    ],
+    [
+     "L",
+     "Pousse de bambou crue (40 g cuite)",
+     25
+    ],
+    [
+     "L",
+     "Pousse de bambou cuite (25 g crue)",
+     40
+    ],
+    [
+     "L",
+     "Pâtisson",
+     50
+    ],
+    [
+     "L",
+     "Radis noir",
+     70
+    ],
+    [
+     "L",
+     "Radis rose",
+     60
+    ],
+    [
+     "L",
+     "Raifort",
+     5
+    ],
+    [
+     "L",
+     "Rutabaga",
+     15
+    ],
+    [
+     "L",
+     "Sal. Chicorée",
+     30
+    ],
+    [
+     "L",
+     "Sal. Cresson",
+     15
+    ],
+    [
+     "L",
+     "Sal. Laitue",
+     30
+    ],
+    [
+     "L",
+     "Sal. Laitue iceberg",
+     30
+    ],
+    [
+     "L",
+     "Sal. Laitue romaine",
+     30
+    ],
+    [
+     "L",
+     "Sal. Mâche",
+     25
+    ],
+    [
+     "L",
+     "Sal. Pourpier",
+     30
+    ],
+    [
+     "L",
+     "Sal. Scarole ou endive belge",
+     30
+    ],
+    [
+     "L",
+     "Sal. Trévise",
+     30
+    ],
+    [
+     "L",
+     "Salsifis ou scorsonère",
+     20
+    ],
+    [
+     "L",
+     "Taro cru (70 g cuit)",
+     25
+    ],
+    [
+     "L",
+     "Taro cuit (25 g cru)",
+     70
+    ],
+    [
+     "L",
+     "Tomate crue (95 g cuite)",
+     120
+    ],
+    [
+     "L",
+     "Tomate cuite (120 g crue)",
+     95
+    ],
+    [
+     "L",
+     "Tomate en concentré",
+     35
+    ],
+    [
+     "L",
+     "Tomate en coulis",
+     75
+    ],
+    [
+     "L",
+     "Topinambour",
+     15
+    ],
+    [
+     "L",
+     "Échalote (à négliger si utilisé en petite quantité)",
+     60
+    ],
+    [
+     "L",
+     "Épinards",
+     15
+    ],
+    [
+     "C",
+     "Bolet orange",
+     20
+    ],
+    [
+     "C",
+     "Bolet rude",
+     40
+    ],
+    [
+     "C",
+     "Chanterelle / girole",
+     30
+    ],
+    [
+     "C",
+     "Cèpe",
+     10
+    ],
+    [
+     "C",
+     "Oronge",
+     180
+    ],
+    [
+     "C",
+     "Pleurote",
+     15
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "nom": "Protéines (1 g)",
+   "part": "1 part = 1 g de protéines",
+   "pathologies": "Régimes hypoprotidiques (cycle de l'urée, aciduries organiques…)",
+   "aliments": [
+    [
+     "S",
+     "Abricot au sirop",
+     155
+    ],
+    [
+     "S",
+     "Airelles au sirop",
+     185
+    ],
+    [
+     "S",
+     "Ananas au sirop",
+     285
+    ],
+    [
+     "S",
+     "Cerises au sirop",
+     150
+    ],
+    [
+     "S",
+     "Figues au sirop",
+     160
+    ],
+    [
+     "S",
+     "Fraises au sirop",
+     175
+    ],
+    [
+     "S",
+     "Framboises au sirop",
+     140
+    ],
+    [
+     "S",
+     "Litchis au sirop",
+     65
+    ],
+    [
+     "S",
+     "Mandarines au sirop",
+     250
+    ],
+    [
+     "S",
+     "Myrtilles au sirop",
+     140
+    ],
+    [
+     "S",
+     "Pamplemousse au sirop",
+     175
+    ],
+    [
+     "S",
+     "Poires au sirop",
+     500
+    ],
+    [
+     "S",
+     "Prunes au sirop",
+     175
+    ],
+    [
+     "S",
+     "Pêches au sirop",
+     220
+    ],
+    [
+     "S",
+     "Raisins au sirop",
+     200
+    ],
+    [
+     "F",
+     "Abricot",
+     70
+    ],
+    [
+     "F",
+     "Ananas",
+     185
+    ],
+    [
+     "F",
+     "Baie de sureau",
+     140
+    ],
+    [
+     "F",
+     "Banane",
+     90
+    ],
+    [
+     "F",
+     "Carambole ou fruit étoile",
+     95
+    ],
+    [
+     "F",
+     "Cassis",
+     70
+    ],
+    [
+     "F",
+     "Cerise",
+     95
+    ],
+    [
+     "F",
+     "Citron",
+     140
+    ],
+    [
+     "F",
+     "Citron lime",
+     140
+    ],
+    [
+     "F",
+     "Clémentine / Mandarine / Tangerine",
+     140
+    ],
+    [
+     "F",
+     "Coing",
+     250
+    ],
+    [
+     "F",
+     "Corossol",
+     100
+    ],
+    [
+     "F",
+     "Figue",
+     130
+    ],
+    [
+     "F",
+     "Figue de Barbarie ou Nopale",
+     75
+    ],
+    [
+     "F",
+     "Fraise",
+     150
+    ],
+    [
+     "F",
+     "Framboise",
+     80
+    ],
+    [
+     "F",
+     "Fruit de la passion ou grenadille",
+     45
+    ],
+    [
+     "F",
+     "Goyave",
+     40
+    ],
+    [
+     "F",
+     "Grenade",
+     105
+    ],
+    [
+     "F",
+     "Groseille ou gadelle rouge et blanche",
+     70
+    ],
+    [
+     "F",
+     "Kaki",
+     170
+    ],
+    [
+     "F",
+     "Kiwi",
+     85
+    ],
+    [
+     "F",
+     "Kumquat",
+     50
+    ],
+    [
+     "F",
+     "Litchi",
+     100
+    ],
+    [
+     "F",
+     "Mangue",
+     195
+    ],
+    [
+     "F",
+     "Melon",
+     120
+    ],
+    [
+     "F",
+     "Mirabelle",
+     135
+    ],
+    [
+     "F",
+     "Myrtille",
+     140
+    ],
+    [
+     "F",
+     "Mûre",
+     70
+    ],
+    [
+     "F",
+     "Nashi ou poire asiatique",
+     200
+    ],
+    [
+     "F",
+     "Nectarine / Brugnon",
+     95
+    ],
+    [
+     "F",
+     "Nèfle du Japon",
+     230
+    ],
+    [
+     "F",
+     "Orange",
+     125
+    ],
+    [
+     "F",
+     "Pamplemousse blanc",
+     155
+    ],
+    [
+     "F",
+     "Pamplemousse rose",
+     155
+    ],
+    [
+     "F",
+     "Papaye",
+     165
+    ],
+    [
+     "F",
+     "Pastèque",
+     165
+    ],
+    [
+     "F",
+     "Poire",
+     260
+    ],
+    [
+     "F",
+     "Pomme",
+     370
+    ],
+    [
+     "F",
+     "Pomme cannelle",
+     45
+    ],
+    [
+     "F",
+     "Prune",
+     140
+    ],
+    [
+     "F",
+     "Pêche",
+     110
+    ],
+    [
+     "F",
+     "Raisin blanc et noir",
+     140
+    ],
+    [
+     "F",
+     "Rhubarbe",
+     165
+    ],
+    [
+     "F",
+     "Sapote",
+     45
+    ],
+    [
+     "F",
+     "Sapotille",
+     225
+    ],
+    [
+     "L",
+     "Ail (à négliger si utilisé en petite quantité)",
+     15
+    ],
+    [
+     "L",
+     "Artichaut",
+     25
+    ],
+    [
+     "L",
+     "Asperge",
+     40
+    ],
+    [
+     "L",
+     "Aubergine",
+     125
+    ],
+    [
+     "L",
+     "Avocat",
+     50
+    ],
+    [
+     "L",
+     "Banane plantain",
+     125
+    ],
+    [
+     "L",
+     "Bette ou carde",
+     50
+    ],
+    [
+     "L",
+     "Betterave",
+     60
+    ],
+    [
+     "L",
+     "Brocoli",
+     30
+    ],
+    [
+     "L",
+     "Carotte crue (165 g cuite)",
+     110
+    ],
+    [
+     "L",
+     "Carotte cuite (110 g crue)",
+     165
+    ],
+    [
+     "L",
+     "Champignon de Paris cru (50 g cuit)",
+     30
+    ],
+    [
+     "L",
+     "Champignon de Paris cuit (30 g cru)",
+     50
+    ],
+    [
+     "L",
+     "Chou blanc",
+     70
+    ],
+    [
+     "L",
+     "Chou de Bruxelles",
+     25
+    ],
+    [
+     "L",
+     "Chou de Chine ou pet-sai cru (65 g cuit)",
+     80
+    ],
+    [
+     "L",
+     "Chou de Chine ou pet-sai cuit (80 g cru)",
+     65
+    ],
+    [
+     "L",
+     "Chou romanesco",
+     30
+    ],
+    [
+     "L",
+     "Chou rouge",
+     65
+    ],
+    [
+     "L",
+     "Chou vert frisé cru (50 g cuit)",
+     30
+    ],
+    [
+     "L",
+     "Chou vert frisé cuit (30 g cru)",
+     50
+    ],
+    [
+     "L",
+     "Chou-fleur cru (55 g cuit)",
+     50
+    ],
+    [
+     "L",
+     "Chou-fleur cuit (50 g cru)",
+     55
+    ],
+    [
+     "L",
+     "Chou-rave",
+     55
+    ],
+    [
+     "L",
+     "Christophine ou chayote (légume antillais)",
+     165
+    ],
+    [
+     "L",
+     "Châtaigne crue ou marron cru (50 g cuit)",
+     60
+    ],
+    [
+     "L",
+     "Châtaigne cuite ou marron cuit (60 g cru)",
+     50
+    ],
+    [
+     "L",
+     "Citrouille / potiron cru (140 g cuit)",
+     100
+    ],
+    [
+     "L",
+     "Citrouille / potiron cuit (100 g cru)",
+     140
+    ],
+    [
+     "L",
+     "Civette (à négliger si utilisé en petite quantité)",
+     25
+    ],
+    [
+     "L",
+     "Coeurs de palmiers",
+     40
+    ],
+    [
+     "L",
+     "Concombre",
+     140
+    ],
+    [
+     "L",
+     "Cornichon (à négliger si utilisé en petite quantité)",
+     345
+    ],
+    [
+     "L",
+     "Courge (spaghetti)",
+     80
+    ],
+    [
+     "L",
+     "Courgette (longue)",
+     80
+    ],
+    [
+     "L",
+     "Courgette (ronde)",
+     80
+    ],
+    [
+     "L",
+     "Crosne",
+     35
+    ],
+    [
+     "L",
+     "Céleri branche cru, coeur de céleri cru (125 g cuit)",
+     140
+    ],
+    [
+     "L",
+     "Céleri branche cuit, coeur de céleri cuit (140 g cru)",
+     125
+    ],
+    [
+     "L",
+     "Céleri-rave",
+     60
+    ],
+    [
+     "L",
+     "Endive (chicorée de Bruxelles ou witloof)",
+     110
+    ],
+    [
+     "L",
+     "Fenouil",
+     70
+    ],
+    [
+     "L",
+     "Feuille de vigne",
+     55
+    ],
+    [
+     "L",
+     "Fruit à pain (légume antillais)",
+     90
+    ],
+    [
+     "L",
+     "Germes de soja (haricots mango)",
+     50
+    ],
+    [
+     "L",
+     "Gombo ou Okra",
+     50
+    ],
+    [
+     "L",
+     "Haricots beurre crus (65 g cuits)",
+     40
+    ],
+    [
+     "L",
+     "Haricots beurre cuits (40 g crus)",
+     65
+    ],
+    [
+     "L",
+     "Haricots beurre plats crus (65 g cuits)",
+     40
+    ],
+    [
+     "L",
+     "Haricots beurre plats cuits (40 g crus)",
+     65
+    ],
+    [
+     "L",
+     "Haricots verts crus (65 g cuits)",
+     40
+    ],
+    [
+     "L",
+     "Haricots verts cuits (40 g crus)",
+     65
+    ],
+    [
+     "L",
+     "Haricots verts plats crus (65 g cuits)",
+     40
+    ],
+    [
+     "L",
+     "Haricots verts plats cuits (40 g crus)",
+     65
+    ],
+    [
+     "L",
+     "Igname",
+     65
+    ],
+    [
+     "L",
+     "Manioc",
+     70
+    ],
+    [
+     "L",
+     "Maïs",
+     35
+    ],
+    [
+     "L",
+     "Navet cru (140 g cuit)",
+     110
+    ],
+    [
+     "L",
+     "Navet cuit (110 g cru)",
+     140
+    ],
+    [
+     "L",
+     "Oignon (à négliger si utilisé en petite quantité)",
+     110
+    ],
+    [
+     "L",
+     "Oseille",
+     50
+    ],
+    [
+     "L",
+     "Panais",
+     75
+    ],
+    [
+     "L",
+     "Patate douce crue (70 g cuite)",
+     60
+    ],
+    [
+     "L",
+     "Patate douce cuite (60 g crue)",
+     70
+    ],
+    [
+     "L",
+     "Persil (à négliger si utilisé en petite quantité)",
+     30
+    ],
+    [
+     "L",
+     "Petits pois",
+     15
+    ],
+    [
+     "L",
+     "Piment cru (125 g cuit) (à négliger si utilisé en petite quantité)",
+     50
+    ],
+    [
+     "L",
+     "Piment cuit (50 g cru) (à négliger si utilisé en petite quantité)",
+     125
+    ],
+    [
+     "L",
+     "Pissenlit",
+     30
+    ],
+    [
+     "L",
+     "Poireau cru (125 g cuit)",
+     65
+    ],
+    [
+     "L",
+     "Poireau cuit (65 g cru)",
+     125
+    ],
+    [
+     "L",
+     "Pois plats crus ou pois gourmands crus (25 g cuits)",
+     35
+    ],
+    [
+     "L",
+     "Pois plats cuits ou pois gourmands cuits (35 g crus)",
+     25
+    ],
+    [
+     "L",
+     "Poivron",
+     110
+    ],
+    [
+     "L",
+     "Pomme de terre crue (60 g cuite)",
+     50
+    ],
+    [
+     "L",
+     "Pomme de terre cuite (50 g crue)",
+     60
+    ],
+    [
+     "L",
+     "Potimarron cru (140 g cuit)",
+     100
+    ],
+    [
+     "L",
+     "Potimarron cuit (100 g cru)",
+     140
+    ],
+    [
+     "L",
+     "Pousse de bambou crue (55 g cuite)",
+     40
+    ],
+    [
+     "L",
+     "Pousse de bambou cuite (40 g crue)",
+     55
+    ],
+    [
+     "L",
+     "Pâtisson cru (100 g cuit)",
+     80
+    ],
+    [
+     "L",
+     "Pâtisson cuit (80 g cru)",
+     100
+    ],
+    [
+     "L",
+     "Radis noir",
+     165
+    ],
+    [
+     "L",
+     "Radis rose",
+     140
+    ],
+    [
+     "L",
+     "Raifort",
+     35
+    ],
+    [
+     "L",
+     "Rutabaga cru (80 g cuit)",
+     75
+    ],
+    [
+     "L",
+     "Rutabaga cuit (75 g cru)",
+     80
+    ],
+    [
+     "L",
+     "Sal. Chicorée",
+     80
+    ],
+    [
+     "L",
+     "Sal. Cresson",
+     40
+    ],
+    [
+     "L",
+     "Sal. Laitue",
+     80
+    ],
+    [
+     "L",
+     "Sal. Laitue iceberg",
+     80
+    ],
+    [
+     "L",
+     "Sal. Laitue romaine",
+     80
+    ],
+    [
+     "L",
+     "Sal. Mâche",
+     50
+    ],
+    [
+     "L",
+     "Sal. Pourpier",
+     80
+    ],
+    [
+     "L",
+     "Sal. Scarole ou endive belge",
+     80
+    ],
+    [
+     "L",
+     "Sal. Trévise",
+     80
+    ],
+    [
+     "L",
+     "Salsifis ou scorsonère",
+     70
+    ],
+    [
+     "L",
+     "Taro cru (200 g cuit)",
+     65
+    ],
+    [
+     "L",
+     "Taro cuit (65 g cru)",
+     200
+    ],
+    [
+     "L",
+     "Tomate crue (100 g cuite)",
+     110
+    ],
+    [
+     "L",
+     "Tomate cuite (110 g crue)",
+     100
+    ],
+    [
+     "L",
+     "Tomate en concentré",
+     25
+    ],
+    [
+     "L",
+     "Tomate en coulis",
+     60
+    ],
+    [
+     "L",
+     "Topinambour",
+     50
+    ],
+    [
+     "L",
+     "Échalote (à négliger si utilisé en petite quantité)",
+     40
+    ],
+    [
+     "L",
+     "Épinards",
+     30
+    ],
+    [
+     "C",
+     "Bolet orange",
+     45
+    ],
+    [
+     "C",
+     "Bolet rude",
+     20
+    ],
+    [
+     "C",
+     "Chanterelle / girole",
+     40
+    ],
+    [
+     "C",
+     "Cèpe",
+     15
+    ],
+    [
+     "C",
+     "Oronge",
+     35
+    ],
+    [
+     "C",
+     "Pleurote",
+     50
+    ]
+   ]
+  },
+  {
+   "id": "p2",
+   "nom": "Protéines (2 g)",
+   "part": "1 part = 2 g de protéines",
+   "pathologies": "Régimes hypoprotidiques (cycle de l'urée, aciduries organiques…)",
+   "aliments": [
+    [
+     "S",
+     "Abricot au sirop",
+     315
+    ],
+    [
+     "S",
+     "Airelles au sirop",
+     370
+    ],
+    [
+     "S",
+     "Ananas au sirop",
+     570
+    ],
+    [
+     "S",
+     "Cerises au sirop",
+     300
+    ],
+    [
+     "S",
+     "Figues au sirop",
+     525
+    ],
+    [
+     "S",
+     "Fraises au sirop",
+     355
+    ],
+    [
+     "S",
+     "Framboises au sirop",
+     285
+    ],
+    [
+     "S",
+     "Litchis au sirop",
+     135
+    ],
+    [
+     "S",
+     "Mandarines au sirop",
+     500
+    ],
+    [
+     "S",
+     "Myrtilles au sirop",
+     285
+    ],
+    [
+     "S",
+     "Pamplemousse au sirop",
+     355
+    ],
+    [
+     "S",
+     "Poires au sirop",
+     1000
+    ],
+    [
+     "S",
+     "Prunes au sirop",
+     555
+    ],
+    [
+     "S",
+     "Pêches au sirop",
+     445
+    ],
+    [
+     "S",
+     "Raisins au sirop",
+     400
+    ],
+    [
+     "F",
+     "Abricot",
+     145
+    ],
+    [
+     "F",
+     "Ananas",
+     370
+    ],
+    [
+     "F",
+     "Baie de sureau",
+     285
+    ],
+    [
+     "F",
+     "Banane",
+     185
+    ],
+    [
+     "F",
+     "Carambole ou fruit étoile",
+     190
+    ],
+    [
+     "F",
+     "Cassis",
+     145
+    ],
+    [
+     "F",
+     "Cerise",
+     190
+    ],
+    [
+     "F",
+     "Citron",
+     285
+    ],
+    [
+     "F",
+     "Citron lime",
+     285
+    ],
+    [
+     "F",
+     "Clémentine / Mandarine / Tangerine",
+     285
+    ],
+    [
+     "F",
+     "Coing",
+     500
+    ],
+    [
+     "F",
+     "Corossol",
+     200
+    ],
+    [
+     "F",
+     "Figue",
+     265
+    ],
+    [
+     "F",
+     "Figue de Barbarie ou Nopale",
+     150
+    ],
+    [
+     "F",
+     "Fraise",
+     300
+    ],
+    [
+     "F",
+     "Framboise",
+     165
+    ],
+    [
+     "F",
+     "Fruit de la passion ou grenadille",
+     90
+    ],
+    [
+     "F",
+     "Goyave",
+     80
+    ],
+    [
+     "F",
+     "Grenade",
+     210
+    ],
+    [
+     "F",
+     "Groseille ou gadelle rouge et blanche",
+     145
+    ],
+    [
+     "F",
+     "Kaki",
+     345
+    ],
+    [
+     "F",
+     "Kiwi",
+     175
+    ],
+    [
+     "F",
+     "Kumquat",
+     105
+    ],
+    [
+     "F",
+     "Litchi",
+     200
+    ],
+    [
+     "F",
+     "Mangue",
+     390
+    ],
+    [
+     "F",
+     "Melon",
+     240
+    ],
+    [
+     "F",
+     "Mirabelle",
+     275
+    ],
+    [
+     "F",
+     "Myrtille",
+     285
+    ],
+    [
+     "F",
+     "Mûre",
+     145
+    ],
+    [
+     "F",
+     "Nashi ou poire asiatique",
+     400
+    ],
+    [
+     "F",
+     "Nectarine / Brugnon",
+     190
+    ],
+    [
+     "F",
+     "Nèfle du Japon",
+     465
+    ],
+    [
+     "F",
+     "Orange",
+     250
+    ],
+    [
+     "F",
+     "Pamplemousse blanc",
+     315
+    ],
+    [
+     "F",
+     "Pamplemousse rose",
+     315
+    ],
+    [
+     "F",
+     "Papaye",
+     330
+    ],
+    [
+     "F",
+     "Pastèque",
+     330
+    ],
+    [
+     "F",
+     "Poire",
+     525
+    ],
+    [
+     "F",
+     "Pomme",
+     740
+    ],
+    [
+     "F",
+     "Pomme cannelle",
+     95
+    ],
+    [
+     "F",
+     "Prune",
+     285
+    ],
+    [
+     "F",
+     "Pêche",
+     220
+    ],
+    [
+     "F",
+     "Raisin blanc et noir",
+     280
+    ],
+    [
+     "F",
+     "Rhubarbe",
+     335
+    ],
+    [
+     "F",
+     "Sapote",
+     95
+    ],
+    [
+     "F",
+     "Sapotille",
+     455
+    ],
+    [
+     "L",
+     "Ail (à négliger si utilisé en petite quantité)",
+     30
+    ],
+    [
+     "L",
+     "Artichaut",
+     55
+    ],
+    [
+     "L",
+     "Asperge",
+     85
+    ],
+    [
+     "L",
+     "Aubergine",
+     250
+    ],
+    [
+     "L",
+     "Avocat",
+     100
+    ],
+    [
+     "L",
+     "Banane plantain",
+     250
+    ],
+    [
+     "L",
+     "Bette ou carde",
+     105
+    ],
+    [
+     "L",
+     "Betterave",
+     120
+    ],
+    [
+     "L",
+     "Brocoli",
+     65
+    ],
+    [
+     "L",
+     "Carotte crue (330 g cuite)",
+     220
+    ],
+    [
+     "L",
+     "Carotte cuite (220 g crue)",
+     330
+    ],
+    [
+     "L",
+     "Champignon de Paris cru (105 g cuit)",
+     65
+    ],
+    [
+     "L",
+     "Champignon de Paris cuit (65 g cru)",
+     105
+    ],
+    [
+     "L",
+     "Chou blanc",
+     145
+    ],
+    [
+     "L",
+     "Chou de Bruxelles",
+     55
+    ],
+    [
+     "L",
+     "Chou de Chine ou pet-sai cru (135 g cuit)",
+     165
+    ],
+    [
+     "L",
+     "Chou de Chine ou pet-sai cuit (165 g cru)",
+     135
+    ],
+    [
+     "L",
+     "Chou romanesco",
+     65
+    ],
+    [
+     "L",
+     "Chou rouge",
+     135
+    ],
+    [
+     "L",
+     "Chou vert frisé cru (105 g cuit)",
+     60
+    ],
+    [
+     "L",
+     "Chou vert frisé cuit (60 g cru)",
+     105
+    ],
+    [
+     "L",
+     "Chou-fleur cru (110 g cuit)",
+     100
+    ],
+    [
+     "L",
+     "Chou-fleur cuit (100 g cru)",
+     110
+    ],
+    [
+     "L",
+     "Chou-rave",
+     110
+    ],
+    [
+     "L",
+     "Christophine ou chayote (légume antillais)",
+     335
+    ],
+    [
+     "L",
+     "Châtaigne crue ou marron cru (100 g cuit)",
+     125
+    ],
+    [
+     "L",
+     "Châtaigne cuite ou marron cuit (125 g cru)",
+     100
+    ],
+    [
+     "L",
+     "Citrouille / potiron cru (285 g cuit)",
+     200
+    ],
+    [
+     "L",
+     "Citrouille / potiron cuit (200 g cru)",
+     285
+    ],
+    [
+     "L",
+     "Civette (à négliger si utilisé en petite quantité)",
+     55
+    ],
+    [
+     "L",
+     "Coeurs de palmiers",
+     80
+    ],
+    [
+     "L",
+     "Concombre",
+     285
+    ],
+    [
+     "L",
+     "Cornichon (à négliger si utilisé en petite quantité)",
+     690
+    ],
+    [
+     "L",
+     "Courge (spaghetti)",
+     165
+    ],
+    [
+     "L",
+     "Courgette (longue)",
+     165
+    ],
+    [
+     "L",
+     "Courgette (ronde)",
+     165
+    ],
+    [
+     "L",
+     "Crosne",
+     75
+    ],
+    [
+     "L",
+     "Céleri branche cru, coeur de céleri cru (250 g cuit)",
+     285
+    ],
+    [
+     "L",
+     "Céleri branche cuit, coeur de céleri cuit (285 g cru)",
+     250
+    ],
+    [
+     "L",
+     "Céleri-rave",
+     125
+    ],
+    [
+     "L",
+     "Endive (chicorée de Bruxelles ou witloof)",
+     220
+    ],
+    [
+     "L",
+     "Fenouil",
+     145
+    ],
+    [
+     "L",
+     "Feuille de vigne",
+     110
+    ],
+    [
+     "L",
+     "Fruit à pain (légume antillais)",
+     180
+    ],
+    [
+     "L",
+     "Germes de soja (haricots mango)",
+     100
+    ],
+    [
+     "L",
+     "Gombo ou Okra",
+     100
+    ],
+    [
+     "L",
+     "Haricots beurre crus (135 g cuits)",
+     85
+    ],
+    [
+     "L",
+     "Haricots beurre cuits (85 g crus)",
+     135
+    ],
+    [
+     "L",
+     "Haricots beurre plats crus (135 g cuits)",
+     85
+    ],
+    [
+     "L",
+     "Haricots beurre plats cuits (85 g crus)",
+     135
+    ],
+    [
+     "L",
+     "Haricots verts crus (135 g cuits)",
+     85
+    ],
+    [
+     "L",
+     "Haricots verts cuits (85 g crus)",
+     135
+    ],
+    [
+     "L",
+     "Haricots verts plats crus (135 g cuits)",
+     85
+    ],
+    [
+     "L",
+     "Haricots verts plats cuits (85 g crus)",
+     135
+    ],
+    [
+     "L",
+     "Igname",
+     135
+    ],
+    [
+     "L",
+     "Manioc",
+     145
+    ],
+    [
+     "L",
+     "Maïs",
+     75
+    ],
+    [
+     "L",
+     "Navet cru (285 g cuit)",
+     220
+    ],
+    [
+     "L",
+     "Navet cuit (220 g cru)",
+     285
+    ],
+    [
+     "L",
+     "Oignon (à négliger si utilisé en petite quantité)",
+     220
+    ],
+    [
+     "L",
+     "Oseille",
+     100
+    ],
+    [
+     "L",
+     "Panais",
+     150
+    ],
+    [
+     "L",
+     "Patate douce crue (145 g cuite)",
+     125
+    ],
+    [
+     "L",
+     "Patate douce cuite (125 g crue)",
+     145
+    ],
+    [
+     "L",
+     "Persil (à négliger si utilisé en petite quantité)",
+     65
+    ],
+    [
+     "L",
+     "Petits pois",
+     35
+    ],
+    [
+     "L",
+     "Piment cru (250 g cuit) (à négliger si utilisé en petite quantité)",
+     100
+    ],
+    [
+     "L",
+     "Piment cuit (100 g cru) (à négliger si utilisé en petite quantité)",
+     250
+    ],
+    [
+     "L",
+     "Pissenlit",
+     65
+    ],
+    [
+     "L",
+     "Poireau cru (250 g cuit)",
+     135
+    ],
+    [
+     "L",
+     "Poireau cuit (135 g cru)",
+     250
+    ],
+    [
+     "L",
+     "Pois plats crus ou pois gourmands crus (55 g cuits)",
+     70
+    ],
+    [
+     "L",
+     "Pois plats cuits ou pois gourmands cuits (70 g crus)",
+     55
+    ],
+    [
+     "L",
+     "Poivron",
+     220
+    ],
+    [
+     "L",
+     "Pomme de terre crue (120 g cuite)",
+     100
+    ],
+    [
+     "L",
+     "Pomme de terre cuite (100 g crue)",
+     120
+    ],
+    [
+     "L",
+     "Potimarron cru (285 g cuit)",
+     200
+    ],
+    [
+     "L",
+     "Potimarron cuit (200 g cru)",
+     285
+    ],
+    [
+     "L",
+     "Pousse de bambou crue (110 g cuite)",
+     80
+    ],
+    [
+     "L",
+     "Pousse de bambou cuite (80 g crue)",
+     110
+    ],
+    [
+     "L",
+     "Pâtisson cru (200 g cuit)",
+     165
+    ],
+    [
+     "L",
+     "Pâtisson cuit (165 g cru)",
+     200
+    ],
+    [
+     "L",
+     "Radis noir",
+     335
+    ],
+    [
+     "L",
+     "Radis rose",
+     285
+    ],
+    [
+     "L",
+     "Raifort",
+     70
+    ],
+    [
+     "L",
+     "Rutabaga cru (165 g cuit)",
+     155
+    ],
+    [
+     "L",
+     "Rutabaga cuit (155 g cru)",
+     165
+    ],
+    [
+     "L",
+     "Sal. Chicorée",
+     165
+    ],
+    [
+     "L",
+     "Sal. Cresson",
+     85
+    ],
+    [
+     "L",
+     "Sal. Laitue",
+     165
+    ],
+    [
+     "L",
+     "Sal. Laitue iceberg",
+     165
+    ],
+    [
+     "L",
+     "Sal. Laitue romaine",
+     165
+    ],
+    [
+     "L",
+     "Sal. Mâche",
+     100
+    ],
+    [
+     "L",
+     "Sal. Pourpier",
+     165
+    ],
+    [
+     "L",
+     "Sal. Scarole ou endive belge",
+     165
+    ],
+    [
+     "L",
+     "Sal. Trévise",
+     165
+    ],
+    [
+     "L",
+     "Salsifis ou scorsonère",
+     145
+    ],
+    [
+     "L",
+     "Taro cru (400 g cuit)",
+     135
+    ],
+    [
+     "L",
+     "Taro cuit (135 g cru)",
+     400
+    ],
+    [
+     "L",
+     "Tomate crue (200 g cuite)",
+     220
+    ],
+    [
+     "L",
+     "Tomate cuite (220 g crue)",
+     200
+    ],
+    [
+     "L",
+     "Tomate en concentré",
+     55
+    ],
+    [
+     "L",
+     "Tomate en coulis",
+     120
+    ],
+    [
+     "L",
+     "Topinambour",
+     100
+    ],
+    [
+     "L",
+     "Échalote (à négliger si utilisé en petite quantité)",
+     80
+    ],
+    [
+     "L",
+     "Épinards",
+     65
+    ],
+    [
+     "C",
+     "Bolet orange",
+     90
+    ],
+    [
+     "C",
+     "Bolet rude",
+     45
+    ],
+    [
+     "C",
+     "Chanterelle / girole",
+     85
+    ],
+    [
+     "C",
+     "Cèpe",
+     35
+    ],
+    [
+     "C",
+     "Oronge",
+     70
+    ],
+    [
+     "C",
+     "Pleurote",
+     55
+    ]
+   ]
+  }
+ ]
+}

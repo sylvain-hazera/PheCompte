@@ -80,7 +80,7 @@ details summary{cursor:pointer;font-weight:600}
   <header style="display:grid;gap:8px">
     <div class="small muted"><a href="index.html">← Retour à l'application PhéCompte</a></div>
     <h1>Base d'aliments et recettes PhéCompte</h1>
-    <p class="muted">Document de relecture destiné aux diététicien(ne)s. Il présente toutes les valeurs utilisées par l'application pour compter les parts de phénylalanine.</p>
+    <p class="muted">Document de relecture destiné aux diététicien(ne)s. Il présente toutes les valeurs utilisées par l'application pour compter les parts de phénylalanine, ainsi que les listes SFEIM 2009 des autres pathologies.</p>
   </header>
 
   <section class="card">
@@ -92,7 +92,7 @@ details summary{cursor:pointer;font-weight:600}
     </div>
     <p class="small">Pour chaque aliment, la base contient une seule valeur : <b>le poids (en grammes) qui apporte 1 part de Phé</b>. Les colonnes « Phé pour 100 g » et « Parts pour 100 g » en sont déduites : <span class="formula">Phé/100 g = 20 × 100 ÷ poids</span>. L'application calcule les parts d'une portion par <span class="formula">parts = grammes ÷ poids pour 1 part</span>, arrondi au centième.</p>
     <p class="small">Les <b>calories</b> des fruits et légumes viennent de la table Ciqual 2020 de l'Anses. Quand la valeur d'énergie manque dans la table, elle est calculée à partir des protéines, glucides, lipides, fibres et polyols (coefficients du règlement UE 1169/2011). Les correspondances « approchées » utilisent l'aliment Ciqual le plus proche (par exemple, une macédoine au sirop pour les fruits au sirop). Merci de vérifier en priorité la colonne « Correspondance Ciqual ».</p>
-    <p class="small muted">Origine des données : application aPhetit (Merck Serono puis BioMarin, 2015-2017), élaborée avec la SFEIM et l'association Les Feux Follets. Elles n'ont pas été mises à jour depuis : c'est l'objet de cette relecture.</p>
+    <p class="small muted">Origine des données : application aPhetit (Merck Serono puis BioMarin, 2015-2017), élaborée avec la SFEIM et l'association Les Feux Follets. Fruits et légumes alignés en novembre 2026 sur le consensus national SFEIM 2009 publié par la filière G2M : taro cru 25 g, salsifis 40 g (une seule valeur), ajout du persil, du potimarron et des laitues iceberg et romaine ; mangue au sirop retirée (absente du consensus).</p>
   </section>
 
   <section class="card noprint">
@@ -172,6 +172,21 @@ details summary{cursor:pointer;font-weight:600}
       <tbody></tbody>
     </table></div>
   </section>
+  <section style="display:grid;gap:12px">
+    <h2>Autres pathologies : listes des parts SFEIM 2009</h2>
+    <p class="small">Le consensus national SFEIM 2009 (diffusé par la <a href="https://filiere-g2m.fr/education-therapeutique-du-patient/outils-pedagogiques/liste-des-parts-de-proteines-et-acides-amines" target="_blank" rel="noopener">filière G2M</a>) donne, pour chaque fruit et légume, le poids à peser pour 1 part selon l'acide aminé ou la protéine contrôlé. Ce tableau rassemble les 7 listes. <b>PhéCompte n'utilise aujourd'hui que la colonne Phénylalanine</b> : les autres colonnes sont proposées pour relecture, en vue d'un éventuel suivi d'autres maladies héréditaires du métabolisme.</p>
+    <p class="small muted" id="sfeimSys"></p>
+    <div class="bar">
+      <input type="search" id="sq" placeholder="Rechercher un aliment" aria-label="Rechercher un aliment (listes SFEIM)">
+      <select id="sc" aria-label="Catégorie"><option value="">Toutes catégories</option><option value="S">Fruits au sirop</option><option value="F">Fruits frais</option><option value="L">Légumes</option><option value="C">Champignons</option></select>
+      <span class="small muted" id="scount"></span>
+    </div>
+    <div class="scroll"><table id="stbl"><thead></thead><tbody></tbody></table></div>
+    <p class="small muted">Valeurs en grammes d'aliment pour 1 part. « — » : aliment absent de cette liste, ou présent seulement sous une autre forme (cru / cuit). Quand une liste précise l'équivalence cru / cuit, elle est affichée sous la valeur. Écarts relevés dans les listes d'origine : figues au sirop (160 g pour 1 g de protéines mais 525 g pour 2 g) et prunes au sirop (175 g pour 1 g, 555 g pour 2 g).</p>
+    <div class="noprint st" style="align-items:center;flex-wrap:wrap;gap:8px"><span class="small">Ces listes sont-elles correctement reprises ?</span>
+      <button class="ok" data-id="sfeim" data-v="ok">Correct</button><button class="ko" data-id="sfeim" data-v="ko">À corriger</button>
+      <input type="text" class="cmt" data-id="sfeim" placeholder="Commentaire (aliment, liste, valeur attendue)" style="flex:1 1 220px"></div>
+  </section>
 </div>
 <div id="toast"></div>
 <script>
@@ -182,7 +197,7 @@ details summary{cursor:pointer;font-weight:600}
 const TEN = ["Faible","Moyenne","Forte"], CAT = {F:"Fruits", L:"Légumes"};
 const fmt = (n, d=1) => Number(n).toLocaleString("fr-FR", {maximumFractionDigits:d});
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const foods = ALIMENTS.map(([id, n, w, t, c]) => { const k = (typeof KCAL_FL !== "undefined" && KCAL_FL["a" + id]) || null; return {id:"a"+id, n:n.trim(), w, t, c, mg:2000 / w, p:100 / w, k: k ? k.kcal : -1, ciq:k}; });
+const foods = ALIMENTS.filter(a => !a[5]).map(([id, n, w, t, c]) => { const k = (typeof KCAL_FL !== "undefined" && KCAL_FL["a" + id]) || null; return {id:"a"+id, n:n.trim(), w, t, c, mg:2000 / w, p:100 / w, k: k ? k.kcal : -1, ciq:k}; });
 const KEY = "phecompte.revue.v1";
 let rev = {};
 try { rev = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch(e){}
@@ -221,10 +236,10 @@ function drawRecipes(){
     <td>${esc(r.t)}${r.src ? `<br><span class="small" style="color:${r.statut === "validee" ? "var(--low)" : "var(--mid)"}">${r.statut === "validee" ? "Communauté · validée" : "Communauté · non vérifiée"}</span>${r.url ? ` · <a class="small" href="${esc(r.url)}" target="_blank" rel="noopener">issue</a>` : ""}` : ""}</td><td class="n">${esc(r.parts)}</td><td class="n">${fmt(r.phe, 0)}</td><td class="n">${fmt(r.kcal, 0)}</td>${stCell(id)}</tr>`; }).join("");
 }
 function progress(){
-  const ids = [...foods.map(f => f.id), ...HYPO.map(h => h.id), ...RECS().map(r => "r" + r.id), "formules"];
+  const ids = [...foods.map(f => f.id), ...HYPO.map(h => h.id), ...RECS().map(r => "r" + r.id), "formules", ...(typeof SFEIM !== "undefined" ? ["sfeim"] : [])];
   const ok = ids.filter(i => rev[i] && rev[i].s === "ok").length, ko = ids.filter(i => rev[i] && rev[i].s === "ko").length;
   document.getElementById("progress").innerHTML = `<b>${ok + ko} / ${ids.length}</b> lignes relues · <span style="color:var(--low)">${ok} correctes</span> · <span style="color:var(--high)">${ko} à corriger</span>`;
-  document.querySelectorAll('[data-id="formules"][data-v]').forEach(b => b.setAttribute("aria-pressed", (rev.formules||{}).s === b.dataset.v));
+  for (const k of ["formules", "sfeim"]) document.querySelectorAll(`[data-id="${k}"][data-v]`).forEach(b => b.setAttribute("aria-pressed", (rev[k]||{}).s === b.dataset.v));
 }
 document.querySelectorAll("#tbl th[data-k] button").forEach(b => b.addEventListener("click", () => {
   const k = b.parentElement.dataset.k; sortDir = sortK === k ? -sortDir : 1; sortK = k;
@@ -246,6 +261,7 @@ function csv(){
   let out = `Relecture base PhéCompte;${q(rev._who || "")};${new Date().toLocaleDateString("fr-FR")}\nType;Élément;Valeur dans l'application;Avis;Commentaire\n`;
   const line = (type, id, name, val) => { const r = rev[id]; if (r && (r.s || r.c)) out += [type, q(name), q(val), r.s === "ok" ? "Correct" : r.s === "ko" ? "À corriger" : "", q(r.c || "")].join(";") + "\n"; };
   line("Formules", "formules", "Produits emballés", "50 / 32 / 38 mg Phé par g de protéines");
+  line("Autres pathologies", "sfeim", "Listes des parts SFEIM 2009", "Phé, leucine, méthionine, lysine, arginine, protéines 1 g et 2 g");
   foods.slice().sort((a, b) => a.n.localeCompare(b.n, "fr")).forEach(f => line(CAT[f.c], f.id, f.n, `1 part = ${fmt(f.w)} g (${TEN[f.t]})${f.ciq ? ` ; ${fmt(f.k, 0)} kcal/100 g (Ciqual ${f.ciq.code})` : ""}`));
   HYPO.forEach(h => line("Hypoprotéiné", h.id, h.n, `${h.kcal ?? "?"} kcal, ${h.prot} g prot., ${h.phe ?? "Phé ?"} mg Phé /100 g (${h.base})`));
   RECS().forEach(r => line(r.src ? "Recette communauté" : "Recette", "r" + r.id, r.n, `${r.parts} parts, ${r.phe} mg Phé`));
@@ -265,9 +281,9 @@ let clrArmed = false;
 document.getElementById("clr").addEventListener("click", e => {
   if (!clrArmed){ clrArmed = true; e.target.textContent = "Confirmer l'effacement"; setTimeout(() => { clrArmed = false; e.target.textContent = "Effacer mes réponses"; }, 4000); return; }
   rev = {_who: rev._who}; persist(); clrArmed = false; e.target.textContent = "Effacer mes réponses";
-  document.querySelector('[data-id="formules"].cmt').value = ""; drawFoods(); drawRecipes(); drawHypo(); toast("Réponses effacées");
+  document.querySelectorAll('.cmt[data-id="formules"], .cmt[data-id="sfeim"]').forEach(i => i.value = ""); drawFoods(); drawRecipes(); drawHypo(); toast("Réponses effacées");
 });
-document.querySelector('[data-id="formules"].cmt').value = (rev.formules || {}).c || "";
+document.querySelectorAll('.cmt[data-id="formules"], .cmt[data-id="sfeim"]').forEach(i => i.value = (rev[i.dataset.id] || {}).c || "");
 function drawHypo(){
   document.getElementById("hypoNote").textContent = HYPO_NOTE;
   document.querySelector("#htbl tbody").innerHTML = HYPO.map(h => { const s = (rev[h.id]||{}).s || ""; return `<tr class="${s}">
@@ -277,6 +293,32 @@ function drawHypo(){
 }
 drawFoods(); drawRecipes(); drawHypo();
 fetch("recettes-communaute.json", {cache:"no-cache"}).then(r => r.ok ? r.json() : []).then(d => { if (Array.isArray(d) && d.length){ COMM = d; document.getElementById("nRec").textContent = RECS().length; drawRecipes(); progress(); } }).catch(() => {});
+
+/* Listes SFEIM 2009 pour les autres pathologies (lecture seule) */
+(function(){
+  if (typeof SFEIM === "undefined") return;
+  const SY = SFEIM.systemes, CATS = SFEIM.cats;
+  document.getElementById("sfeimSys").innerHTML = SY.map(s => `<b>${esc(s.nom)}</b> : ${esc(s.part)} (${esc(s.pathologies)})`).join(" · ");
+  const key = n => n.replace(/\s*\((\d+ g [^)]*)\)/g, "").replace(/\s*\(à négliger[^)]*\)/g, "").trim();
+  const rows = new Map();
+  for (const s of SY) for (const [c, n, g] of s.aliments){
+    const k = c + "|" + key(n);
+    if (!rows.has(k)) rows.set(k, {c, n:key(n), v:{}, neg:/à négliger/.test(n)});
+    const eq = (n.match(/\((\d+ g [^)]*)\)/) || [])[1];
+    rows.get(k).v[s.id] = {g, eq};
+  }
+  const all = [...rows.values()].sort((a, b) => "SFLC".indexOf(a.c) - "SFLC".indexOf(b.c) || a.n.localeCompare(b.n, "fr"));
+  document.querySelector("#stbl thead").innerHTML = `<tr><th>Aliment</th><th>Catégorie</th>${SY.map(s => `<th class="n">${esc(s.nom)}<br><span style="text-transform:none;font-weight:400">${esc(s.part.replace("1 part = ", ""))}</span></th>`).join("")}</tr>`;
+  const draw = () => {
+    const q = document.getElementById("sq").value.trim().toLowerCase(), c = document.getElementById("sc").value;
+    const list = all.filter(r => (!c || r.c === c) && (!q || r.n.toLowerCase().includes(q)));
+    document.getElementById("scount").textContent = list.length + " aliments";
+    document.querySelector("#stbl tbody").innerHTML = list.map(r => `<tr><td class="name">${esc(r.n)}${r.neg ? `<br><span class="small muted">à négliger si utilisé en petite quantité</span>` : ""}</td><td>${esc(CATS[r.c])}</td>${SY.map(s => { const x = r.v[s.id]; return `<td class="n">${x ? `${fmt(x.g, 0)} g${x.eq ? `<br><span class="small muted">= ${esc(x.eq)}</span>` : ""}` : "—"}</td>`; }).join("")}</tr>`).join("");
+  };
+  document.getElementById("sq").addEventListener("input", draw);
+  document.getElementById("sc").addEventListener("change", draw);
+  draw();
+})();
 </script>
 </body>
 </html>
