@@ -1,0 +1,33 @@
+PhéCompte
+Copyright © 2025-2026 Sylvain Hazera. Tous droits réservés.
+
+Le code source, l'interface, les textes et les images de PhéCompte sont protégés
+par le droit d'auteur (Code de la propriété intellectuelle).
+
+Ce qui est autorisé
+- Utiliser l'application publiée à l'adresse https://sylvain-hazera.github.io/PheCompte/
+  pour un usage personnel et non commercial.
+- Consulter le code source.
+
+Ce qui est interdit sans accord écrit préalable de l'auteur
+- Copier, reproduire ou republier tout ou partie du code, de l'interface ou des textes.
+- Modifier l'application ou en distribuer une version dérivée, gratuite ou payante.
+- Utiliser le nom « PhéCompte » ou ses icônes pour un autre produit.
+
+Pour toute demande : ouvrir une issue sur https://github.com/sylvain-hazera/PheCompte
+
+Éléments qui ne relèvent pas de cette licence
+- Les poids par part des fruits et légumes : consensus national des parts pondérales,
+  diététiciens SFEIM (2009), listes diffusées par la filière G2M.
+- Les valeurs caloriques : table Ciqual 2020 de l'Anses, licence ouverte Etalab.
+- La méthode de calcul des produits emballés et les recettes d'origine : application
+  aPhetit (2015-2017), élaborée avec la SFEIM et l'association Les Feux Follets.
+- Les bibliothèques jsPDF et jsPDF-AutoTable (dossier vendor/) : licence MIT,
+  voir vendor/LICENSE-jspdf.txt et vendor/LICENSE-jspdf-autotable.txt.
+- Les recettes et trouvailles proposées par les familles restent à leurs auteurs.
+
+Avertissement
+PhéCompte est un outil personnel et indicatif. Il ne remplace ni l'avis de l'équipe
+médicale ni le régime prescrit. L'application est fournie « en l'état », sans
+garantie d'aucune sorte ; l'auteur ne saurait être tenu responsable de son usage,
+ni de l'usage d'une version copiée ou modifiée.

@@ -23,3 +23,7 @@ La table des aliments, les formules des produits emballés et les recettes provi
 Proposées depuis l'application sous forme d'issue GitHub. La Phé est recalculée par `scripts/recettes.py`. **Une recette n'est publiée qu'après ajout de l'étiquette « validée »** (par une diététicienne ou le mainteneur) ; retirer l'étiquette ou fermer l'issue la retire. Une modification de la recette retire automatiquement la validation.
 
 **Outil indicatif : ne remplace pas l'avis de l'équipe médicale.**
+
+## Licence
+
+© 2025-2026 Sylvain Hazera, tous droits réservés. Usage personnel de l'application publiée autorisé ; copie, modification et redistribution interdites sans accord écrit. Les données de tiers (SFEIM, Ciqual, aPhetit) et les bibliothèques du dossier `vendor/` gardent leurs propres conditions. Voir [LICENSE](LICENSE).
