@@ -33,4 +33,6 @@ c=root/'data/recettes-communaute.json'
 (out/'recettes-communaute.json').write_text(c.read_text(encoding='utf-8') if c.exists() else '[]\n',encoding='utf-8')
 shutil.copytree(root/'vendor',out/'vendor',dirs_exist_ok=True)
 shutil.copy(root/'src/confidentialite.html',out/'confidentialite.html')
+shutil.copy(root/'src/guide.html',out/'guide.html')
+shutil.copytree(root/'src/guide',out/'guide',dirs_exist_ok=True)
 print('ok')

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Guide PhéCompte</title>
+<meta name="description" content="Guide d'utilisation de PhéCompte : installation, saisie des repas, rapport PDF, calories et relecture des données.">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#f3f6f8; --surface:#fff; --surface-2:#e9eff2; --ink:#12232e; --muted:#566b78; --line:#d6e0e5;
+  --accent:#0d7a70; --accent-ink:#fff; --accent-soft:#d5efeb; --low:#2b9a57; --mid:#d98a1f; --high:#cf3f39;
+  --f-display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --f-body:"Figtree","Segoe UI",system-ui,-apple-system,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0c161c; --surface:#14222b; --surface-2:#1b2c36; --ink:#e6eef2; --muted:#93a8b4; --line:#253a46;
+  --accent:#3cbcae; --accent-ink:#06201d; --accent-soft:#163a37; --low:#4cc47e; --mid:#f0a845; --high:#f06a62; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c161c; --surface:#14222b; --surface-2:#1b2c36; --ink:#e6eef2; --muted:#93a8b4; --line:#253a46;
+  --accent:#3cbcae; --accent-ink:#06201d; --accent-soft:#163a37; --low:#4cc47e; --mid:#f0a845; --high:#f06a62; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body)}
+.wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px;display:grid;gap:20px}
+h1,h2{font-family:var(--f-display);margin:0;line-height:1.15;text-wrap:balance}
+h1{font-size:clamp(1.6rem,4vw,2.3rem);font-weight:800}
+h2{font-size:1.35rem;margin-top:12px}
+h3{font-family:var(--f-display);font-size:1.08rem;margin:4px 0 0}
+.wrap{max-width:820px;gap:14px}
+p,li{margin:0}
+ol,ul{margin:0;padding-left:1.4em;display:grid;gap:6px}
+a{color:var(--accent)}
+img{display:block;width:100%;height:auto;border-radius:14px;border:1px solid var(--line);background:var(--surface)}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:.93rem}
+th,td{padding:9px 10px;border-top:1px solid var(--line);text-align:left;vertical-align:top}
+thead th{border-top:0;background:var(--surface-2);font-size:.78rem;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+li.todo{list-style:none;margin-left:-1.4em}
+li.todo::before{content:"☐ ";color:var(--accent)}
+.top{display:flex;gap:12px;flex-wrap:wrap;font-size:.9rem}
+.foot{font-size:.85rem;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;margin-top:10px}
+@media print{.top{display:none}body{background:#fff}img{max-width:15cm;margin:auto}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <nav class="top" aria-label="Liens"><a href="index.html">← Ouvrir l'application</a><a href="aliments.html">Base d'aliments et relecture</a></nav>
+  <h1>{{TITLE}}</h1>
+{{BODY}}
+  <p class="foot">PhéCompte © 2025-2026 Sylvain Hazera, tous droits réservés (<a href="https://github.com/sylvain-hazera/PheCompte/blob/main/LICENSE">licence</a>). Outil indicatif : il ne remplace ni l'avis de l'équipe médicale ni le régime prescrit. · <a href="confidentialite.html">Politique de confidentialité</a></p>
+</main>
+</body>
+</html>
