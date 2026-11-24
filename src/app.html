@@ -1772,7 +1772,7 @@ function restore(text){ importBackup(text); }
    Connexion OAuth « jeton » par redirection, sans serveur : portée drive.file (l'application ne voit que le fichier qu'elle a créé).
    Google limite le jeton à 1 h : il est renouvelé sans action (redirection prompt=none) à l'ouverture de l'application.
    Chaque synchronisation fusionne (mergeDb) le fichier et ce téléphone, puis renvoie le résultat : rien n'est écrasé. */
-const GOOGLE_CLIENT_ID = "";
+const GOOGLE_CLIENT_ID = "912776231128-rifi5bdst0utt471463qa9ch4vkqaskh.apps.googleusercontent.com";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file";
 const DRIVE_KEY = "phecompte.drive", DRIVE_NAME = "PhéCompte - synchronisation.json";
 const DRIVE_REDIRECT = (() => { try { const u = new URL("index.html", location.href); return u.origin + u.pathname; } catch(e){ return ""; } })();
