@@ -1261,9 +1261,27 @@ function viewRecipe(p, r){
 }
 
 /* proposer une recette */
-const ING_MODES = [["base","Fruit ou légume de la base"],["prot","Produit emballé (protéines)"],["phe","Phé indiquée sur l'étiquette"],["zero","Sans Phé (sucre, huile, eau…)"]];
+const ING_MODES = [["base","Aliment de la liste"],["prot","Produit emballé (protéines)"],["phe","Phé indiquée sur l'étiquette"],["zero","Sans Phé (sucre, huile, eau…)"]];
 const ING_SHORT = {prot:"produit emballé", phe:"Phé indiquée sur l'étiquette", zero:"sans Phé"};
 const FOOD_BY_NAME = new Map([...FOOD.values()].map(f => [f.n.toLowerCase(), f]));
+const fold = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+/* aliments proposés dans une recette : fruits et légumes, produits hypo, Mes aliments comptés au poids */
+function ingFoods(){
+  const mine = P().custom.filter(c => !c.hidden && c.pp == null && (c.c === "H" || c.w));
+  return [...[...FOOD.values()].filter(f => !f.x), ...mine].sort((a, b) => a.n.localeCompare(b.n, "fr"));
+}
+const ingFood = ref => ref ? (FOOD.get(ref) || P().custom.find(c => c.ref === ref) || null) : null;
+const ingRule = f => !f ? "" : f.c === "H" ? "produit hypo : aucune part" : f.w ? `1 part = ${fmt(f.w)} g` : "";
+function ingSuggest(i){
+  const box = document.getElementById("ingSug" + i), x = draft.ing[i]; if (!box || !x) return;
+  const q = fold(x.nom), all = ingFoods(), cur = ingFood(x.ref);
+  const c = document.getElementById("ingCur" + i); if (c) c.textContent = cur ? `${cur.n} · ${ingRule(cur)}` : "Fruits, légumes, produits hypo et Mes aliments";
+  let list = [];
+  if (x.showAll) list = all;
+  else if (q && !(cur && fold(cur.n) === q)) list = all.filter(f => fold(f.n).includes(q)).sort((a, b) => (fold(b.n).startsWith(q) - fold(a.n).startsWith(q))).slice(0, 8);
+  box.innerHTML = list.length ? `<div class="list" style="max-height:${x.showAll ? 280 : 400}px;overflow:auto">${list.map(f => `<button class="item" data-act="ingPick" data-i="${i}" data-ref="${esc(f.ref)}" style="min-height:40px;padding:6px 10px"><span class="grow t">${esc(f.n)}</span><span class="s num">${esc(ingRule(f))}</span></button>`).join("")}</div>`
+    : q && !cur ? `<div class="small" style="color:var(--mid)">Aucun aliment ne correspond. Essayez un autre mot, ou la liste A→Z.</div>` : "";
+}
 const blankIng = () => ({nom:"", g:"", mode:"base", ref:"", prot:"", lait:true, phe100:""});
 let draft;
 try { draft = JSON.parse(localStorage.getItem("phecompte.draft") || "null"); } catch(e){ draft = null; }
@@ -1273,13 +1291,15 @@ const saveDraft = () => { try { localStorage.setItem("phecompte.draft", JSON.str
 function ingPhe(x){
   const g = parseNum(x.g); if (isNaN(g) || g <= 0) return NaN;
   if (x.mode === "zero") return 0;
-  if (x.mode === "base"){ const f = FOOD.get(x.ref); return f ? g / f.w * PART_MG : NaN; }
+  if (x.mode === "base"){ const f = ingFood(x.ref); if (!f) return NaN; if (f.c === "H") return 0; return f.w ? g / f.w * PART_MG : NaN; }
   if (x.mode === "prot"){ const pr = parseNum(x.prot); if (isNaN(pr) || pr < 0 || pr > (x.lait ? 12 : 5)) return NaN; return g * pr * (x.lait ? 50 : pr < 0.8 ? 32 : 38) / 100; }
   if (x.mode === "phe"){ const v = parseNum(x.phe100); if (isNaN(v) || v < 0 || v > 5000) return NaN; return g * v / 100; }
   return NaN;
 }
 function ingRow(x, i){
-  const f = x.mode === "base" ? `<input type="text" list="foodNames" data-i="${i}" data-f="nom" placeholder="Ex. : Carotte" value="${esc(x.nom)}" aria-label="Aliment">`
+  const cur = x.mode === "base" ? ingFood(x.ref) : null;
+  const f = x.mode === "base" ? `<div class="row" style="flex-wrap:nowrap"><input type="search" class="grow" data-i="${i}" data-f="nom" placeholder="Rechercher : carotte, pâtes…" value="${esc(x.nom)}" aria-label="Aliment" autocomplete="off"><button class="btn" data-act="ingAll" data-i="${i}" aria-pressed="${!!x.showAll}" style="min-height:40px;white-space:nowrap">Liste A→Z</button></div>
+    <div id="ingSug${i}"></div><div class="small muted" id="ingCur${i}">${cur ? `${esc(cur.n)} · ${esc(ingRule(cur))}` : "Fruits, légumes, produits hypo et Mes aliments"}</div>`
     : `<input type="text" data-i="${i}" data-f="nom" placeholder="${x.mode === "zero" ? "Ex. : huile d'olive" : "Nom du produit"}" value="${esc(x.nom)}" aria-label="Nom" maxlength="80">`;
   const extra = x.mode === "prot" ? `<div class="row" style="flex-wrap:nowrap"><input type="text" inputmode="decimal" data-i="${i}" data-f="prot" placeholder="Protéines / 100 g" value="${esc(x.prot)}" aria-label="Protéines pour 100 g"><select data-i="${i}" data-f="lait" aria-label="Type"><option value="1" ${x.lait ? "selected" : ""}>Avec lait/céréales</option><option value="0" ${x.lait ? "" : "selected"}>Sans lait ni céréales</option></select></div>`
     : x.mode === "phe" ? `<input type="text" inputmode="decimal" data-i="${i}" data-f="phe100" placeholder="Phé en mg pour 100 g" value="${esc(x.phe100)}" aria-label="Phé pour 100 g">` : "";
@@ -1306,7 +1326,6 @@ function openPropose(){
       <label class="f grow">Niveau<select data-f="lv">${["Facile","Moyen","Difficile"].map(t => `<option ${d.lv === t ? "selected" : ""}>${t}</option>`).join("")}</select></label></div>
     <div class="row" style="flex-wrap:nowrap"><label class="f grow">Préparation (min)<input type="text" inputmode="numeric" data-f="min" value="${esc(d.min)}"></label><label class="f grow">Personnes<input type="text" inputmode="numeric" data-f="p" value="${esc(d.p)}"></label><label class="f grow">kcal (total)<input type="text" inputmode="numeric" data-f="kcal" value="${esc(d.kcal)}" placeholder="facultatif"></label></div>
     <div class="label">Ingrédients</div>
-    <datalist id="foodNames">${[...FOOD.values()].filter(f => !f.x).sort((a, b) => a.n.localeCompare(b.n, "fr")).map(f => `<option value="${esc(f.n)}">`).join("")}</datalist>
     <div id="ingRows" style="display:grid;gap:10px">${d.ing.map(ingRow).join("")}</div>
     <button class="btn" data-act="ingAdd">${icon("plus")}Ajouter un ingrédient</button>
     <div class="total card" style="padding:14px"><div class="label">Total calculé</div><div class="num" style="font:800 1.8rem var(--f-display)" id="propTotal"></div></div>
@@ -1326,18 +1345,19 @@ function onPropInput(e){
     const x = draft.ing[+el.dataset.i];
     if (f === "mode"){ if (e.type !== "change") return; x.mode = el.value; x.ref = ""; redrawIngs(); }
     else if (f === "lait") x.lait = el.value === "1";
-    else { x[f] = el.value; if (f === "nom" && x.mode === "base"){ const m = FOOD_BY_NAME.get(el.value.trim().toLowerCase()); x.ref = m ? m.ref : ""; } }
+    else if (f === "nom" && e.type === "change") return;   // déjà traité à la frappe ; évite d'effacer la suggestion touchée
+    else { x[f] = el.value; if (f === "nom" && x.mode === "base"){ const m = ingFoods().find(z => fold(z.n) === fold(el.value)); x.ref = m ? m.ref : ""; x.showAll = false; ingSuggest(+el.dataset.i); } }
   } else draft[f] = el.value;
   document.getElementById("propSend").innerHTML = "";
   saveDraft(); propCompute();
 }
-function redrawIngs(){ document.getElementById("ingRows").innerHTML = draft.ing.map(ingRow).join(""); propCompute(); }
+function redrawIngs(){ document.getElementById("ingRows").innerHTML = draft.ing.map(ingRow).join(""); draft.ing.forEach((x, i) => { if (x.mode === "base") ingSuggest(i); }); propCompute(); }
 function propCompute(){
   let tot = 0, ok = true;
   draft.ing.forEach((x, i) => {
     const out = document.getElementById("ingOut" + i); if (!out) return;
     const v = ingPhe(x);
-    if (isNaN(v)){ ok = false; out.textContent = x.mode === "base" && x.nom && !x.ref ? "Aliment introuvable dans la base" : "À compléter"; out.style.color = "var(--mid)"; }
+    if (isNaN(v)){ ok = false; out.textContent = x.mode === "base" && x.nom && !x.ref ? "Choisissez l'aliment dans la liste" : x.mode === "base" && x.ref && !(parseNum(x.g) > 0) ? "Indiquez la quantité" : "À compléter"; out.style.color = "var(--mid)"; }
     else { tot += v; out.textContent = `${fmt(v / PART_MG)} part${v / PART_MG > 1 ? "s" : ""} · ${fmt(v, 0)} mg`; out.style.color = ""; }
   });
   const el = document.getElementById("propTotal");
@@ -1597,6 +1617,9 @@ async function findVote(btn){
 }
 async function sendRecipeAnon(btn){
   const payload = draftPayload(); if (!payload) return;
+  /* le service ne connaît que les fruits et légumes : produits hypo et Mes aliments sont envoyés avec leur valeur */
+  payload.ing = payload.ing.map(o => { if (o.mode !== "base" || /^a\d+$/.test(o.ref)) return o; const f = ingFood(o.ref), {ref, ...r} = o;
+    return !f || f.c === "H" ? {...r, mode:"zero"} : {...r, mode:"phe", phe100:Math.round(PART_MG * 100 / f.w * 100) / 100}; });
   const err = document.getElementById("anonErr");
   btn.disabled = true; btn.textContent = "Envoi…";
   try {
@@ -1959,6 +1982,8 @@ document.addEventListener("click", e => {
     case "editRecipe": { const r = mesRecettes().find(x => x.id === t.dataset.id); if (r){ draft = draftFrom(r); saveDraft(); openPropose(); } break; }
     case "shareRecipe": { const r = mesRecettes().find(x => x.id === t.dataset.id); if (r){ draft = draftFrom(r); saveDraft(); openPropose(); propReady(); setTimeout(() => { const s = document.getElementById("propSend"); if (s) s.scrollIntoView({block:"center"}); }, 50); } break; }
     case "delRecipe": armed(t, "Confirmer la suppression", () => { const id = t.dataset.id; db.mesRecettes = mesRecettes().filter(x => x.id !== id); db.profiles.forEach(pp => pp.favoris = pp.favoris.filter(f => f !== id)); ui.recipe = null; save(); render(); toast("Recette supprimée"); }); break;
+    case "ingPick": { const i = +t.dataset.i, x = draft.ing[i], f = ingFood(t.dataset.ref); if (x && f){ x.nom = f.n; x.ref = f.ref; x.showAll = false; saveDraft(); redrawIngs(); const g = document.querySelector(`[data-i="${i}"][data-f="g"]`); if (g && !x.g) g.focus(); } break; }
+    case "ingAll": { const x = draft.ing[+t.dataset.i]; if (x){ x.showAll = !x.showAll; t.setAttribute("aria-pressed", x.showAll); ingSuggest(+t.dataset.i); } break; }
     case "ingAdd": draft.ing.push(blankIng()); saveDraft(); redrawIngs(); document.getElementById("propSend").innerHTML = ""; break;
     case "ingDel": draft.ing.splice(+t.dataset.i, 1); if (!draft.ing.length) draft.ing.push(blankIng()); saveDraft(); redrawIngs(); document.getElementById("propSend").innerHTML = ""; break;
     case "propReady": propReady(); break;
