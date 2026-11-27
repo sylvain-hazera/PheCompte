@@ -3,7 +3,9 @@ root=pathlib.Path(__file__).parent; data=pathlib.Path(sys.argv[1] if len(sys.arg
 import json
 _h=json.loads((root/'data/hypo-catalogue.json').read_text(encoding='utf-8'))
 _k=json.loads((root/'data/kcal-fruits-legumes.json').read_text(encoding='utf-8'))
-data=data.rstrip()+'\nconst KCAL_FL='+json.dumps(_k['aliments'],ensure_ascii=False,separators=(',',':'))+';\nconst KCAL_FL_SRC='+json.dumps(_k['source'],ensure_ascii=False)+';\nconst HYPO='+json.dumps(_h['produits'],ensure_ascii=False,separators=(',',':'))+';\nconst HYPO_NOTE='+json.dumps(_h['note'],ensure_ascii=False)+';\n'
+_sf=json.loads((root/'data/parts-sfeim.json').read_text(encoding='utf-8'))
+_lys=next(s['aliments'] for s in _sf['systemes'] if s['id']=='lys')
+data=data.rstrip()+'\nconst LYS='+json.dumps(_lys,ensure_ascii=False,separators=(',',':'))+';\nconst KCAL_FL='+json.dumps(_k['aliments'],ensure_ascii=False,separators=(',',':'))+';\nconst KCAL_FL_SRC='+json.dumps(_k['source'],ensure_ascii=False)+';\nconst HYPO='+json.dumps(_h['produits'],ensure_ascii=False,separators=(',',':'))+';\nconst HYPO_NOTE='+json.dumps(_h['note'],ensure_ascii=False)+';\n'
 app=(root/'src/app.html').read_text(encoding='utf-8').replace('/*DATA*/',data)
 out=root/'dist'; out.mkdir(exist_ok=True); (out/'icons').mkdir(exist_ok=True)
 (root/'artifact.html').write_text(app,encoding='utf-8')
