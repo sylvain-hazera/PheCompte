@@ -693,7 +693,7 @@
    "id": "h-pde-reach5"
   },
   {
-   "n": "PFD 1 (poudre sans protéines)",
+   "n": "PFD 1 (poudre énergétique sans protéines)",
    "marque": "Mead Johnson",
    "cat": "Substituts et compléments",
    "kcal": 530,
@@ -703,7 +703,7 @@
    "unit": "dose de 10 g",
    "uw": 10,
    "src": "https://www.medical.enfamil.ca/products/pfd-1",
-   "rq": "Sans protéines ni acides aminés (glucides, lipides, vitamines) ; fiche Canada",
+   "rq": "Apporte des calories, sans protéines ni acides aminés : aucune part, pour tous les régimes ; 53 kcal par dose de 10 g ; fiche Canada",
    "id": "h-pfd-1-poudre-sans-proteines"
   },
   {
