@@ -177,6 +177,8 @@ svg.i.xs{width:13px;height:13px;vertical-align:-2px}
 <script>
 "use strict";
 const PART_MG = 20, UMOL = 60.54;
+/* µmol/L pour 1 mg/dL : Phé 60,54 (165,19 g/mol), lysine 68,40 (146,19 g/mol) — selon le régime du profil affiché */
+const UM = () => typeof rg === "function" && rg().id === "lys" ? 68.40 : UMOL;
 const KEY = "phecompte.v1";
 const MEALS = [["pdj","Petit déj."],["dej","Déjeuner"],["gouter","Goûter"],["diner","Dîner"]];
 const TENEUR = ["Faible","Moyenne","Forte"];
@@ -438,9 +440,9 @@ const mealParts = (p, m, iso = ui.day) => sumMeal(p, dayData(p, iso), m);
 const dayParts = (p, iso = ui.day) => sumDay(p, dayData(p, iso));
 const dayNoteTxt = d => d ? [...(d.tags || []), d.note].filter(Boolean).join(" · ") : "";
 function notesBefore(p, iso, n = 3){ const out = []; for (let k = 0; k <= n; k++){ const i = isoShift(iso, -k), t = dayNoteTxt(p.days[i]); if (t) out.push([i, t]); } return out; }
-const toUnit = (mg, u) => u === "mg" ? mg : mg * UMOL;
+const toUnit = (mg, u) => u === "mg" ? mg : mg * UM();
 const unitLabel = u => u === "mg" ? "mg/dL" : "µmol/L";
-const fmtVal = (mg, u) => u === "mg" ? fmt(mg, 1) : fmt(Math.round(mg * UMOL), 0);
+const fmtVal = (mg, u) => u === "mg" ? fmt(mg, 1) : fmt(Math.round(mg * UM()), 0);
 const initials = p => ((p.prenom||"?")[0] + (p.nom ? p.nom[0] : "")).toUpperCase();
 const avatarHTML = (p, lg) => `<span class="avatar${lg?" lg":""}" aria-hidden="true">${p.photo ? `<img src="${esc(p.photo)}" alt="">` : esc(initials(p))}</span>`;
 function status(p, mg){
@@ -478,7 +480,7 @@ function render(){
   const av = document.getElementById("hdrAvatar");
   av.innerHTML = p.photo ? `<img src="${esc(p.photo)}" alt="">` : esc(initials(p));
   av.setAttribute("aria-label", "Profil de " + p.prenom);
-  const titles = {repas:["Parts de " + rg(p).court, "Calcul de la journée"], suivi: rg(p).id === "phe" ? ["Suivi sanguin", "Taux de phénylalanine"] : ["Suivi", "Calendrier et rapport"], recettes:["Recettes","Pauvres en protéines"], trouvailles:["Trouvailles","Où trouver les produits hypoprotéinés"], convertir:["Convertir","mg/dL ⇄ µmol/L"], profil:["Profil", p.prenom + (p.nom ? " " + p.nom : "")]};
+  const titles = {repas:["Parts de " + rg(p).court, "Calcul de la journée"], suivi:["Suivi sanguin", "Taux de " + rg(p).nom], recettes:["Recettes","Pauvres en protéines"], trouvailles:["Trouvailles","Où trouver les produits hypoprotéinés"], convertir:["Convertir","mg/dL ⇄ µmol/L"], profil:["Profil", p.prenom + (p.nom ? " " + p.nom : "")]};
   const [t, s] = titles[ui.tab];
   document.getElementById("title").innerHTML = `${esc(t)}<small>${esc(s)}</small>`;
   const v = document.getElementById("view");
@@ -845,9 +847,6 @@ function openWeight(ref, idx){
 
 /* ---------- Suivi ---------- */
 function viewSuivi(p){
-  if (rg(p).id !== "phe") return `<div class="note small">Le suivi des analyses sanguines (acide pipécolique, lysine…) sera ajouté quand l'équipe médicale aura précisé les dosages à suivre. En attendant : calendrier des parts, notes du jour et rapport PDF pour la diététicienne.</div>
-  <button class="btn primary block" data-act="export">Exporter le rapport PDF</button>
-  ${viewCalendar(p)}`;
   const an = [...p.analyses].sort((a, b) => a.date.localeCompare(b.date));
   const last = an[an.length - 1], u = p.unit;
   const hasSeuil = p.seuilMin != null && p.seuilMax != null;
@@ -889,7 +888,7 @@ function drawChart(){
   const step = niceStep(vmax / 4); vmax = Math.ceil(vmax * 1.08 / step) * step;
   const X = t => m.l + (t - x0) / (x1 - x0) * (W - m.l - m.r);
   const Y = v => H - m.b - v / vmax * (H - m.t - m.b);
-  let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Évolution du taux de Phé en ${unitLabel(u)}">`;
+  let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Évolution du taux de ${rg(p).court} en ${unitLabel(u)}">`;
   if (p.seuilMin != null && p.seuilMax != null){
     const a = Y(toUnit(p.seuilMax, u)), b = Y(toUnit(p.seuilMin, u));
     s += `<rect x="${m.l}" y="${a}" width="${W - m.l - m.r}" height="${b - a}" fill="var(--band)"/>`;
@@ -956,7 +955,7 @@ function openAnalyse(id){
   sheet(a ? "Modifier le résultat" : "Nouveau résultat", `
     <label class="f">Date de la prise de sang<input type="date" id="aDate" max="${todayISO()}" value="${a ? a.date : todayISO()}"></label>
     <div class="f"><span>Unité du résultat</span><div class="seg" role="group" aria-label="Unité">${["mg","umol"].map(k => `<button type="button" data-u="${k}" aria-pressed="${u===k}">${unitLabel(k)}</button>`).join("")}</div></div>
-    <label class="f">Résultat<input type="text" id="aVal" inputmode="decimal" placeholder="${u === "mg" ? "Ex. : 4,5" : "Ex. : 270"}" value="${a ? (a.u === "mg" ? fmt(a.mg, 2) : Math.round(a.mg * UMOL)) : ""}"></label>
+    <label class="f">Résultat<input type="text" id="aVal" inputmode="decimal" placeholder="${u === "mg" ? "Ex. : 4,5" : "Ex. : 270"}" value="${a ? (a.u === "mg" ? fmt(a.mg, 2) : Math.round(a.mg * UM())) : ""}"></label>
     <label class="f">Commentaire (facultatif)<input type="text" id="aNote" maxlength="80" placeholder="Ex. : contrôle au CHU" value="${esc(a ? a.note : "")}"></label>
     <div id="aMsg"></div>
     <button class="btn primary block" id="aSave">Enregistrer</button>
@@ -974,7 +973,7 @@ function openAnalyse(id){
           msg.innerHTML = `<div class="warn" role="alert">${esc(fmt(v))} ${unitLabel(u)} semble inhabituel. Le résultat est peut-être en ${unitLabel(u === "mg" ? "umol" : "mg")} : changez l'unité ci-dessus, ou appuyez de nouveau sur Enregistrer pour confirmer.</div>`;
           return;
         }
-        const rec = {id: a ? a.id : uid(), date, mg: u === "mg" ? v : v / UMOL, u, note: b.querySelector("#aNote").value.trim()};
+        const rec = {id: a ? a.id : uid(), date, mg: u === "mg" ? v : v / UM(), u, note: b.querySelector("#aNote").value.trim()};
         if (a) Object.assign(a, rec); else p.analyses.push(rec);
         save(); closeSheet(); render(); toast("Résultat enregistré");
       });
@@ -984,7 +983,7 @@ function openAnalyse(id){
 }
 function openSeuils(){
   const p = P(); let u = p.unit;
-  const val = mg => mg == null ? "" : (u === "mg" ? fmt(mg, 2) : Math.round(mg * UMOL));
+  const val = mg => mg == null ? "" : (u === "mg" ? fmt(mg, 2) : Math.round(mg * UM()));
   sheet("Zone cible", `
     <p class="small muted" style="margin:0">Renseignez les seuils indiqués par votre médecin. Ils servent uniquement à colorer le graphique.</p>
     <div class="f"><span>Unité</span><div class="seg" role="group">${["mg","umol"].map(k => `<button type="button" data-u="${k}" aria-pressed="${u===k}">${unitLabel(k)}</button>`).join("")}</div></div>
@@ -993,7 +992,7 @@ function openSeuils(){
     <button class="btn primary block" id="sSave">Enregistrer</button>`, b => {
       b.querySelectorAll("[data-u]").forEach(x => x.addEventListener("click", () => {
         const mn = parseNum(b.querySelector("#sMin").value), mx = parseNum(b.querySelector("#sMax").value);
-        const toMg = v => isNaN(v) ? null : (u === "mg" ? v : v / UMOL);
+        const toMg = v => isNaN(v) ? null : (u === "mg" ? v : v / UM());
         const a = toMg(mn), c = toMg(mx);
         u = x.dataset.u; b.querySelectorAll("[data-u]").forEach(y => y.setAttribute("aria-pressed", y.dataset.u === u));
         b.querySelector("#sMin").value = val(a); b.querySelector("#sMax").value = val(c);
@@ -1001,7 +1000,7 @@ function openSeuils(){
       b.querySelector("#sSave").addEventListener("click", () => {
         const mn = parseNum(b.querySelector("#sMin").value), mx = parseNum(b.querySelector("#sMax").value);
         if (isNaN(mn) || isNaN(mx) || mn < 0 || mx <= mn){ b.querySelector("#sErr").textContent = "Le maximum doit être supérieur au minimum."; return; }
-        p.seuilMin = u === "mg" ? mn : mn / UMOL; p.seuilMax = u === "mg" ? mx : mx / UMOL; p.unit = u;
+        p.seuilMin = u === "mg" ? mn : mn / UM(); p.seuilMax = u === "mg" ? mx : mx / UM(); p.unit = u;
         save(); closeSheet(); render(); toast("Zone cible enregistrée");
       });
     });
@@ -1010,8 +1009,8 @@ function csvFor(p, from, to){
   const an = [...p.analyses].sort((a, b) => a.date.localeCompare(b.date)).filter(a => (!from || a.date >= from) && (!to || a.date <= to));
   const who = [p.prenom, p.nom].filter(Boolean).join(" ") + (p.naissance ? ` (né(e) le ${frDate(p.naissance)})` : "");
   const q = s => /[;"\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-  let c = `${q(who)};Date de l'analyse;Phé (mg/dL);Phé (µmol/L);Commentaire\n`;
-  an.forEach(a => { c += `;${frDate(a.date)};${fmt(a.mg, 1).replace(/\s/g, "")};${Math.round(a.mg * UMOL)};${q(a.note || "")}\n`; });
+  let c = `${q(who)};Date de l'analyse;${cap(rg(p).court)} (mg/dL);${cap(rg(p).court)} (µmol/L);Commentaire\n`;
+  an.forEach(a => { c += `;${frDate(a.date)};${fmt(a.mg, 1).replace(/\s/g, "")};${Math.round(a.mg * UM())};${q(a.note || "")}\n`; });
   if (from || to) c += `\nPériode : ${from ? frDate(from) : "début"} au ${to ? frDate(to) : "aujourd'hui"}\n`;
   c += "Données saisies par l'utilisateur, à titre indicatif.\n";
   return {csv:c, n:an.length};
@@ -1108,7 +1107,7 @@ async function buildPdf(p, from, to, detail){
   y += 7; doc.setFontSize(12); T(who + (p.naissance ? `, né(e) le ${frDate(p.naissance)} (${age(p.naissance)})` : ""), M, y);
   y += 6; doc.setFont("helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(...MUT);
   T(`Période du ${frDate(from)} au ${frDate(to)} (${N} jours) · édité le ${frDate(t)} avec PhéCompte`, M, y);
-  y += 5; T(`${rg(p).id === "phe" ? `Zone cible : ${p.seuilMin != null ? `${fmtVal(p.seuilMin, u)} à ${fmtVal(p.seuilMax, u)} ${unitLabel(u)}` : "non renseignée"} · ` : ""}Objectif : ${p.objectif ? fmt(p.objectif) + " parts/jour" : "non renseigné"} · 1 part = ${rg(p).mg} mg de ${rg(p).nom}`, M, y);
+  y += 5; T(`${true ? `Zone cible : ${p.seuilMin != null ? `${fmtVal(p.seuilMin, u)} à ${fmtVal(p.seuilMax, u)} ${unitLabel(u)}` : "non renseignée"} · ` : ""}Objectif : ${p.objectif ? fmt(p.objectif) + " parts/jour" : "non renseigné"} · 1 part = ${rg(p).mg} mg de ${rg(p).nom}`, M, y);
   y += 5; T(`Produits hypoprotéinés AGEPS : grammes et calories seulement, aucune part de ${rg(p).court} comptée (consigne).`, M, y);
   if (p.poids || kcalTarget(p)){ y += 5; T(`Poids : ${p.poids ? fmt(p.poids) + " kg" + (p.poidsDate ? " (pesé le " + frDate(p.poidsDate) + ")" : "") : "non renseigné"}${kcalTarget(p) ? ` · Cible calorique : ${fmt(p.kcalKg)} kcal/kg/j = ${fmt(kcalTarget(p), 0)} kcal/j` : ""}`, M, y); }
 
@@ -1154,9 +1153,9 @@ async function buildPdf(p, from, to, detail){
   if (p.objectif){ const yy = y + h1 - p.objectif / v1 * h1; doc.setDrawColor(...SUN); doc.setLineWidth(0.5); doc.setLineDashPattern([1.2, 1], 0); doc.line(gx, yy, gx + gw, yy); doc.setLineDashPattern([], 0); }
   isos.forEach((i, k) => { if (dayNoteTxt(p.days[i])){ const x = X(k, gx, gw), yb = y + h1; doc.setFillColor(...SUN); doc.triangle(x - 1.1, yb + 2.4, x + 1.1, yb + 2.4, x, yb + 0.6, "F"); } });
   axisX(gx, gw, y + h1); doc.setFontSize(7); y += h1 + 9;
-  // 2. Phé sanguine (régime Phé seulement)
-  if (rg(p).id === "phe"){
-  doc.setFont("helvetica", "bold"); doc.setFontSize(10.5); doc.setTextColor(...INK); T(`Phé sanguine (${unitLabel(u)})`, M, y);
+  // 2. taux sanguin
+  {
+  doc.setFont("helvetica", "bold"); doc.setFontSize(10.5); doc.setTextColor(...INK); T(`${cap(rg(p).court)} sanguine (${unitLabel(u)})`, M, y);
   doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(...MUT); T("Bande verte : zone cible", W - M, y, {align:"right"});
   y += 3;
   const h2 = 34;
@@ -1175,11 +1174,11 @@ async function buildPdf(p, from, to, detail){
   const section = (title) => { if (y > 262){ doc.addPage(); y = 18; } doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(...INK); T(title, M, y); y += 2.5; };
 
   // prises de sang
-  if (rg(p).id === "phe"){
+  {
   section("Prises de sang");
   autoTable(doc, {...tableBase, startY:y,
     head:[["Date", "mg/dL", "µmol/L", "Situation", "Commentaire", "Notes des 3 jours précédents"].map(pdfT)],
-    body: ans.length ? ans.map(a => { const s = status(p, a.mg); return [frDate(a.date), fmt(a.mg, 1), String(Math.round(a.mg * UMOL)), s ? s[1] : "", a.note || "", notesBefore(p, a.date).map(([i, n]) => `${frDate(i).slice(0, 5)} : ${n}`).join("\n")].map(pdfT); })
+    body: ans.length ? ans.map(a => { const s = status(p, a.mg); return [frDate(a.date), fmt(a.mg, 1), String(Math.round(a.mg * UM())), s ? s[1] : "", a.note || "", notesBefore(p, a.date).map(([i, n]) => `${frDate(i).slice(0, 5)} : ${n}`).join("\n")].map(pdfT); })
       : [[{content:pdfT("Aucune prise de sang sur la période."), colSpan:6, styles:{textColor:MUT, fontStyle:"italic"}}]],
     columnStyles:{0:{cellWidth:19}, 1:{cellWidth:14, halign:"right"}, 2:{cellWidth:15, halign:"right"}, 3:{cellWidth:28}, 4:{cellWidth:40}},
     didParseCell: c => { if (c.section === "body" && c.column.index === 3){ const v = String(c.cell.raw); if (v.startsWith("Au-dessus")) c.cell.styles.textColor = HIGH; else if (v.startsWith("En dessous")) c.cell.styles.textColor = MID; else if (v) c.cell.styles.textColor = LOW; } }});
@@ -1702,7 +1701,7 @@ function viewProfil(p){
     <div class="row">${avatarHTML(p, true)}<div class="grow"><h2 style="font-size:1.3rem">${esc(p.prenom)} ${esc(p.nom)}</h2><div class="small muted">${[p.sexe, age(p.naissance)].filter(Boolean).join(" · ") || "Profil"}</div></div><button class="btn" data-act="editProfile">Modifier</button></div>
     <div class="list">
       <button class="item" data-act="editProfile"><span class="grow"><span class="t">Régime</span><br><span class="s">${rg(p).id === "phe" ? "Phénylalanine : 1 part = 20 mg" : "Lysine : 1 part = 25 mg (liste SFEIM 2009)"}</span></span>›</button>
-      ${rg(p).id === "phe" ? `<button class="item" data-act="seuils"><span class="grow"><span class="t">Zone cible</span><br><span class="s num">${p.seuilMin != null ? `${fmtVal(p.seuilMin, p.unit)} à ${fmtVal(p.seuilMax, p.unit)} ${unitLabel(p.unit)}` : "Non définie"}</span></span>›</button>` : ""}
+      <button class="item" data-act="seuils"><span class="grow"><span class="t">Zone cible</span><br><span class="s num">${p.seuilMin != null ? `${fmtVal(p.seuilMin, p.unit)} à ${fmtVal(p.seuilMax, p.unit)} ${unitLabel(p.unit)}` : "Non définie"}</span></span>›</button>
       <button class="item" data-act="editProfile"><span class="grow"><span class="t">Objectif de parts par jour</span><br><span class="s">${p.objectif ? fmt(p.objectif) + " parts" : "Non défini"}</span></span>›</button>
       <button class="item" data-act="editProfile"><span class="grow"><span class="t">Poids et cible calorique</span><br><span class="s num">${p.poids ? `${fmt(p.poids)} kg${p.poidsDate ? " (pesé le " + frDate(p.poidsDate) + ")" : ""}` : "Poids non renseigné"}${kcalTarget(p) ? ` · ${fmt(p.kcalKg)} kcal/kg = ${fmt(kcalTarget(p), 0)} kcal/j` : ""}</span>${p.poidsDate && (new Date() - new Date(p.poidsDate)) / 864e5 > 60 ? `<br><span class="s" style="color:var(--mid)">Pesée de plus de 2 mois : pensez à mettre le poids à jour</span>` : ""}</span>›</button>
     </div>
@@ -1761,6 +1760,7 @@ function openProfile(isNew){
         const pre = b.querySelector("#pPre").value.trim();
         if (!pre){ b.querySelector("#pErr").textContent = "Indiquez au moins un prénom."; return; }
         const obj = parseNum(b.querySelector("#pObj").value);
+        if (b.querySelector("#pReg").value === "lys" && p.regime !== "lys" && !p.analyses.length){ p.unit = "umol"; p.seuilMin = p.seuilMax = null; }
         Object.assign(p, {regime:b.querySelector("#pReg").value, prenom:pre, nom:b.querySelector("#pNom").value.trim(), sexe:b.querySelector("#pSexe").value, naissance:b.querySelector("#pNai").value, photo, objectif: isNaN(obj) || obj <= 0 ? null : obj});
         const pw = parseNum(b.querySelector("#pPoids").value), kk = parseNum(b.querySelector("#pKcalKg").value);
         const newW = isNaN(pw) || pw <= 0 || pw > 200 ? null : pw;
