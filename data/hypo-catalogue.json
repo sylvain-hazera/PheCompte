@@ -644,7 +644,8 @@
    "uw": 36,
    "src": "https://www.nutriciametabolics.com/nl-nl/producten/pku/producten.pku-anamix-junior-vanille/",
    "rq": "Mélange d'acides aminés sans Phé ; 132 à 136 kcal/sachet selon les fiches",
-   "id": "h-pku-anamix-junior-vanille"
+   "id": "h-pku-anamix-junior-vanille",
+   "rg": "phe"
   },
   {
    "n": "PKU Anamix Junior fruits rouges",
@@ -658,7 +659,8 @@
    "uw": 36,
    "src": "https://www.nutridrinks.co.uk/pku-anamix-junior-berry-powder-30-x-36g",
    "rq": "Mélange d'acides aminés sans Phé ; source revendeur UK",
-   "id": "h-pku-anamix-junior-fruits-rouges"
+   "id": "h-pku-anamix-junior-fruits-rouges",
+   "rg": "phe"
   },
   {
    "n": "PKU Anamix Junior chocolat",
@@ -672,7 +674,95 @@
    "uw": 36,
    "src": "https://www.nutriciametabolics.com/nl-nl/producten/pku/producten.pku-anamix-junior-chocolade/",
    "rq": "Mélange d'acides aminés sans Phé",
-   "id": "h-pku-anamix-junior-chocolat"
+   "id": "h-pku-anamix-junior-chocolat",
+   "rg": "phe"
+  },
+  {
+   "n": "PDE reach5",
+   "marque": "Vitaflo",
+   "cat": "Substituts et compléments",
+   "kcal": 348,
+   "prot": 28,
+   "phe": null,
+   "base": "sec",
+   "unit": "sachet",
+   "uw": 18,
+   "src": "https://www.nestlehealthscience.co.uk/vitaflo/conditions/protein-metabolism/pde/pde-reach-5-hcp",
+   "rq": "Mélange d'acides aminés sans lysine pour l'épilepsie dépendante de la vitamine B6 ; 63 kcal par sachet de 18 g ; fiche UK",
+   "rg": "lys",
+   "id": "h-pde-reach5"
+  },
+  {
+   "n": "PFD 1 (poudre sans protéines)",
+   "marque": "Mead Johnson",
+   "cat": "Substituts et compléments",
+   "kcal": 530,
+   "prot": 0,
+   "phe": 0,
+   "base": "sec",
+   "unit": "dose de 10 g",
+   "uw": 10,
+   "src": "https://www.medical.enfamil.ca/products/pfd-1",
+   "rq": "Sans protéines ni acides aminés (glucides, lipides, vitamines) ; fiche Canada",
+   "id": "h-pfd-1-poudre-sans-proteines"
+  },
+  {
+   "n": "GA1 Anamix Infant",
+   "marque": "Nutricia",
+   "cat": "Substituts et compléments",
+   "kcal": 466,
+   "prot": 13.1,
+   "phe": null,
+   "base": "sec",
+   "src": "https://www.nutricia.co.uk/hcp/products/ga1-anamix-infant/",
+   "rq": "Lait infantile sans lysine, pauvre en tryptophane (acidurie glutarique de type 1) ; fiche UK",
+   "rg": "lys",
+   "id": "h-ga1-anamix-infant"
+  },
+  {
+   "n": "GA1 Anamix Junior",
+   "marque": "Nutricia",
+   "cat": "Substituts et compléments",
+   "kcal": 367,
+   "prot": 28,
+   "phe": null,
+   "base": "sec",
+   "unit": "sachet",
+   "uw": 18,
+   "src": "https://www.nutricia.co.uk/hcp/products/ga1-anamix-junior/",
+   "rq": "Sans lysine, pauvre en tryptophane (1 à 10 ans) ; 66 kcal par sachet de 18 g ; fiche UK",
+   "rg": "lys",
+   "id": "h-ga1-anamix-junior"
+  },
+  {
+   "n": "GA1 Maxamum",
+   "marque": "Nutricia",
+   "cat": "Substituts et compléments",
+   "kcal": 297,
+   "prot": 39,
+   "phe": null,
+   "base": "sec",
+   "unit": "dose de 20 g",
+   "uw": 20,
+   "src": "https://www.nutricia.co.uk/hcp/products/ga1-maxamum/",
+   "rq": "Sans lysine, pauvre en tryptophane (à partir de 8 ans) ; fiche UK",
+   "rg": "lys",
+   "id": "h-ga1-maxamum"
+  },
+  {
+   "n": "GA gel",
+   "marque": "Vitaflo",
+   "cat": "Substituts et compléments",
+   "kcal": 339,
+   "prot": 41.7,
+   "phe": null,
+   "base": "sec",
+   "unit": "sachet",
+   "uw": 24,
+   "src": "https://www.nestlehealthscience.co.uk/sites/default/files/2020-01/ga_gel_app.pdf",
+   "rq": "Sans lysine, pauvre en tryptophane ; 81 kcal par sachet de 24 g d'après une fiche produit, à vérifier sur l'emballage",
+   "rg": "lys",
+   "id": "h-ga-gel"
   }
  ]
 }

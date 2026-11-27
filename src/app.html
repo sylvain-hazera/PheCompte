@@ -214,7 +214,7 @@ const FOOD = new Map(ALIMENTS.map(([id, n, w, t, c, x]) => ["a"+id, {ref:"a"+id,
 /* calories des fruits et légumes : Ciqual 2020 (data/kcal-fruits-legumes.json) */
 if (typeof KCAL_FL !== "undefined") for (const [ref, k] of Object.entries(KCAL_FL)){ const f = FOOD.get(ref); if (f){ f.kcal = k.kcal; f.ciq = k; } }
 /* catalogue des produits hypoprotéinés (data/hypo-catalogue.json) */
-const HYPO_FOODS = (typeof HYPO !== "undefined" ? HYPO : []).map(h => ({ref:h.id, n:h.n, marque:h.marque, cat:h.cat, c:"H", kcal:h.kcal, prot:h.prot, phe100:h.phe,
+const HYPO_FOODS = (typeof HYPO !== "undefined" ? HYPO : []).map(h => ({ref:h.id, rg:h.rg, n:h.n, marque:h.marque, cat:h.cat, c:"H", kcal:h.kcal, prot:h.prot, phe100:h.phe,
   w: h.phe ? Math.round(100 * 2000 / h.phe) / 100 : null, base:h.base, unit:h.unit, uw:h.uw, src:h.src, rq:h.rq, cata:true}));
 HYPO_FOODS.forEach(f => FOOD.set(f.ref, f));
 /* deux régimes : Phé (phénylcétonurie, 1 part = 20 mg) et lysine (épilepsie dépendante de la vitamine B6,
@@ -231,7 +231,8 @@ if (typeof LYS !== "undefined"){
     FOOD.set(ref, {ref, n:nm, w:g, t:g <= 65 ? 2 : g <= 115 ? 1 : 0, c:c === "S" || c === "F" ? "F" : "L", rg:"lys", neg:/à négliger/.test(n), ...(k ? {kcal:k.kcal, ciq:k.ciq} : {})});
   }
 }
-const ofRegime = (f, p) => (f.rg || "phe") === rg(p).id;
+/* un aliment de la liste appartient à un régime ; un produit hypo convient aux deux, sauf mélange propre à un régime */
+const ofRegime = (f, p) => f.c === "H" ? (!f.rg || f.rg === rg(p).id) : (f.rg || "phe") === rg(p).id;
 
 /* ---------- storage ---------- */
 let storageOK = true;
@@ -719,9 +720,9 @@ function openAddFood(){
       const q = ui.search.trim().toLowerCase();
       const match = f => !q || (f.n + " " + (f.marque || "")).toLowerCase().includes(q);
       const row = f => `<button class="item" data-act="pickFood" data-ref="${f.ref}"><span class="cat H">${catTag(f)}</span><span class="grow"><span class="t">${esc(f.n)}</span><br><span class="s num">${[f.kcal != null ? fmt(f.kcal, 0) + " kcal/100 " + (f.base === "pour 100 ml" ? "ml" : "g") + (f.base === "sec" ? " (sec)" : "") : "", ruleTxt(f)].filter(Boolean).join(" · ")}</span></span></button>`;
-      const mine = hy.filter(match), cats = [...new Set(HYPO_FOODS.map(f => f.cat))];
+      const mine = hy.filter(match), HY = HYPO_FOODS.filter(f => ofRegime(f, p)), cats = [...new Set(HY.map(f => f.cat))];
       let list = mine.length ? `<div class="letter">Mes produits</div>${mine.map(row).join("")}` : "";
-      cats.forEach(c => { const r = HYPO_FOODS.filter(f => f.cat === c && match(f)); if (r.length) list += `<div class="letter">${esc(c)}</div>${r.map(row).join("")}`; });
+      cats.forEach(c => { const r = HY.filter(f => f.cat === c && match(f)); if (r.length) list += `<div class="letter">${esc(c)}</div>${r.map(row).join("")}`; });
       body += `<input type="search" id="foodSearch" placeholder="Rechercher un produit ou une marque" value="${esc(ui.search)}" autocomplete="off">
         <p class="small muted" style="margin:0"><b>Conformément à la consigne, ces produits AGEPS ne comptent pas de parts${rg(p).id === "phe" ? " de Phé" : ""}.</b> Leurs grammes et leurs calories sont enregistrés et apparaissent dans le rapport PDF pour la diététicienne. ${esc(typeof HYPO_NOTE !== "undefined" ? HYPO_NOTE : "")}</p>
         <div class="list" id="foodList">${list || `<div class="empty">Aucun produit pour « ${esc(ui.search)} ».</div>`}</div>
@@ -1312,7 +1313,7 @@ const fold = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "
 /* aliments proposés dans une recette : fruits et légumes, produits hypo, Mes aliments comptés au poids */
 function ingFoods(){
   const mine = P().custom.filter(c => !c.hidden && c.pp == null && (c.c === "H" || c.w));
-  return [...[...FOOD.values()].filter(f => !f.x && (f.c === "H" || ofRegime(f))), ...mine].sort((a, b) => a.n.localeCompare(b.n, "fr"));
+  return [...[...FOOD.values()].filter(f => !f.x && ofRegime(f)), ...mine].sort((a, b) => a.n.localeCompare(b.n, "fr"));
 }
 const ingFood = ref => ref ? (FOOD.get(ref) || P().custom.find(c => c.ref === ref) || null) : null;
 const ingRule = f => !f ? "" : f.c === "H" ? "produit hypo : aucune part" : f.w ? `1 part = ${fmt(f.w)} g` : "";
